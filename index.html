@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMARA OS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="errorDisplay" class="error-display hidden"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>AMARA OS</h1>
+            <button id="modeToggle" class="btn-mode">Split View</button>
+        </div>
+
+        <!-- SINGLE VIEW (default) -->
+        <div id="singleViewContainer" class="view-container active">
+            <div class="robot-wrapper">
+                <div class="robot-stage">
+                    <img id="baseImage" src="./public/Amara_OS.png" alt="Amara Base" class="robot-base">
+                    <canvas id="overlayCanvas" class="robot-overlay"></canvas>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <button id="initiateBtn" class="btn-control">
+                    <span class="btn-label">Initiate</span>
+                    <span class="btn-sublabel">(light eyes)</span>
+                </button>
+                <button id="talkBtn" class="btn-control">
+                    <span class="btn-label">Talk</span>
+                    <span class="btn-sublabel">(animate mouth)</span>
+                </button>
+                <button id="blinkBtn" class="btn-control">
+                    <span class="btn-label">Blink</span>
+                    <span class="btn-sublabel">(auto blink)</span>
+                </button>
+                <button id="headTurnBtn" class="btn-control">
+                    <span class="btn-label">Head Turn</span>
+                    <span class="btn-sublabel">(rotate head)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SPLIT VIEW -->
+        <div id="splitViewContainer" class="view-container">
+            <div class="split-wrapper">
+                <div class="split-column">
+                    <h2>BASE</h2>
+                    <img id="splitBase" src="./public/Amara_OS.png" alt="Amara Base" class="split-image">
+                </div>
+                <div class="split-divider"></div>
+                <div class="split-column">
+                    <h2>LIT</h2>
+                    <img id="splitLit" src="./public/Amara_OS_lit.png" alt="Amara Lit" class="split-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

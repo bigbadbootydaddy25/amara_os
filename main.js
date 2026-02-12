@@ -15,8 +15,8 @@ let autoBlinkTimer = null;
 // Canvas references
 const baseCanvas = document.getElementById('baseCanvas');
 const litCanvas = document.getElementById('litCanvas');
-const baseCtx = baseCanvas.getContext('2d');
-const litCtx = litCanvas.getContext('2d');
+const baseCtx = baseCanvas.getContext('2d', { willReadFrequently: true });
+const litCtx = litCanvas.getContext('2d', { willReadFrequently: true });
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {

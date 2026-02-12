@@ -1,6 +1,9 @@
 // AMARA OS Animation System with Feathered Edge Masking
 // No black rectangles - smooth, soft edge blending
 
+// Constants
+const DEGREES_TO_RADIANS = Math.PI / 180;
+
 // ROI Configuration (640x640 canvas)
 const ROI_CONFIG = {
     eyesLeft: { x: 175, y: 135, w: 75, h: 85, feather: 15 },
@@ -67,30 +70,68 @@ function createFeatheredMask(width, height, roi) {
     const maskCtx = maskCanvas.getContext('2d');
     
     const { x, y, w, h, feather } = roi;
-    const centerX = x + w / 2;
-    const centerY = y + h / 2;
     
-    // Create radial gradient for feathering
-    const radiusX = w / 2;
-    const radiusY = h / 2;
-    const maxRadius = Math.max(radiusX, radiusY);
-    
-    // Draw the mask with feathered edges
-    const gradient = maskCtx.createRadialGradient(
-        centerX, centerY, maxRadius - feather,
-        centerX, centerY, maxRadius + feather
-    );
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    
-    // Fill the ROI area
+    // Draw base rectangle with full opacity
     maskCtx.fillStyle = 'white';
-    maskCtx.fillRect(x, y, w, h);
+    maskCtx.fillRect(x + feather, y + feather, w - feather * 2, h - feather * 2);
     
-    // Apply gradient for feathering
-    maskCtx.globalCompositeOperation = 'destination-in';
-    maskCtx.fillStyle = gradient;
-    maskCtx.fillRect(x - feather, y - feather, w + feather * 2, h + feather * 2);
+    // Create feathered edges using gradients on all four sides
+    // Top edge
+    const topGradient = maskCtx.createLinearGradient(x, y, x, y + feather);
+    topGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    topGradient.addColorStop(1, 'rgba(255, 255, 255, 1)');
+    maskCtx.fillStyle = topGradient;
+    maskCtx.fillRect(x + feather, y, w - feather * 2, feather);
+    
+    // Bottom edge
+    const bottomGradient = maskCtx.createLinearGradient(x, y + h - feather, x, y + h);
+    bottomGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    bottomGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    maskCtx.fillStyle = bottomGradient;
+    maskCtx.fillRect(x + feather, y + h - feather, w - feather * 2, feather);
+    
+    // Left edge
+    const leftGradient = maskCtx.createLinearGradient(x, y, x + feather, y);
+    leftGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    leftGradient.addColorStop(1, 'rgba(255, 255, 255, 1)');
+    maskCtx.fillStyle = leftGradient;
+    maskCtx.fillRect(x, y + feather, feather, h - feather * 2);
+    
+    // Right edge
+    const rightGradient = maskCtx.createLinearGradient(x + w - feather, y, x + w, y);
+    rightGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    rightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    maskCtx.fillStyle = rightGradient;
+    maskCtx.fillRect(x + w - feather, y + feather, feather, h - feather * 2);
+    
+    // Corner feathering using radial gradients
+    // Top-left corner
+    const tlGradient = maskCtx.createRadialGradient(x + feather, y + feather, 0, x + feather, y + feather, feather);
+    tlGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    tlGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    maskCtx.fillStyle = tlGradient;
+    maskCtx.fillRect(x, y, feather, feather);
+    
+    // Top-right corner
+    const trGradient = maskCtx.createRadialGradient(x + w - feather, y + feather, 0, x + w - feather, y + feather, feather);
+    trGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    trGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    maskCtx.fillStyle = trGradient;
+    maskCtx.fillRect(x + w - feather, y, feather, feather);
+    
+    // Bottom-left corner
+    const blGradient = maskCtx.createRadialGradient(x + feather, y + h - feather, 0, x + feather, y + h - feather, feather);
+    blGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    blGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    maskCtx.fillStyle = blGradient;
+    maskCtx.fillRect(x, y + h - feather, feather, feather);
+    
+    // Bottom-right corner
+    const brGradient = maskCtx.createRadialGradient(x + w - feather, y + h - feather, 0, x + w - feather, y + h - feather, feather);
+    brGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    brGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    maskCtx.fillStyle = brGradient;
+    maskCtx.fillRect(x + w - feather, y + h - feather, feather, feather);
     
     return maskCanvas;
 }
@@ -177,16 +218,32 @@ function talkRobot() {
 function blinkRobot() {
     console.log('Robot blinking...');
     
-    // Save current state
-    const currentImageData = litCtx.getImageData(0, 0, 640, 640);
+    // Save current state of eye regions only (more efficient than full canvas)
+    const padding = ROI_CONFIG.eyesLeft.feather;
+    const leftEyeData = litCtx.getImageData(
+        ROI_CONFIG.eyesLeft.x - padding, 
+        ROI_CONFIG.eyesLeft.y - padding,
+        ROI_CONFIG.eyesLeft.w + padding * 2, 
+        ROI_CONFIG.eyesLeft.h + padding * 2
+    );
+    const rightEyeData = litCtx.getImageData(
+        ROI_CONFIG.eyesRight.x - padding, 
+        ROI_CONFIG.eyesRight.y - padding,
+        ROI_CONFIG.eyesRight.w + padding * 2, 
+        ROI_CONFIG.eyesRight.h + padding * 2
+    );
     
-    // Close eyes (no light)
-    drawBaseRobot(litCtx);
-    drawOverlayWithFeathering(litCtx, ROI_CONFIG.mouth, '#ff6600', 0.6);
+    // Close eyes (redraw dark eyes)
+    litCtx.fillStyle = '#1a1a1a';
+    litCtx.fillRect(ROI_CONFIG.eyesLeft.x, ROI_CONFIG.eyesLeft.y, 
+                    ROI_CONFIG.eyesLeft.w, ROI_CONFIG.eyesLeft.h);
+    litCtx.fillRect(ROI_CONFIG.eyesRight.x, ROI_CONFIG.eyesRight.y, 
+                    ROI_CONFIG.eyesRight.w, ROI_CONFIG.eyesRight.h);
     
     // Reopen after 150ms
     setTimeout(() => {
-        litCtx.putImageData(currentImageData, 0, 0);
+        litCtx.putImageData(leftEyeData, ROI_CONFIG.eyesLeft.x - padding, ROI_CONFIG.eyesLeft.y - padding);
+        litCtx.putImageData(rightEyeData, ROI_CONFIG.eyesRight.x - padding, ROI_CONFIG.eyesRight.y - padding);
     }, 150);
 }
 
@@ -225,7 +282,7 @@ function headTurnRobot() {
         
         // Translate to center, rotate, translate back
         litCtx.translate(320, 320);
-        litCtx.rotate(angle * Math.PI / 180);
+        litCtx.rotate(angle * DEGREES_TO_RADIANS);
         litCtx.scale(1 - Math.abs(angle) / 100, 1);
         litCtx.translate(-320, -320);
         

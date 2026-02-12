@@ -258,16 +258,19 @@ function setupEventListeners() {
     document.getElementById('toggleView').addEventListener('click', () => {
         isSplitView = !isSplitView;
         const mainContent = document.getElementById('mainContent');
+        const baseWrapper = document.getElementById('baseWrapper');
         const litWrapper = document.getElementById('litWrapper');
         
         if (isSplitView) {
             mainContent.classList.remove('single-view');
             mainContent.classList.add('split-view');
+            baseWrapper.style.display = 'block';
             litWrapper.style.display = 'block';
         } else {
             mainContent.classList.remove('split-view');
             mainContent.classList.add('single-view');
-            litWrapper.style.display = 'none';
+            baseWrapper.style.display = 'none';
+            litWrapper.style.display = 'block';
         }
     });
     

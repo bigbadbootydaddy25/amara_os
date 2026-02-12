@@ -1,13 +1,16 @@
-.body {
+.background {
     background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
-    color: #333;
+    background-image: url('path/to/image.jpg');
+    background-size: cover;
+    background-position: center;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: #2c3e50;
-}
-
-p {
-    line-height: 1.6;
+.feathered-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
 }

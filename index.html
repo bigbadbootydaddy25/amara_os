@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMARA OS - Robot Animation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>AMARA OS</h1>
+        </header>
+        
+        <div id="singleViewContainer" class="robot-wrapper">
+            <div class="robot-stage">
+                <img id="robotBase" class="robot-base" alt="Robot Base">
+                <canvas id="robotCanvas" class="robot-overlay" width="640" height="640"></canvas>
+            </div>
+            
+            <div class="controls-panel">
+                <button id="initiateBtn" class="btn-control">Initiate</button>
+                <button id="blinkBtn" class="btn-control">Blink</button>
+                <button id="talkBtn" class="btn-control">Talk</button>
+                <button id="headTurnBtn" class="btn-control">Head Turn</button>
+            </div>
+        </div>
+        
+        <div id="errorDisplay" class="error-display"></div>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+</html>

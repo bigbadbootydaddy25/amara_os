@@ -46,10 +46,16 @@ function init() {
     state.baseImage.src = IMAGES.base;
     
     // Setup event listeners for control buttons
-    document.getElementById('initiateBtn').addEventListener('click', initiateRobot);
-    document.getElementById('blinkBtn').addEventListener('click', blinkRobot);
-    document.getElementById('talkBtn').addEventListener('click', talkRobot);
-    document.getElementById('headTurnBtn').addEventListener('click', headTurnRobot);
+    document.getElementById('initiateBtn')?.addEventListener('click', initiateRobot);
+    
+    // Old buttons may not exist anymore (replaced with voice interface)
+    const blinkBtn = document.getElementById('blinkBtn');
+    const talkBtn = document.getElementById('talkBtn');
+    const headTurnBtn = document.getElementById('headTurnBtn');
+    
+    if (blinkBtn) blinkBtn.addEventListener('click', blinkRobot);
+    if (talkBtn) talkBtn.addEventListener('click', talkRobot);
+    if (headTurnBtn) headTurnBtn.addEventListener('click', headTurnRobot);
 }
 
 /**

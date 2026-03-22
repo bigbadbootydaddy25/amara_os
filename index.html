@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amara</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .scene {
+      width: 100vw; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    /* ── Concentric Rings ── */
+    .rings {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      animation: ringPulse 4s ease-in-out infinite;
+    }
+
+    .ring:nth-child(1) { width: 20vmin; height: 20vmin; border: 2.5px solid rgba(210,218,235,0.42); }
+    .ring:nth-child(2) { width: 40vmin; height: 40vmin; border: 2px   solid rgba(210,218,235,0.34); animation-delay: 0.22s; }
+    .ring:nth-child(3) { width: 60vmin; height: 60vmin; border: 1.5px solid rgba(210,218,235,0.26); animation-delay: 0.44s; }
+    .ring:nth-child(4) { width: 80vmin; height: 80vmin; border: 1.5px solid rgba(210,218,235,0.19); animation-delay: 0.66s; }
+    .ring:nth-child(5) { width:100vmin; height:100vmin; border: 1px   solid rgba(210,218,235,0.13); animation-delay: 0.88s; }
+    .ring:nth-child(6) { width:120vmin; height:120vmin; border: 1px   solid rgba(210,218,235,0.08); animation-delay: 1.1s;  }
+
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50%       { opacity: 1;    transform: scale(1.013); }
+    }
+
+    /* ── Face wrapper ── */
+    .face-wrap {
+      position: relative; z-index: 10;
+      height: 88vh;
+      animation: breathe 5s ease-in-out infinite;
+    }
+    .face-wrap svg { height: 100%; width: auto; display: block; }
+
+    @keyframes breathe {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+
+    /* ── Eyelid blink ── */
+    .eyelid {
+      transform-box: fill-box;
+      transform-origin: top center;
+      transform: scaleY(0);
+      animation: blink 7s ease-in-out infinite;
+    }
+    .eyelid-r { animation-delay: 0.06s; }
+
+    @keyframes blink {
+      0%, 83%, 100% { transform: scaleY(0); }
+      87%, 91%      { transform: scaleY(1); }
+    }
+
+    /* ── State: listening ── */
+    .listening .ring {
+      border-color: rgba(70, 155, 255, 0.32) !important;
+      animation-duration: 1.1s;
+    }
+
+    /* ── State: thinking ── */
+    .thinking .ring:nth-child(odd)  { animation: spinCW  3s linear infinite; }
+    .thinking .ring:nth-child(even) { animation: spinCCW 3.6s linear infinite; }
+    @keyframes spinCW  { to { transform: rotate(360deg); } }
+    @keyframes spinCCW { to { transform: rotate(-360deg); } }
+
+    /* ── State: speaking ── */
+    .speaking .ring {
+      border-color: rgba(130, 200, 255, 0.42) !important;
+      animation-duration: 0.55s;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene" id="scene">
+
+    <!-- Concentric rings -->
+    <div class="rings">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+    </div>
+
+    <!-- Amara face -->
+    <div class="face-wrap">
+      <svg id="face" viewBox="0 0 400 530" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+
+          <!-- Head surface: bright centre, darkens at rounded edges -->
+          <radialGradient id="HG" cx="48%" cy="36%" r="62%">
+            <stop offset="0%"   stop-color="#f9f9f9"/>
+            <stop offset="50%"  stop-color="#eeeeee"/>
+            <stop offset="80%"  stop-color="#dadada"/>
+            <stop offset="100%" stop-color="#c4c4c4"/>
+          </radialGradient>
+
+          <!-- Subtle cheek shading L / R -->
+          <radialGradient id="CL" cx="18%" cy="58%" r="38%">
+            <stop offset="0%"   stop-color="#bbbbbb" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#f5f5f5" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="CR" cx="82%" cy="58%" r="38%">
+            <stop offset="0%"   stop-color="#bbbbbb" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#f5f5f5" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Iris blue gradient -->
+          <radialGradient id="EG" cx="36%" cy="32%" r="68%">
+            <stop offset="0%"   stop-color="#c5e5ff"/>
+            <stop offset="28%"  stop-color="#4a9dd8"/>
+            <stop offset="68%"  stop-color="#1b62a5"/>
+            <stop offset="100%" stop-color="#0b2d5a"/>
+          </radialGradient>
+
+          <!-- Pupil -->
+          <radialGradient id="PG" cx="34%" cy="30%" r="58%">
+            <stop offset="0%"   stop-color="#0c1c35"/>
+            <stop offset="100%" stop-color="#000008"/>
+          </radialGradient>
+
+          <!-- Neck horizontal gradient (left/right darker) -->
+          <linearGradient id="NG" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#5e5e5e"/>
+            <stop offset="22%"  stop-color="#aaaaaa"/>
+            <stop offset="50%"  stop-color="#d8d8d8"/>
+            <stop offset="78%"  stop-color="#aaaaaa"/>
+            <stop offset="100%" stop-color="#5e5e5e"/>
+          </linearGradient>
+
+          <!-- Shoulder plate gradient -->
+          <linearGradient id="SG" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stop-color="#d2d2d2"/>
+            <stop offset="100%" stop-color="#8a8a8a"/>
+          </linearGradient>
+
+          <!-- Blue collar -->
+          <linearGradient id="BG" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#14437e"/>
+            <stop offset="50%"  stop-color="#3a88cc"/>
+            <stop offset="100%" stop-color="#14437e"/>
+          </linearGradient>
+
+          <!-- Eye glow bloom filter -->
+          <filter id="eyeGlow" x="-45%" y="-45%" width="190%" height="190%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+
+          <!-- Blue ear-stripe glow -->
+          <filter id="earGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+
+          <!-- Sensor LED glow -->
+          <filter id="ledGlow" x="-120%" y="-120%" width="340%" height="340%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+
+        </defs>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  SHOULDERS                              -->
+        <!-- ═══════════════════════════════════════ -->
+        <!-- Left shoulder mass -->
+        <path d="M -5 530 Q 18 478 108 452 L 158 447 Q 92 462 28 518 Z" fill="url(#SG)"/>
+        <path d="M -5 530 Q 22 484 112 458 L 117 469 Q 32 500  3 530 Z" fill="#c0c0c0" opacity="0.45"/>
+        <!-- Right shoulder mass -->
+        <path d="M 405 530 Q 382 478 292 452 L 242 447 Q 308 462 372 518 Z" fill="url(#SG)"/>
+        <path d="M 405 530 Q 378 484 288 458 L 283 469 Q 368 500 397 530 Z" fill="#c0c0c0" opacity="0.45"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  NECK / MECHANICAL INNER               -->
+        <!-- ═══════════════════════════════════════ -->
+        <rect x="152" y="390" width="96" height="72" rx="8" fill="url(#NG)"/>
+        <!-- Internal cables (dark vertical lines) -->
+        <line x1="166" y1="396" x2="163" y2="456" stroke="#464646" stroke-width="3.5" stroke-linecap="round" opacity="0.75"/>
+        <line x1="175" y1="395" x2="172" y2="457" stroke="#3a3a3a" stroke-width="2"   opacity="0.55"/>
+        <line x1="200" y1="393" x2="200" y2="458" stroke="#747474" stroke-width="3"   opacity="0.65"/>
+        <line x1="225" y1="395" x2="228" y2="457" stroke="#3a3a3a" stroke-width="2"   opacity="0.55"/>
+        <line x1="234" y1="396" x2="237" y2="456" stroke="#464646" stroke-width="3.5" stroke-linecap="round" opacity="0.75"/>
+        <!-- Blue collar ring -->
+        <rect x="146" y="432" width="108" height="13" rx="6" fill="url(#BG)"/>
+        <rect x="149" y="433.5" width="102" height="8"  rx="4" fill="#70b8f0" opacity="0.35"/>
+        <!-- Head-to-neck transition shadow -->
+        <path d="M 158 392 Q 200 382 242 392 L 242 398 Q 200 387 158 398 Z" fill="#c5c5c5" opacity="0.5"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  HEAD                                  -->
+        <!-- ═══════════════════════════════════════ -->
+        <ellipse cx="200" cy="210" rx="160" ry="194" fill="url(#HG)"/>
+        <!-- Cheek depth shading -->
+        <ellipse cx="200" cy="210" rx="160" ry="194" fill="url(#CL)"/>
+        <ellipse cx="200" cy="210" rx="160" ry="194" fill="url(#CR)"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  PANEL SEAM LINES                      -->
+        <!-- ═══════════════════════════════════════ -->
+        <!-- Crown vertical -->
+        <line x1="200" y1="20"  x2="200" y2="92"  stroke="#c6c6c6" stroke-width="1"   opacity="0.7"/>
+        <!-- Crown rivet dots -->
+        <circle cx="200" cy="27"  r="2.2" fill="#9a9a9a" opacity="0.7"/>
+        <circle cx="200" cy="52"  r="1.6" fill="#ababab" opacity="0.6"/>
+        <!-- Forehead horizontal seam -->
+        <path d="M 80 150 Q 140 137 200 135 Q 260 137 320 150" fill="none" stroke="#cccccc" stroke-width="1" opacity="0.6"/>
+        <!-- Seam rivets -->
+        <circle cx="126" cy="142" r="2.1" fill="#bababa" opacity="0.65"/>
+        <circle cx="274" cy="142" r="2.1" fill="#bababa" opacity="0.65"/>
+        <!-- Vertical side creases -->
+        <path d="M 50 196 Q 55 252 67 296" fill="none" stroke="#c4c4c4" stroke-width="1.5" opacity="0.5"/>
+        <path d="M 350 196 Q 345 252 333 296" fill="none" stroke="#c4c4c4" stroke-width="1.5" opacity="0.5"/>
+        <!-- Side rivet marks -->
+        <circle cx="68" cy="180"  r="2.4" fill="#bababa" opacity="0.68"/>
+        <circle cx="332" cy="180" r="2.4" fill="#bababa" opacity="0.68"/>
+        <circle cx="58" cy="244"  r="2"   fill="#bababa" opacity="0.58"/>
+        <circle cx="342" cy="244" r="2"   fill="#bababa" opacity="0.58"/>
+        <circle cx="66" cy="302"  r="2"   fill="#bababa" opacity="0.55"/>
+        <circle cx="334" cy="302" r="2"   fill="#bababa" opacity="0.55"/>
+        <!-- Jaw / lower face seam -->
+        <path d="M 94 328 Q 120 342 158 350 Q 200 356 242 350 Q 280 342 306 328"
+              fill="none" stroke="#cccccc" stroke-width="1" opacity="0.4"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  FOREHEAD SENSOR BAR                   -->
+        <!-- ═══════════════════════════════════════ -->
+        <rect x="180" y="76" width="40" height="11" rx="5.5" fill="#1e1e1e" opacity="0.92"/>
+        <rect x="183" y="77.5" width="34" height="8" rx="4" fill="#1f5faa"/>
+        <!-- Glowing centre LED -->
+        <circle cx="200" cy="81.5" r="3.2" fill="#72c0ff" filter="url(#ledGlow)" opacity="0.95"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  EAR SIDE PIECES                       -->
+        <!-- ═══════════════════════════════════════ -->
+        <!-- Left ear -->
+        <rect x="35" y="188" width="19" height="54" rx="9" fill="#d2d2d2" stroke="#b5b5b5" stroke-width="1"/>
+        <rect x="39" y="195" width="11" height="40" rx="5" fill="#256ab0" opacity="0.88" filter="url(#earGlow)"/>
+        <rect x="41" y="198" width="7"  height="34" rx="3" fill="#6cb5ee" opacity="0.55"/>
+        <!-- Right ear -->
+        <rect x="346" y="188" width="19" height="54" rx="9" fill="#d2d2d2" stroke="#b5b5b5" stroke-width="1"/>
+        <rect x="350" y="195" width="11" height="40" rx="5" fill="#256ab0" opacity="0.88" filter="url(#earGlow)"/>
+        <rect x="352" y="198" width="7"  height="34" rx="3" fill="#6cb5ee" opacity="0.55"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  LEFT EYE                              -->
+        <!-- ═══════════════════════════════════════ -->
+        <g filter="url(#eyeGlow)">
+          <!-- Brow ridge -->
+          <path d="M 103 165 Q 143 157 183 165" fill="none" stroke="#c4c4c4" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Socket depression -->
+          <ellipse cx="143" cy="198" rx="47" ry="37" fill="#d4d4d4"/>
+          <!-- Sclera (slight blue-white) -->
+          <ellipse cx="143" cy="198" rx="42" ry="32" fill="#e0eeff"/>
+          <!-- Iris -->
+          <ellipse cx="143" cy="198" rx="27" ry="27" fill="url(#EG)"/>
+          <!-- Limbal ring -->
+          <ellipse cx="143" cy="198" rx="27" ry="27" fill="none" stroke="#0c2f5e" stroke-width="2.5" opacity="0.72"/>
+          <!-- Iris fibre rings -->
+          <ellipse cx="143" cy="198" rx="22" ry="22" fill="none" stroke="#3a82c2" stroke-width="1.5" opacity="0.42"/>
+          <ellipse cx="143" cy="198" rx="16" ry="16" fill="none" stroke="#5598d6" stroke-width="1"   opacity="0.34"/>
+          <!-- Pupil -->
+          <ellipse cx="143" cy="198" rx="12" ry="12" fill="url(#PG)"/>
+          <!-- Catchlight highlight -->
+          <ellipse cx="135" cy="190" rx="5.5" ry="4.5" fill="white" opacity="0.88"/>
+          <ellipse cx="152" cy="205" rx="2.5" ry="2"   fill="white" opacity="0.38"/>
+        </g>
+        <!-- Left eyelid (blink) -->
+        <ellipse class="eyelid eyelid-l" cx="143" cy="198" rx="45" ry="34" fill="url(#HG)"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  RIGHT EYE                             -->
+        <!-- ═══════════════════════════════════════ -->
+        <g filter="url(#eyeGlow)">
+          <!-- Brow ridge -->
+          <path d="M 217 165 Q 257 157 297 165" fill="none" stroke="#c4c4c4" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Socket depression -->
+          <ellipse cx="257" cy="198" rx="47" ry="37" fill="#d4d4d4"/>
+          <!-- Sclera -->
+          <ellipse cx="257" cy="198" rx="42" ry="32" fill="#e0eeff"/>
+          <!-- Iris -->
+          <ellipse cx="257" cy="198" rx="27" ry="27" fill="url(#EG)"/>
+          <!-- Limbal ring -->
+          <ellipse cx="257" cy="198" rx="27" ry="27" fill="none" stroke="#0c2f5e" stroke-width="2.5" opacity="0.72"/>
+          <!-- Iris fibre rings -->
+          <ellipse cx="257" cy="198" rx="22" ry="22" fill="none" stroke="#3a82c2" stroke-width="1.5" opacity="0.42"/>
+          <ellipse cx="257" cy="198" rx="16" ry="16" fill="none" stroke="#5598d6" stroke-width="1"   opacity="0.34"/>
+          <!-- Pupil -->
+          <ellipse cx="257" cy="198" rx="12" ry="12" fill="url(#PG)"/>
+          <!-- Catchlight highlight -->
+          <ellipse cx="249" cy="190" rx="5.5" ry="4.5" fill="white" opacity="0.88"/>
+          <ellipse cx="266" cy="205" rx="2.5" ry="2"   fill="white" opacity="0.38"/>
+        </g>
+        <!-- Right eyelid (blink) -->
+        <ellipse class="eyelid eyelid-r" cx="257" cy="198" rx="45" ry="34" fill="url(#HG)"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  NOSE                                  -->
+        <!-- ═══════════════════════════════════════ -->
+        <path d="M 197 243 Q 193 267 188 278 Q 200 284 212 278 Q 207 267 203 243"
+              fill="#d6d6d6" opacity="0.48"/>
+        <ellipse cx="191" cy="280" rx="7.5" ry="5.5" fill="#c8c8c8" opacity="0.38"/>
+        <ellipse cx="209" cy="280" rx="7.5" ry="5.5" fill="#c8c8c8" opacity="0.38"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  MOUTH                                 -->
+        <!-- ═══════════════════════════════════════ -->
+        <!-- Upper lip -->
+        <path id="upperLip"
+          d="M 158 316 Q 174 307 200 309 Q 226 307 242 316 Q 226 322 200 320 Q 174 322 158 316 Z"
+          fill="#bebdbe"/>
+        <!-- Teeth (slightly open at rest) -->
+        <path id="teethArea"
+          d="M 164 317 Q 200 315 236 317 L 234 325 Q 200 327 166 325 Z"
+          fill="#e5e5e5" opacity="0.92"/>
+        <!-- Tooth gap lines -->
+        <line x1="182" y1="316" x2="182" y2="324" stroke="#cecece" stroke-width="0.8" opacity="0.45"/>
+        <line x1="200" y1="315" x2="200" y2="325" stroke="#cecece" stroke-width="0.8" opacity="0.45"/>
+        <line x1="218" y1="316" x2="218" y2="324" stroke="#cecece" stroke-width="0.8" opacity="0.45"/>
+        <!-- Lower lip -->
+        <path id="lowerLip"
+          d="M 158 319 Q 174 334 200 332 Q 226 334 242 319 Q 226 324 200 322 Q 174 324 158 319 Z"
+          fill="#b3b2b3"/>
+        <!-- Mouth gap line -->
+        <path id="mouthGap"
+          d="M 162 317 Q 200 315 238 317"
+          fill="none" stroke="#606060" stroke-width="2.2" stroke-linecap="round"/>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!--  CHIN DETAIL                           -->
+        <!-- ═══════════════════════════════════════ -->
+        <path d="M 157 380 Q 200 400 243 380"
+              fill="none" stroke="#c8c8c8" stroke-width="1.5" opacity="0.32" stroke-linecap="round"/>
+
+      </svg>
+    </div>
+
+  </div>
+
+  <script>
+    // ════════════════════════════════════════════════════════
+    //  AMARA  —  Animated Conversational ASI
+    //  Stage 1: Visual Shell  (voice hooks ready — no voice yet)
+    //  States: idle | listening | thinking | speaking
+    // ════════════════════════════════════════════════════════
+
+    const scene     = document.getElementById('scene');
+    const upperLip  = document.getElementById('upperLip');
+    const lowerLip  = document.getElementById('lowerLip');
+    const mouthGap  = document.getElementById('mouthGap');
+    const teethArea = document.getElementById('teethArea');
+
+    let state      = 'idle';
+    let mouthTimer = null;
+    let mouthOpen  = false;
+
+    // ── Mouth path sets ──────────────────────────────────────
+    const M = {
+      closed: {
+        lower:  'M 158 319 Q 174 334 200 332 Q 226 334 242 319 Q 226 324 200 322 Q 174 324 158 319 Z',
+        gap:    'M 162 317 Q 200 315 238 317',
+        teeth:  'M 164 317 Q 200 315 236 317 L 234 325 Q 200 327 166 325 Z'
+      },
+      open: {
+        lower:  'M 158 322 Q 174 340 200 338 Q 226 340 242 322 Q 226 328 200 326 Q 174 328 158 322 Z',
+        gap:    'M 162 320 Q 200 318 238 320',
+        teeth:  'M 164 320 Q 200 318 236 320 L 234 330 Q 200 332 166 330 Z'
+      }
+    };
+
+    // ── State machine ────────────────────────────────────────
+    function setState(newState) {
+      scene.classList.remove('idle', 'listening', 'thinking', 'speaking');
+      scene.classList.add(newState);
+      state = newState;
+      newState === 'speaking' ? startMouth() : stopMouth();
+    }
+
+    // ── Lip-sync (randomised cadence for naturalness) ────────
+    function startMouth() {
+      stopMouth();
+      function cycle() {
+        mouthOpen = !mouthOpen;
+        const m = mouthOpen ? M.open : M.closed;
+        lowerLip.setAttribute('d',  m.lower);
+        mouthGap.setAttribute('d',  m.gap);
+        teethArea.setAttribute('d', m.teeth);
+        mouthTimer = setTimeout(cycle, 75 + Math.random() * 130);
+      }
+      cycle();
+    }
+
+    function stopMouth() {
+      clearTimeout(mouthTimer);
+      mouthTimer = null;
+      lowerLip.setAttribute('d',  M.closed.lower);
+      mouthGap.setAttribute('d',  M.closed.gap);
+      teethArea.setAttribute('d', M.closed.teeth);
+    }
+
+    // ── Public API — called by voice layer ───────────────────
+    window.amara = {
+      setState,
+      getState:      () => state,
+      onListenStart: () => setState('listening'),
+      onThinkStart:  () => setState('thinking'),
+      onSpeakStart:  () => setState('speaking'),
+      onSpeakEnd:    () => setState('idle'),
+    };
+
+    // Initialise
+    setState('idle');
+  </script>
+</body>
+</html>

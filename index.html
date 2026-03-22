@@ -431,6 +431,117 @@
 
     // Initialise
     setState('idle');
+
+    // ════════════════════════════════════════════════════════
+    //  VOICE PIPELINE
+    //  Mic  →  Web Speech API  →  Claude  →  ElevenLabs  →  Audio
+    // ════════════════════════════════════════════════════════
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { console.warn('SpeechRecognition not supported in this browser.'); }
+
+    const recognition       = SR ? new SR() : null;
+    const conversationHistory = [];
+    let   isProcessing      = false;
+
+    if (recognition) {
+      recognition.continuous     = false;
+      recognition.interimResults = false;
+      recognition.lang           = 'en-US';
+
+      recognition.onstart = () => {
+        if (!isProcessing) setState('listening');
+      };
+
+      recognition.onresult = async (e) => {
+        const transcript = e.results[0][0].transcript.trim();
+        if (!transcript) return;
+        isProcessing = true;
+        await runPipeline(transcript);
+        isProcessing = false;
+      };
+
+      recognition.onerror = (e) => {
+        if (e.error === 'no-speech') return;
+        console.warn('[SR]', e.error);
+        setState('idle');
+      };
+
+      recognition.onend = () => {
+        if (!isProcessing) restartListening();
+      };
+    }
+
+    function restartListening() {
+      setTimeout(() => {
+        try { recognition && recognition.start(); } catch (_) {}
+      }, 350);
+    }
+
+    // ── Pipeline: listen → think → speak ────────────────────
+    async function runPipeline(text) {
+      try {
+        // 1. Think
+        setState('thinking');
+        conversationHistory.push({ role: 'user', content: text });
+
+        const chatRes = await fetch('/api/chat', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ messages: conversationHistory })
+        });
+
+        if (!chatRes.ok) throw new Error(`Chat ${chatRes.status}`);
+        const { text: reply } = await chatRes.json();
+        conversationHistory.push({ role: 'assistant', content: reply });
+
+        // 2. Speak
+        await speakText(reply);
+
+      } catch (err) {
+        console.error('[pipeline]', err);
+        setState('idle');
+        restartListening();
+      }
+    }
+
+    async function speakText(text) {
+      setState('speaking');
+
+      const res = await fetch('/api/speak', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ text })
+      });
+
+      if (!res.ok) {
+        console.error('[speak] upstream error', res.status);
+        setState('idle');
+        restartListening();
+        return;
+      }
+
+      const blob  = await res.blob();
+      const url   = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        setState('idle');
+        restartListening();
+      };
+      audio.onerror = () => {
+        setState('idle');
+        restartListening();
+      };
+
+      await audio.play();
+    }
+
+    // ── Boot: start listening after short delay ──────────────
+    setTimeout(() => {
+      try { recognition && recognition.start(); } catch (_) {}
+    }, 800);
   </script>
 </body>
 </html>

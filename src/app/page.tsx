@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CanonicalDeal } from "@/core/schema/canonical";
 import { CommandHeader } from "@/components/dashboard/CommandHeader";
 import { DealCard } from "@/components/dashboard/DealCard";
@@ -8,12 +8,19 @@ import { DealDrilldown } from "@/components/dashboard/DealDrilldown";
 import { MarketIntelPanel } from "@/components/dashboard/MarketIntelPanel";
 import { BuyerIntelPanel } from "@/components/dashboard/BuyerIntelPanel";
 import { ScanStatusPanel } from "@/components/dashboard/ScanStatusPanel";
-import { GlassCard } from "@/components/ui/GlassCard";
 import { StatusPulse } from "@/components/ui/StatusPulse";
-import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 type SidebarPanel = "markets" | "buyers" | "scan";
+
+interface ScanStatus {
+  isRunning: boolean;
+  marketsScanned?: number;
+  totalMarkets?: number;
+  totalListings?: number;
+  totalDealsQualified?: number;
+  status?: string;
+}
 
 export default function MissionControl() {
   const [deals, setDeals] = useState<CanonicalDeal[]>([]);
@@ -31,12 +38,10 @@ export default function MissionControl() {
   const [filterUrgency, setFilterUrgency] = useState<"ALL" | "HOT" | "WARM">("ALL");
   const [filterMarket, setFilterMarket] = useState<string>("ALL");
   const [loading, setLoading] = useState(true);
+  const [scanStatus, setScanStatus] = useState<ScanStatus>({ isRunning: false });
+  const [scanInitiated, setScanInitiated] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     try {
       const [dealsRes, statsRes] = await Promise.all([
         fetch("/api/deals"),
@@ -50,6 +55,63 @@ export default function MissionControl() {
       console.error("Failed to fetch data:", err);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const fetchScanStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/scan/status");
+      const data = await res.json();
+      setScanStatus({
+        isRunning: data.isRunning,
+        marketsScanned: data.marketsScanned,
+        totalMarkets: data.totalMarkets,
+        totalListings: data.totalListings,
+        totalDealsQualified: data.totalDealsQualified,
+        status: data.status,
+      });
+      // Refresh deals if scan just completed
+      if (!data.isRunning && data.status === "COMPLETE") {
+        fetchData();
+      }
+    } catch {
+      // silent
+    }
+  }, [fetchData]);
+
+  useEffect(() => {
+    fetchData();
+    fetchScanStatus();
+  }, [fetchData, fetchScanStatus]);
+
+  // Poll scan status while running
+  useEffect(() => {
+    if (!scanStatus.isRunning) return;
+    const interval = setInterval(fetchScanStatus, 5000);
+    return () => clearInterval(interval);
+  }, [scanStatus.isRunning, fetchScanStatus]);
+
+  async function triggerScan(options?: { tierFilter?: string }) {
+    try {
+      setScanInitiated(true);
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(options ?? {}),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setScanStatus({ isRunning: true });
+        setActivePanel("scan");
+        // Start polling
+        setTimeout(fetchScanStatus, 2000);
+      } else {
+        console.error("Scan error:", data);
+      }
+    } catch (err) {
+      console.error("Failed to trigger scan:", err);
+    } finally {
+      setScanInitiated(false);
     }
   }
 
@@ -114,7 +176,7 @@ export default function MissionControl() {
         {/* Center — Deal Feed (Strike Zone) */}
         <div className="flex-1 flex flex-col overflow-hidden border-r border-[#1f2937]">
           {/* Strike Zone header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f2937] bg-[#080b12]/50">
+          <div className="relative flex items-center justify-between px-4 py-3 border-b border-[#1f2937] bg-[#080b12]/50">
             <div className="flex items-center gap-3">
               <div>
                 <div className="data-label mb-0">STRIKE ZONE</div>
@@ -122,10 +184,45 @@ export default function MissionControl() {
                   {filteredDeals.length} qualified deal{filteredDeals.length !== 1 ? "s" : ""} · exits confirmed · spread validated
                 </div>
               </div>
-              <StatusPulse color="green" />
+              {scanStatus.isRunning ? (
+                <StatusPulse color="signal" label={`SCANNING ${scanStatus.marketsScanned ?? 0}/${scanStatus.totalMarkets ?? 37}`} />
+              ) : (
+                <StatusPulse color="green" />
+              )}
             </div>
 
-            {/* Filters */}
+            {/* Filters + Scan button */}
+            <div className="flex items-center gap-2">
+              {/* SCAN NOW */}
+              <div className="flex gap-1 mr-2">
+                <button
+                  onClick={() => triggerScan({ tierFilter: "TIER_1_PRIORITY" })}
+                  disabled={scanStatus.isRunning || scanInitiated}
+                  className={cn(
+                    "px-2 py-1 rounded text-[9px] font-mono tracking-wider border transition-colors",
+                    scanStatus.isRunning || scanInitiated
+                      ? "text-slate-600 border-[#1f2937] cursor-not-allowed"
+                      : "text-green-400 border-green-400/30 bg-green-400/5 hover:bg-green-400/10"
+                  )}
+                >
+                  {scanStatus.isRunning ? "SCANNING..." : "⚡ TIER 1 SCAN"}
+                </button>
+                <button
+                  onClick={() => triggerScan()}
+                  disabled={scanStatus.isRunning || scanInitiated}
+                  className={cn(
+                    "px-2 py-1 rounded text-[9px] font-mono tracking-wider border transition-colors",
+                    scanStatus.isRunning || scanInitiated
+                      ? "text-slate-600 border-[#1f2937] cursor-not-allowed"
+                      : "text-[#00d4ff] border-[#00d4ff]/20 bg-[#00d4ff]/5 hover:bg-[#00d4ff]/10"
+                  )}
+                >
+                  {scanStatus.isRunning ? "..." : "ALL 37 MARKETS"}
+                </button>
+              </div>
+            </div>
+
+            {/* Original filters */}
             <div className="flex items-center gap-2">
               {/* Urgency filter */}
               <div className="flex gap-1">
@@ -158,6 +255,18 @@ export default function MissionControl() {
                 ))}
               </select>
             </div>
+
+            {/* Scan progress bar */}
+            {scanStatus.isRunning && (
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-[#1f2937]">
+                <div
+                  className="h-full bg-[#00d4ff] transition-all duration-500"
+                  style={{
+                    width: `${scanStatus.totalMarkets ? Math.round((scanStatus.marketsScanned ?? 0) / scanStatus.totalMarkets * 100) : 0}%`
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Deal feed */}
@@ -165,7 +274,7 @@ export default function MissionControl() {
             {loading ? (
               <LoadingState />
             ) : filteredDeals.length === 0 ? (
-              <EmptyState />
+              <EmptyState onScan={() => triggerScan()} />
             ) : (
               <div className="space-y-3">
                 {filteredDeals.map((deal) => (
@@ -211,7 +320,7 @@ function LoadingState() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ onScan }: { onScan?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
       <div className="text-[#00d4ff] text-4xl opacity-20">◉</div>
@@ -219,8 +328,16 @@ function EmptyState() {
         NO DEALS IN STRIKE ZONE
       </div>
       <div className="text-xs text-slate-600 max-w-xs">
-        AMARA is scanning silently. When a deal passes all gates — exit path confirmed, distress validated, spread real — it will appear here.
+        AMARA scans 37 virtual markets simultaneously. When a deal passes all gates — exit path confirmed, distress validated, spread real — it surfaces here.
       </div>
+      {onScan && (
+        <button
+          onClick={onScan}
+          className="mt-2 text-[10px] font-mono text-green-400 border border-green-400/30 bg-green-400/5 px-4 py-2 rounded hover:bg-green-400/10 transition-colors"
+        >
+          ⚡ LAUNCH ALL 37 MARKETS
+        </button>
+      )}
       <div className="text-[10px] font-mono text-slate-700">
         AMARA watches so you don't have to.
       </div>

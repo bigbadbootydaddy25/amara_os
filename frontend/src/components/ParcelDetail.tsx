@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Parcel } from "../types/parcel";
+import type { DealReview } from "../types/review";
 import { api } from "../api/client";
 import { AssistantPanel } from "./AssistantPanel";
 import { AmaraReviewPanel } from "./amara/AmaraReviewPanel";
+import { AmaraDealBreakdown } from "./amara/DealBreakdown";
 import styles from "./ParcelDetail.module.css";
 
 interface Props {
@@ -37,6 +39,13 @@ function Bool({ v }: { v: boolean | null }) {
 export function ParcelDetail({ parcel, loading, onRecomputed }: Props) {
   const [recomputing, setRecomputing] = useState(false);
   const [recomputeError, setRecomputeError] = useState<string | null>(null);
+  const [review, setReview] = useState<DealReview | null>(null);
+
+  useEffect(() => {
+    if (!parcel) return;
+    setReview(null);
+    api.getAmaraReview(parcel.id).then((r) => setReview(r.data)).catch(() => {});
+  }, [parcel?.id]);
 
   async function handleRecompute() {
     if (!parcel) return;
@@ -87,6 +96,10 @@ export function ParcelDetail({ parcel, loading, onRecomputed }: Props) {
       >
         {recomputing ? "Recomputing…" : "⟳ Recompute Feasibility"}
       </button>
+
+      <div className={styles.breakdownRow}>
+        <AmaraDealBreakdown parcel={parcel} review={review} />
+      </div>
 
       <div className={styles.scrollArea}>
         <Section title="Location">

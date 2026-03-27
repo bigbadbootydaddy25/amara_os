@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "migrate": "psql $DATABASE_URL -f migrations/001_create_land_parcels.sql && psql $DATABASE_URL -f migrations/002_create_deal_reviews.sql",
+    "seed": "tsx scripts/seed-vegas.ts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push"
   },

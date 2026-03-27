@@ -1,10 +1,12 @@
 import type { Parcel, PaginatedParcels, ParcelFilters } from "../types/parcel";
 import type { DealReview, PipelineStats, PipelineRun } from "../types/review";
 
-const BASE = "";  // proxied via Vite dev server; in production set to your API origin
+// In dev: Vite proxies to localhost:3001, so BASE="" works fine.
+// In production / Docker: set VITE_API_BASE_URL in your .env or Docker env.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(BASE + path, {
+  const res = await fetch(API_BASE_URL + path, {
     headers: { "Content-Type": "application/json" },
     ...init,
   });

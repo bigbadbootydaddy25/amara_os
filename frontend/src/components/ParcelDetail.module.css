@@ -74,6 +74,11 @@
   padding: 6px 16px;
 }
 
+.breakdownRow {
+  border-bottom: 1px solid #2a2e40;
+  padding: 6px 10px;
+}
+
 .recomputeBtn {
   background: #1e3a8a;
   border: none;

@@ -1,0 +1,93 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PropVision × Amara OS — Full Stack
+#
+# Usage:
+#   docker-compose up --build          # build + start everything
+#   docker-compose up -d               # detached
+#   docker-compose logs -f backend     # tail a service
+#   docker-compose down -v             # stop + delete volumes
+#
+# Production overrides:
+#   - Set AMARA_AI_PROVIDER + API keys in a .env file (never commit .env)
+#   - Set VITE_API_BASE_URL=https://api.yourhost.com for the frontend build
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Postgres ────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: propvision_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       propvision
+      POSTGRES_USER:     propvision
+      POSTGRES_PASSWORD: propvision_dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U propvision -d propvision"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "5432:5432"   # expose for local psql access; remove in prod
+
+  # ── Backend ─────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: propvision_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL:          postgresql://propvision:propvision_dev@postgres:5432/propvision
+      PGHOST:                postgres
+      PGPORT:                "5432"
+      PGUSER:                propvision
+      PORT:                  "3001"
+      HOST:                  "0.0.0.0"
+      NODE_ENV:              production
+      CORS_ORIGIN:           http://localhost:5173
+
+      # ── AI provider (set these in .env or override here) ──────────────────
+      AMARA_AI_PROVIDER:     ${AMARA_AI_PROVIDER:-stub}
+      PERPLEXITY_API_KEY:    ${PERPLEXITY_API_KEY:-}
+      OPENAI_API_KEY:        ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY:     ${ANTHROPIC_API_KEY:-}
+
+      # ── Pipeline cron (default: 6am daily) ────────────────────────────────
+      PIPELINE_CRON_SCHEDULE: ${PIPELINE_CRON_SCHEDULE:-0 6 * * *}
+      DISABLE_PIPELINE_CRON:  ${DISABLE_PIPELINE_CRON:-false}
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Frontend ────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the Vite build at image build time
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3001}
+    container_name: propvision_ui
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+
+volumes:
+  pgdata:
+    name: propvision_pgdata

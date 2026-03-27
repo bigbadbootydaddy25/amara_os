@@ -1,0 +1,347 @@
+/* ── Activate button ───────────────────────────────────────────────────────── */
+.activateBtn {
+  align-items: center;
+  background: linear-gradient(135deg, #0a0e1a, #111827);
+  border: 1px solid #4f7ef840;
+  border-radius: 8px;
+  color: #4f7ef8;
+  cursor: pointer;
+  display: flex;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 7px;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.activateBtn:hover {
+  background: linear-gradient(135deg, #111827, #1e2235);
+  border-color: #4f7ef8;
+  box-shadow: 0 0 18px #4f7ef840;
+  color: #93c5fd;
+}
+
+.activateBtnOrb {
+  background: radial-gradient(circle, #6ee7f7, #4f7ef8);
+  border-radius: 50%;
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+  animation: orbPulse 2s ease-in-out infinite;
+}
+
+@keyframes orbPulse {
+  0%, 100% { box-shadow: 0 0 4px #4f7ef8; }
+  50%       { box-shadow: 0 0 12px #4f7ef8, 0 0 20px #7c3aed; }
+}
+
+/* ── Full overlay ──────────────────────────────────────────────────────────── */
+.overlay {
+  background: rgba(0, 0, 0, 0.88);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Holo panel ────────────────────────────────────────────────────────────── */
+.holoPanel {
+  background: linear-gradient(160deg, #040810 0%, #080f1e 60%, #060c18 100%);
+  border: 1px solid #1e3a8a60;
+  border-radius: 16px;
+  box-shadow:
+    0 0 60px #1e3a8a40,
+    0 0 120px #7c3aed20,
+    inset 0 0 40px #4f7ef808;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  max-width: 900px;
+  overflow: hidden;
+  position: relative;
+  width: 94vw;
+}
+
+/* Scanlines overlay */
+.scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(79, 126, 248, 0.03) 2px,
+    rgba(79, 126, 248, 0.03) 4px
+  );
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.holoHeader {
+  align-items: center;
+  border-bottom: 1px solid #1e3a8a40;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.holoLogo {
+  color: #4f7ef8;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 12px #4f7ef880;
+}
+
+.holoLogo span {
+  color: #8892a4;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.closeBtn {
+  background: none;
+  border: 1px solid #2a2e40;
+  border-radius: 6px;
+  color: #8892a4;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 10px;
+  transition: all 0.15s;
+}
+.closeBtn:hover { border-color: #ef4444; color: #fca5a5; }
+
+/* ── Field (main holographic area) ────────────────────────────────────────── */
+.field {
+  flex: 1;
+  min-height: 340px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Grid lines background */
+.gridLines {
+  background-image:
+    linear-gradient(rgba(79, 126, 248, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 126, 248, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* ── Avatar zone ───────────────────────────────────────────────────────────── */
+.avatarZone {
+  align-items: center;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  left: 32px;
+  position: absolute;
+}
+
+.avatar {
+  border: 2px solid #4f7ef860;
+  border-radius: 50%;
+  height: 88px;
+  object-fit: cover;
+  width: 88px;
+  box-shadow: 0 0 20px #4f7ef840;
+  transition: box-shadow 0.3s;
+}
+
+.avatarSpeaking {
+  box-shadow: 0 0 30px #4f7ef8bb, 0 0 60px #7c3aed60;
+  animation: avatarSpeak 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes avatarSpeak {
+  from { border-color: #4f7ef880; }
+  to   { border-color: #6ee7f7; }
+}
+
+/* Fallback orb if image is missing */
+.avatarOrb {
+  background: radial-gradient(circle at 35% 35%, #6ee7f7, #4f7ef8 50%, #7c3aed);
+  border-radius: 50%;
+  height: 80px;
+  width: 80px;
+  position: absolute;
+  box-shadow: 0 0 20px #4f7ef840;
+  display: none; /* shown via JS when img errors */
+}
+
+.avatarName {
+  align-items: center;
+  color: #4f7ef8;
+  display: flex;
+  font-size: 9px;
+  font-weight: 800;
+  gap: 5px;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 8px #4f7ef8;
+}
+
+.speakingDot {
+  animation: blink 0.6s infinite;
+  color: #22c55e;
+  font-size: 10px;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ── Central parcel card ───────────────────────────────────────────────────── */
+.parcelCard {
+  background: linear-gradient(135deg, #0d1225cc, #0a0f1fcc);
+  border: 1px solid #4f7ef840;
+  border-radius: 12px;
+  box-shadow: 0 0 30px #4f7ef820, inset 0 0 20px #4f7ef808;
+  left: 50%;
+  padding: 16px 24px;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 200px;
+}
+
+.parcelApn {
+  color: #8892a4;
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.parcelAddress {
+  color: #c8d4e8;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.parcelScore {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 24px currentColor;
+}
+
+.parcelScore span {
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+.parcelRec {
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin-top: 6px;
+  padding: 3px 12px;
+}
+
+/* ── Holographic annotations ───────────────────────────────────────────────── */
+.annotation {
+  opacity: 0;
+  position: absolute;
+  transform: translateY(8px) scale(0.95);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.annotationVisible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.annLabel {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.annValue {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.annDelta {
+  font-size: 9px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.annLine {
+  background: currentColor;
+  height: 1px;
+  margin-top: 3px;
+  opacity: 0.3;
+  width: 40px;
+}
+
+/* Sentiment colors */
+.ann_pos { color: #22c55e; text-shadow: 0 0 10px #22c55e60; }
+.ann_neg { color: #ef4444; text-shadow: 0 0 10px #ef444460; }
+.ann_neutral { color: #93c5fd; text-shadow: 0 0 10px #93c5fd40; }
+
+/* ── Reasoning strip ────────────────────────────────────────────────────────── */
+.reasoningStrip {
+  border-top: 1px solid #1e3a8a30;
+  font-size: 11px;
+  line-height: 1.5;
+  padding: 10px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.reasoningLabel {
+  color: #4f7ef8;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin-right: 6px;
+}
+
+.reasoningText { color: #8892a4; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
+.holoFooter {
+  align-items: center;
+  border-top: 1px solid #1e3a8a30;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.replayBtn {
+  background: #1e3a8a40;
+  border: 1px solid #4f7ef840;
+  border-radius: 6px;
+  color: #93c5fd;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 14px;
+  transition: all 0.15s;
+}
+.replayBtn:hover { background: #1e3a8a80; border-color: #4f7ef8; }
+
+.footerTag {
+  color: #2a3050;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}

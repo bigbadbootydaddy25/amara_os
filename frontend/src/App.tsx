@@ -5,6 +5,8 @@ import { ParcelDetail } from "./components/ParcelDetail";
 import { MapView } from "./components/MapView";
 import { PipelineDashboard } from "./components/amara/PipelineDashboard";
 import { DealsDashboard } from "./components/deals/DealsDashboard";
+import { DeathStarScene } from "./components/claw3d/DeathStarScene";
+import { TrekViewscreen } from "./components/claw3d/TrekViewscreen";
 import type { ParcelFilters, ParcelListItem, Parcel } from "./types/parcel";
 import { useParcels } from "./hooks/useParcels";
 import { api } from "./api/client";
@@ -42,7 +44,7 @@ export default function App() {
 
   return (
     <div className={styles.root}>
-      {/* Top Nav */}
+      {/* ── Top Nav ────────────────────────────────────────────── */}
       <header className={styles.topbar}>
         <div className={styles.logo}>
           PropVision <span>×</span> <span className={styles.amara}>Amara OS</span>
@@ -75,24 +77,33 @@ export default function App() {
             <button className={panelView === "table" ? styles.activeView : ""} onClick={() => setPanelView("table")}>Table</button>
           </div>
         )}
-        {mode !== "console" && <div />}
+        {mode !== "console" && (
+          /* Death Star corner widget in nav right when not in console mode */
+          <div className={styles.deathStarCorner} id="deathstar">
+            <DeathStarScene />
+          </div>
+        )}
       </header>
 
-      {/* Deals mode (default) */}
+      {/* ── Deals mode (default) ───────────────────────────────── */}
       {mode === "deals" && (
         <div className={styles.fullMain}>
-          <DealsDashboard />
+          <TrekViewscreen>
+            <DealsDashboard />
+          </TrekViewscreen>
         </div>
       )}
 
-      {/* Pipeline mode */}
+      {/* ── Pipeline mode ──────────────────────────────────────── */}
       {mode === "pipeline" && (
         <div className={styles.fullMain}>
-          <PipelineDashboard />
+          <TrekViewscreen>
+            <PipelineDashboard />
+          </TrekViewscreen>
         </div>
       )}
 
-      {/* Land Console mode */}
+      {/* ── Land Console mode ──────────────────────────────────── */}
       {mode === "console" && (
         <>
           <FilterBar filters={filters} onChange={setFilters} />

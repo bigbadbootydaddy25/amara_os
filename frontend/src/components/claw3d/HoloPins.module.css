@@ -1,0 +1,67 @@
+/* Hologram Neon Distress Pins overlay */
+.overlay {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1000;
+}
+
+.pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  filter: drop-shadow(0 0 6px currentColor);
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.pinBlue   { color: #2266ff; }
+.pinGreen  { color: #22c55e; }
+.pinAmber  { color: #eab308; }
+.pinRed    { color: #ff2200; }
+
+.pinSelected {
+  filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
+  transform: translate(-50%, -100%) scale(1.35);
+  z-index: 10;
+}
+
+/* Vertical hologram beam beneath the pin */
+.beam {
+  background: linear-gradient(to bottom, currentColor 0%, transparent 100%);
+  display: block;
+  height: 18px;
+  left: 50%;
+  opacity: 0.35;
+  position: absolute;
+  top: 26px;
+  transform: translateX(-50%);
+  width: 1px;
+}
+
+/* Distress pulse ring */
+.pulseRing {
+  animation: pulseRing 1.2s ease-out infinite;
+  border: 2px solid #ff2200;
+  border-radius: 50%;
+  display: block;
+  height: 32px;
+  left: 50%;
+  opacity: 0;
+  position: absolute;
+  top: -6px;
+  transform: translate(-50%, -50%);
+  width: 32px;
+}
+
+.pinDistress {
+  animation: distressGlow 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes pulseRing {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+}
+
+@keyframes distressGlow {
+  from { filter: drop-shadow(0 0 6px #ff2200); }
+  to   { filter: drop-shadow(0 0 20px #ff5500) drop-shadow(0 0 40px #ff2200); }
+}

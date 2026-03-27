@@ -71,6 +71,19 @@
   overflow: hidden;
 }
 
+/* ── DEATH STAR corner widget ──────────────────────────────────── */
+/* #deathstar: radial-gradient(black, #111) per user spec */
+.deathStarCorner {
+  background: radial-gradient(circle at 60% 40%, #111 0%, #000 100%);
+  border: 1px solid rgba(50, 80, 180, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 0 18px rgba(0, 50, 200, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.8);
+  flex-shrink: 0;
+  height: 36px;
+  overflow: hidden;
+  width: 80px;
+}
+
 /* Pipeline full-page mode */
 .pipelineMain {
   flex: 1;

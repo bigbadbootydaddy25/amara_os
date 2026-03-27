@@ -1,0 +1,28 @@
+{
+  "name": "propvision-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "migrate": "psql $DATABASE_URL -f migrations/001_create_land_parcels.sql",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.30.10",
+    "fastify": "^4.26.2",
+    "@fastify/cors": "^9.0.1",
+    "pg": "^8.11.5",
+    "zod": "^3.22.4",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/pg": "^8.11.5",
+    "drizzle-kit": "^0.20.18",
+    "tsx": "^4.7.3",
+    "typescript": "^5.4.5"
+  }
+}

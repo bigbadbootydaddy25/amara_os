@@ -1,0 +1,146 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tableWrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead tr {
+  background: #1a1d2b;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8892a4;
+  border-bottom: 1px solid #2a2e40;
+  white-space: nowrap;
+}
+
+.row {
+  border-bottom: 1px solid #1e2130;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.row:hover {
+  background: #1e2235;
+}
+
+.rowSelected {
+  background: #1a2a4a !important;
+}
+
+.table td {
+  padding: 7px 12px;
+  color: #c8d4e8;
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.center {
+  text-align: center;
+  color: #8892a4;
+  padding: 32px;
+}
+
+.error {
+  background: #7f1d1d;
+  color: #fca5a5;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* Recommendation badges */
+.rec {
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+}
+.recGo    { background: #14532d; color: #86efac; }
+.recMaybe { background: #713f12; color: #fde68a; }
+.recPass  { background: #7f1d1d; color: #fca5a5; }
+
+/* Distress flags */
+.flags { display: flex; gap: 3px; }
+.flag {
+  background: #7c2d12;
+  color: #fed7aa;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+}
+
+.pipeline { color: #8892a4; font-size: 12px; }
+
+/* Score bar */
+.scoreBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scoreTrack {
+  background: #1e2130;
+  border-radius: 4px;
+  height: 6px;
+  width: 60px;
+  overflow: hidden;
+}
+.scoreFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+.scoreNum {
+  color: #c8d4e8;
+  font-size: 12px;
+  min-width: 24px;
+}
+.noScore { color: #4a5568; }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid #2a2e40;
+  background: #1a1d2b;
+}
+.pgInfo { font-size: 12px; color: #8892a4; }
+.pgBtns { display: flex; gap: 8px; }
+.pgBtns button {
+  background: #242738;
+  border: 1px solid #353a52;
+  border-radius: 6px;
+  color: #c8d4e8;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 12px;
+}
+.pgBtns button:disabled { opacity: 0.4; cursor: not-allowed; }
+.pgBtns button:not(:disabled):hover { border-color: #4f7ef8; }

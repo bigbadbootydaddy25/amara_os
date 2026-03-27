@@ -1,0 +1,136 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8892a4;
+  font-size: 14px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #2a2e40;
+  background: #1a1d2b;
+}
+
+.apn {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: monospace;
+  color: #e0e6f0;
+}
+
+.address {
+  font-size: 12px;
+  color: #8892a4;
+  margin-top: 2px;
+}
+
+.scoreBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+
+.scoreNum {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: #e0e6f0;
+}
+
+.scoreLabel {
+  font-size: 10px;
+  color: #8892a4;
+}
+
+.recBadge {
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  margin-top: 4px;
+  padding: 2px 8px;
+}
+
+.recGo    { background: #14532d; color: #86efac; }
+.recMaybe { background: #713f12; color: #fde68a; }
+.recPass  { background: #7f1d1d; color: #fca5a5; }
+
+.error {
+  background: #7f1d1d;
+  color: #fca5a5;
+  font-size: 12px;
+  padding: 6px 16px;
+}
+
+.recomputeBtn {
+  background: #1e3a8a;
+  border: none;
+  border-bottom: 1px solid #2a2e40;
+  color: #93c5fd;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.recomputeBtn:hover:not(:disabled) { background: #1e40af; }
+.recomputeBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.section {
+  border-bottom: 1px solid #1e2130;
+  padding: 8px 0;
+}
+
+.sectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #4f7ef8;
+  padding: 4px 16px 2px;
+}
+
+.field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 16px;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: #8892a4;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.fieldValue {
+  color: #c8d4e8;
+  font-size: 12px;
+  text-align: right;
+  word-break: break-word;
+}
+
+.yes { color: #86efac; font-weight: 600; }
+.no  { color: #8892a4; }

@@ -1,0 +1,83 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Top nav */
+.topbar {
+  align-items: center;
+  background: #11141f;
+  border-bottom: 1px solid #1e2235;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.logo {
+  color: #4f7ef8;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.logo span {
+  color: #8892a4;
+  font-weight: 400;
+  margin-left: 6px;
+  font-size: 13px;
+}
+
+.viewToggle {
+  display: flex;
+  background: #1a1d2b;
+  border: 1px solid #2a2e40;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.viewToggle button {
+  background: none;
+  border: none;
+  color: #8892a4;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  transition: all 0.15s;
+}
+
+.viewToggle button:hover { color: #e0e6f0; }
+
+.activeView {
+  background: #1e3a8a !important;
+  color: #93c5fd !important;
+}
+
+/* Main area */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left panel: map or table */
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid #1e2235;
+}
+
+/* Right panel: detail + assistant */
+.right {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  width: 340px;
+}

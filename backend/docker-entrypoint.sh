@@ -10,6 +10,7 @@ echo "[entrypoint] Postgres is ready."
 echo "[entrypoint] Running migrations…"
 psql "$DATABASE_URL" -f /app/migrations/001_create_land_parcels.sql
 psql "$DATABASE_URL" -f /app/migrations/002_create_deal_reviews.sql
+psql "$DATABASE_URL" -f /app/migrations/003_create_deals_buyers.sql
 echo "[entrypoint] Migrations done."
 
 exec "$@"

@@ -11,6 +11,8 @@ export default defineConfig({
       "/amara":     { target: "http://localhost:3001", changeOrigin: true },
       "/pipeline":  { target: "http://localhost:3001", changeOrigin: true },
       "/health":    { target: "http://localhost:3001", changeOrigin: true },
+      "/deals":     { target: "http://localhost:3001", changeOrigin: true },
+      "/buyers":    { target: "http://localhost:3001", changeOrigin: true },
     },
   },
 });

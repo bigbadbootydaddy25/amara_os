@@ -6,7 +6,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_create_land_parcels.sql && psql $DATABASE_URL -f migrations/002_create_deal_reviews.sql",
+    "migrate": "psql $DATABASE_URL -f migrations/001_create_land_parcels.sql && psql $DATABASE_URL -f migrations/002_create_deal_reviews.sql && psql $DATABASE_URL -f migrations/003_create_deals_buyers.sql",
     "seed": "tsx scripts/seed-vegas.ts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push"
@@ -17,6 +17,8 @@
     "@fastify/cors": "^9.0.1",
     "node-cron": "^3.0.3",
     "pg": "^8.11.5",
+    "csv-parse": "^5.5.5",
+    "pdfkit": "^0.15.0",
     "zod": "^3.22.4",
     "dotenv": "^16.4.5"
   },
@@ -24,6 +26,7 @@
     "@types/node": "^20.12.7",
     "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.11.5",
+    "@types/pdfkit": "^0.13.4",
     "drizzle-kit": "^0.20.18",
     "tsx": "^4.7.3",
     "typescript": "^5.4.5"

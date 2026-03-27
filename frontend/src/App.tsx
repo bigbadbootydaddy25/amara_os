@@ -4,16 +4,17 @@ import { ParcelTable } from "./components/ParcelTable";
 import { ParcelDetail } from "./components/ParcelDetail";
 import { MapView } from "./components/MapView";
 import { PipelineDashboard } from "./components/amara/PipelineDashboard";
+import { DealsDashboard } from "./components/deals/DealsDashboard";
 import type { ParcelFilters, ParcelListItem, Parcel } from "./types/parcel";
 import { useParcels } from "./hooks/useParcels";
 import { api } from "./api/client";
 import styles from "./App.module.css";
 
-type AppMode = "console" | "pipeline";
+type AppMode = "console" | "deals" | "pipeline";
 type PanelView = "map" | "table";
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>("console");
+  const [mode, setMode] = useState<AppMode>("deals");
   const [filters, setFilters] = useState<ParcelFilters>({ page: 1, limit: 50 });
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedParcel, setSelectedParcel] = useState<Parcel | null>(null);
@@ -30,18 +31,12 @@ export default function App() {
     try {
       const res = await api.getParcel(p.id);
       setSelectedParcel(res.data);
-    } catch {
-      // ignore
-    } finally {
-      setDetailLoading(false);
-    }
+    } catch {}
+    finally { setDetailLoading(false); }
   }, []);
 
   const handleRecomputed = useCallback(
-    (updated: Parcel) => {
-      setSelectedParcel(updated);
-      refresh();
-    },
+    (updated: Parcel) => { setSelectedParcel(updated); refresh(); },
     [refresh]
   );
 
@@ -55,10 +50,16 @@ export default function App() {
 
         <div className={styles.navCenter}>
           <button
+            className={`${styles.navBtn} ${mode === "deals" ? styles.navActive : ""}`}
+            onClick={() => setMode("deals")}
+          >
+            💼 Deals
+          </button>
+          <button
             className={`${styles.navBtn} ${mode === "console" ? styles.navActive : ""}`}
             onClick={() => setMode("console")}
           >
-            Land Console
+            🗺 Land Console
           </button>
           <button
             className={`${styles.navBtn} ${mode === "pipeline" ? styles.navActive : ""}`}
@@ -70,60 +71,42 @@ export default function App() {
 
         {mode === "console" && (
           <div className={styles.viewToggle}>
-            <button
-              className={panelView === "map" ? styles.activeView : ""}
-              onClick={() => setPanelView("map")}
-            >
-              Map
-            </button>
-            <button
-              className={panelView === "table" ? styles.activeView : ""}
-              onClick={() => setPanelView("table")}
-            >
-              Table
-            </button>
+            <button className={panelView === "map"   ? styles.activeView : ""} onClick={() => setPanelView("map")}>Map</button>
+            <button className={panelView === "table" ? styles.activeView : ""} onClick={() => setPanelView("table")}>Table</button>
           </div>
         )}
-        {mode === "pipeline" && <div />}
+        {mode !== "console" && <div />}
       </header>
+
+      {/* Deals mode (default) */}
+      {mode === "deals" && (
+        <div className={styles.fullMain}>
+          <DealsDashboard />
+        </div>
+      )}
 
       {/* Pipeline mode */}
       {mode === "pipeline" && (
-        <div className={styles.pipelineMain}>
+        <div className={styles.fullMain}>
           <PipelineDashboard />
         </div>
       )}
 
-      {/* Console mode */}
+      {/* Land Console mode */}
       {mode === "console" && (
         <>
           <FilterBar filters={filters} onChange={setFilters} />
           <div className={styles.main}>
             <div className={styles.left}>
               {panelView === "map" ? (
-                <MapView
-                  parcels={data?.data ?? []}
-                  selectedId={selectedId}
-                  onSelect={handleSelectRow}
-                />
+                <MapView parcels={data?.data ?? []} selectedId={selectedId} onSelect={handleSelectRow} />
               ) : (
-                <ParcelTable
-                  data={data}
-                  loading={loading}
-                  error={error}
-                  selectedId={selectedId}
-                  onSelect={handleSelectRow}
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                />
+                <ParcelTable data={data} loading={loading} error={error} selectedId={selectedId}
+                  onSelect={handleSelectRow} filters={filters} onFiltersChange={setFilters} />
               )}
             </div>
             <div className={styles.right}>
-              <ParcelDetail
-                parcel={selectedParcel}
-                loading={detailLoading}
-                onRecomputed={handleRecomputed}
-              />
+              <ParcelDetail parcel={selectedParcel} loading={detailLoading} onRecomputed={handleRecomputed} />
             </div>
           </div>
         </>

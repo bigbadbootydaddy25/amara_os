@@ -1,0 +1,138 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Stats bar */
+.statsBar {
+  align-items: center;
+  background: #11141f;
+  border-bottom: 1px solid #1e2235;
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.statPill {
+  align-items: center;
+  border-right: 1px solid #1e2235;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 20px;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.statLabel {
+  color: #8892a4;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Body */
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.left {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Tabs */
+.tabs {
+  background: #1a1d2b;
+  border-bottom: 1px solid #2a2e40;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.tab {
+  align-items: center;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #8892a4;
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+  padding: 10px 20px;
+  transition: all 0.15s;
+}
+
+.tab:hover { color: #e0e6f0; }
+
+.tabActive {
+  border-bottom-color: #4f7ef8;
+  color: #93c5fd;
+}
+
+.count {
+  background: #1e3a8a;
+  border-radius: 10px;
+  color: #93c5fd;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+}
+
+/* Deals pane */
+.dealsPane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.tableWrap {
+  background: #0f1117;
+  border: 1px solid #1e2235;
+  border-radius: 8px;
+  flex: 1;
+  overflow: auto;
+}
+
+.loading {
+  color: #8892a4;
+  font-size: 13px;
+  padding: 32px;
+  text-align: center;
+}
+
+/* Pagination */
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.pagination button {
+  background: #242738;
+  border: 1px solid #353a52;
+  border-radius: 6px;
+  color: #c8d4e8;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 12px;
+}
+.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+.pagination span { color: #8892a4; font-size: 11px; }

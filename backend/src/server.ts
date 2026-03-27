@@ -4,6 +4,8 @@ import cors from "@fastify/cors";
 import { parcelRoutes } from "./api/parcels";
 import { assistantRoutes } from "./api/assistant";
 import { amaraRoutes } from "./api/amara";
+import { dealRoutes } from "./api/deals";
+import { pdfRoutes } from "./api/pdf";
 import { startDailyPipelineJob } from "./jobs/dailyPipeline";
 
 const app = Fastify({
@@ -26,6 +28,8 @@ await app.register(cors, {
 await app.register(parcelRoutes);
 await app.register(assistantRoutes);
 await app.register(amaraRoutes);
+await app.register(dealRoutes);
+await app.register(pdfRoutes);
 
 // Health check
 app.get("/health", async () => ({ status: "ok", timestamp: new Date().toISOString() }));

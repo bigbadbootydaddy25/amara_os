@@ -1,0 +1,102 @@
+.root {
+  background: #1a1d2b;
+  border: 1px solid #2a2e40;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.title { color: #e0e6f0; font-size: 13px; font-weight: 700; }
+
+.sampleBtn {
+  background: #242738;
+  border: 1px solid #353a52;
+  border-radius: 5px;
+  color: #8892a4;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 3px 10px;
+}
+.sampleBtn:hover { border-color: #4f7ef8; color: #93c5fd; }
+
+.dropZone {
+  align-items: center;
+  background: #141620;
+  border: 2px dashed #2a2e40;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+.dropZone:hover { border-color: #4f7ef8; }
+
+.dropIcon { font-size: 24px; }
+.dropText { color: #c8d4e8; font-size: 12px; font-weight: 600; }
+.dropHint { color: #4a5568; font-size: 10px; }
+
+.preview { display: flex; flex-direction: column; gap: 4px; }
+.previewLabel { color: #8892a4; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.previewText {
+  background: #0f1117;
+  border: 1px solid #1e2235;
+  border-radius: 6px;
+  color: #6ee7b7;
+  font-size: 10px;
+  max-height: 100px;
+  overflow: auto;
+  padding: 8px;
+  white-space: pre;
+}
+
+.error {
+  background: #7f1d1d;
+  border-radius: 6px;
+  color: #fca5a5;
+  font-size: 11px;
+  padding: 7px 10px;
+}
+
+.success {
+  align-items: center;
+  background: #14532d;
+  border-radius: 6px;
+  color: #86efac;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 6px;
+  padding: 7px 10px;
+}
+
+.batchId {
+  color: #6ee7b7;
+  font-family: monospace;
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+.importBtn {
+  background: linear-gradient(135deg, #4f7ef8, #7c3aed);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px;
+  transition: opacity 0.15s;
+}
+.importBtn:hover:not(:disabled) { opacity: 0.88; }
+.importBtn:disabled { opacity: 0.4; cursor: not-allowed; }

@@ -1,5 +1,6 @@
 import type { Parcel, PaginatedParcels, ParcelFilters } from "../types/parcel";
 import type { DealReview, PipelineStats, PipelineRun } from "../types/review";
+import type { Deal, Buyer, DealMatchRow, DealStats } from "../types/deals";
 
 // In dev: Vite proxies to localhost:3001, so BASE="" works fine.
 // In production / Docker: set VITE_API_BASE_URL in your .env or Docker env.
@@ -106,4 +107,54 @@ export const api = {
 
   getPipelineStats: (): Promise<{ data: PipelineStats }> =>
     apiFetch("/pipeline/stats"),
+
+  // ─── Deals ───────────────────────────────────────────────────────────────
+  importCSV: (csv: string): Promise<{ data: { batchId: string; imported: number; totalMatches: number; deals: Partial<Deal>[] } }> =>
+    apiFetch("/deals/import-csv", { method: "POST", body: JSON.stringify({ csv }) }),
+
+  listDeals: (params: { page?: number; limit?: number; batch?: string } = {}): Promise<{ data: Deal[]; pagination: { page: number; limit: number; total: number } }> => {
+    const qs = new URLSearchParams();
+    if (params.page)  qs.set("page",  String(params.page));
+    if (params.limit) qs.set("limit", String(params.limit));
+    if (params.batch) qs.set("batch", params.batch);
+    return apiFetch(`/deals?${qs}`);
+  },
+
+  getDeal: (id: number): Promise<{ data: Deal }> =>
+    apiFetch(`/deals/${id}`),
+
+  getDealMatches: (id: number): Promise<{ data: DealMatchRow[] }> =>
+    apiFetch(`/deals/${id}/matches`),
+
+  rematchDeal: (id: number): Promise<{ data: { matches: number } }> =>
+    apiFetch(`/deals/${id}/rematch`, { method: "POST" }),
+
+  getDealStats: (): Promise<{ data: DealStats }> =>
+    apiFetch("/deals/stats"),
+
+  // PDF: triggers browser download
+  downloadPDF: async (dealId: number): Promise<void> => {
+    const res = await fetch(`${API_BASE_URL}/deals/${dealId}/pdf`);
+    if (!res.ok) throw new Error(`PDF generation failed: HTTP ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `propvision_deal_${dealId}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  // ─── Buyers ──────────────────────────────────────────────────────────────
+  listBuyers: (): Promise<{ data: Buyer[] }> =>
+    apiFetch("/buyers"),
+
+  createBuyer: (body: Partial<Buyer>): Promise<{ data: Buyer }> =>
+    apiFetch("/buyers", { method: "POST", body: JSON.stringify(body) }),
+
+  updateBuyer: (id: number, body: Partial<Buyer>): Promise<{ data: Buyer }> =>
+    apiFetch(`/buyers/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+
+  deleteBuyer: (id: number): Promise<void> =>
+    apiFetch(`/buyers/${id}`, { method: "DELETE" }),
 };

@@ -31,6 +31,46 @@
   font-size: 13px;
 }
 
+.amara {
+  background: linear-gradient(135deg, #4f7ef8, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800 !important;
+}
+
+/* Nav center tabs */
+.navCenter {
+  display: flex;
+  background: #1a1d2b;
+  border: 1px solid #2a2e40;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.navBtn {
+  background: none;
+  border: none;
+  color: #8892a4;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 16px;
+  transition: all 0.15s;
+}
+
+.navBtn:hover { color: #e0e6f0; }
+
+.navActive {
+  background: linear-gradient(135deg, #1e3a8a, #2d1b69) !important;
+  color: #c4b5fd !important;
+}
+
+/* Pipeline full-page mode */
+.pipelineMain {
+  flex: 1;
+  overflow: hidden;
+}
+
 .viewToggle {
   display: flex;
   background: #1a1d2b;

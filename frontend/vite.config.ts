@@ -8,6 +8,8 @@ export default defineConfig({
     proxy: {
       "/parcels":   { target: "http://localhost:3001", changeOrigin: true },
       "/assistant": { target: "http://localhost:3001", changeOrigin: true },
+      "/amara":     { target: "http://localhost:3001", changeOrigin: true },
+      "/pipeline":  { target: "http://localhost:3001", changeOrigin: true },
       "/health":    { target: "http://localhost:3001", changeOrigin: true },
     },
   },

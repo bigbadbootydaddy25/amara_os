@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Parcel } from "../types/parcel";
 import { api } from "../api/client";
 import { AssistantPanel } from "./AssistantPanel";
+import { AmaraReviewPanel } from "./amara/AmaraReviewPanel";
 import styles from "./ParcelDetail.module.css";
 
 interface Props {
@@ -167,6 +168,7 @@ export function ParcelDetail({ parcel, loading, onRecomputed }: Props) {
         </Section>
       </div>
 
+      <AmaraReviewPanel parcelId={parcel.id} />
       <AssistantPanel parcelId={parcel.id} />
     </div>
   );

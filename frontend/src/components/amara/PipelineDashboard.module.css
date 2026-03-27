@@ -1,0 +1,140 @@
+.root {
+  background: #0f1117;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.header {
+  align-items: flex-start;
+  background: #11141f;
+  border-bottom: 1px solid #1e2235;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.title {
+  color: #e0e6f0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.subtitle {
+  color: #8892a4;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.runBtn {
+  background: linear-gradient(135deg, #4f7ef8, #7c3aed);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 16px;
+  transition: opacity 0.15s;
+}
+.runBtn:hover:not(:disabled) { opacity: 0.88; }
+.runBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error {
+  background: #7f1d1d;
+  color: #fca5a5;
+  font-size: 12px;
+  padding: 8px 20px;
+}
+
+/* Stats */
+.statGrid {
+  border-bottom: 1px solid #1e2235;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #1e2235;
+  padding: 0;
+}
+
+.statCard {
+  background: #0f1117;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.statLabel {
+  color: #8892a4;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* Runs */
+.runsSection {
+  padding: 12px 0;
+}
+
+.runsTitle {
+  color: #8892a4;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0 20px 8px;
+  text-transform: uppercase;
+}
+
+.noRuns {
+  color: #4a5568;
+  font-size: 12px;
+  padding: 12px 20px;
+}
+
+.runRow {
+  border-bottom: 1px solid #1a1d2b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: space-between;
+  padding: 8px 20px;
+}
+
+.runLeft {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.runRight {
+  align-items: center;
+  color: #8892a4;
+  display: flex;
+  font-size: 11px;
+  gap: 10px;
+}
+
+.runStatus {
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
+.statusCOMPLETED { background: #14532d; color: #86efac; }
+.statusFAILED    { background: #7f1d1d; color: #fca5a5; }
+.statusRUNNING   { background: #1e3a8a; color: #93c5fd; }
+
+.runId { color: #4a5568; font-family: monospace; font-size: 10px; }
+.runTrigger { background: #1e2235; border-radius: 4px; color: #8892a4; font-size: 9px; padding: 1px 5px; }
+.runDate { color: #4a5568; font-size: 10px; }
+.runError { color: #fca5a5; font-size: 10px; width: 100%; }

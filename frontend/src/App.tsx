@@ -1,23 +1,28 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { FilterBar } from "./components/FilterBar";
 import { ParcelTable } from "./components/ParcelTable";
 import { ParcelDetail } from "./components/ParcelDetail";
 import { MapView } from "./components/MapView";
+import { PipelineDashboard } from "./components/amara/PipelineDashboard";
 import type { ParcelFilters, ParcelListItem, Parcel } from "./types/parcel";
 import { useParcels } from "./hooks/useParcels";
 import { api } from "./api/client";
 import styles from "./App.module.css";
 
+type AppMode = "console" | "pipeline";
 type PanelView = "map" | "table";
 
 export default function App() {
+  const [mode, setMode] = useState<AppMode>("console");
   const [filters, setFilters] = useState<ParcelFilters>({ page: 1, limit: 50 });
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedParcel, setSelectedParcel] = useState<Parcel | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [panelView, setPanelView] = useState<PanelView>("table");
 
-  const { data, loading, error, refresh } = useParcels(filters);
+  const { data, loading, error, refresh } = useParcels(
+    mode === "console" ? filters : { limit: 0 }
+  );
 
   const handleSelectRow = useCallback(async (p: ParcelListItem) => {
     setSelectedId(p.id);
@@ -26,73 +31,103 @@ export default function App() {
       const res = await api.getParcel(p.id);
       setSelectedParcel(res.data);
     } catch {
-      // ignore — detail panel shows its own state
+      // ignore
     } finally {
       setDetailLoading(false);
     }
   }, []);
 
-  const handleRecomputed = useCallback((updated: Parcel) => {
-    setSelectedParcel(updated);
-    refresh();
-  }, [refresh]);
+  const handleRecomputed = useCallback(
+    (updated: Parcel) => {
+      setSelectedParcel(updated);
+      refresh();
+    },
+    [refresh]
+  );
 
   return (
     <div className={styles.root}>
       {/* Top Nav */}
       <header className={styles.topbar}>
-        <div className={styles.logo}>PropVision <span>Land Console</span></div>
-        <div className={styles.viewToggle}>
+        <div className={styles.logo}>
+          PropVision <span>×</span> <span className={styles.amara}>Amara OS</span>
+        </div>
+
+        <div className={styles.navCenter}>
           <button
-            className={panelView === "map" ? styles.activeView : ""}
-            onClick={() => setPanelView("map")}
+            className={`${styles.navBtn} ${mode === "console" ? styles.navActive : ""}`}
+            onClick={() => setMode("console")}
           >
-            Map
+            Land Console
           </button>
           <button
-            className={panelView === "table" ? styles.activeView : ""}
-            onClick={() => setPanelView("table")}
+            className={`${styles.navBtn} ${mode === "pipeline" ? styles.navActive : ""}`}
+            onClick={() => setMode("pipeline")}
           >
-            Table
+            ⚡ Amara Pipeline
           </button>
         </div>
+
+        {mode === "console" && (
+          <div className={styles.viewToggle}>
+            <button
+              className={panelView === "map" ? styles.activeView : ""}
+              onClick={() => setPanelView("map")}
+            >
+              Map
+            </button>
+            <button
+              className={panelView === "table" ? styles.activeView : ""}
+              onClick={() => setPanelView("table")}
+            >
+              Table
+            </button>
+          </div>
+        )}
+        {mode === "pipeline" && <div />}
       </header>
 
-      {/* Filters */}
-      <FilterBar filters={filters} onChange={setFilters} />
-
-      {/* Main layout */}
-      <div className={styles.main}>
-        {/* Left: Map or Table */}
-        <div className={styles.left}>
-          {panelView === "map" ? (
-            <MapView
-              parcels={data?.data ?? []}
-              selectedId={selectedId}
-              onSelect={handleSelectRow}
-            />
-          ) : (
-            <ParcelTable
-              data={data}
-              loading={loading}
-              error={error}
-              selectedId={selectedId}
-              onSelect={handleSelectRow}
-              filters={filters}
-              onFiltersChange={setFilters}
-            />
-          )}
+      {/* Pipeline mode */}
+      {mode === "pipeline" && (
+        <div className={styles.pipelineMain}>
+          <PipelineDashboard />
         </div>
+      )}
 
-        {/* Right: Detail + Assistant */}
-        <div className={styles.right}>
-          <ParcelDetail
-            parcel={selectedParcel}
-            loading={detailLoading}
-            onRecomputed={handleRecomputed}
-          />
-        </div>
-      </div>
+      {/* Console mode */}
+      {mode === "console" && (
+        <>
+          <FilterBar filters={filters} onChange={setFilters} />
+          <div className={styles.main}>
+            <div className={styles.left}>
+              {panelView === "map" ? (
+                <MapView
+                  parcels={data?.data ?? []}
+                  selectedId={selectedId}
+                  onSelect={handleSelectRow}
+                />
+              ) : (
+                <ParcelTable
+                  data={data}
+                  loading={loading}
+                  error={error}
+                  selectedId={selectedId}
+                  onSelect={handleSelectRow}
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                />
+              )}
+            </div>
+            <div className={styles.right}>
+              <ParcelDetail
+                parcel={selectedParcel}
+                loading={detailLoading}
+                onRecomputed={handleRecomputed}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

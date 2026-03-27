@@ -1,4 +1,5 @@
 import type { Parcel, PaginatedParcels, ParcelFilters } from "../types/parcel";
+import type { DealReview, PipelineStats, PipelineRun } from "../types/review";
 
 const BASE = "";  // proxied via Vite dev server; in production set to your API origin
 
@@ -50,4 +51,57 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ parcelId, message }),
     }),
+
+  // ─── Amara ───────────────────────────────────────────────────────────────
+  amaraReview: (parcelId: number): Promise<{ data: DealReview }> =>
+    apiFetch(`/amara/review/${parcelId}`, { method: "POST" }),
+
+  getAmaraReview: (parcelId: number): Promise<{ data: DealReview }> =>
+    apiFetch(`/amara/reviews/${parcelId}`),
+
+  listAmaraReviews: (): Promise<{ data: DealReview[] }> =>
+    apiFetch("/amara/reviews"),
+
+  generateLOI: (
+    parcelId: number,
+    offerPrice: number,
+    buyerEntity: string
+  ): Promise<{ data: { loiText: string; review: DealReview } }> =>
+    apiFetch(`/amara/generate-loi/${parcelId}`, {
+      method: "POST",
+      body: JSON.stringify({ offerPrice, buyerEntity }),
+    }),
+
+  generateOutreach: (parcelId: number): Promise<{ data: { ownerOutreachText: string; review: DealReview } }> =>
+    apiFetch(`/amara/generate-outreach/${parcelId}`, { method: "POST" }),
+
+  generateNegotiation: (parcelId: number): Promise<{ data: { negotiationStrategy: string; review: DealReview } }> =>
+    apiFetch(`/amara/generate-negotiation/${parcelId}`, { method: "POST" }),
+
+  overrideDecision: (
+    parcelId: number,
+    decision: "APPROVED" | "REJECTED",
+    note?: string,
+    overriddenBy?: string
+  ): Promise<{ data: DealReview }> =>
+    apiFetch(`/amara/override/${parcelId}`, {
+      method: "POST",
+      body: JSON.stringify({ decision, note, overriddenBy }),
+    }),
+
+  advanceLifecycle: (parcelId: number, status: string): Promise<{ data: DealReview }> =>
+    apiFetch(`/amara/lifecycle/${parcelId}`, {
+      method: "POST",
+      body: JSON.stringify({ status }),
+    }),
+
+  // ─── Pipeline ─────────────────────────────────────────────────────────────
+  runPipeline: (): Promise<{ data: PipelineRun }> =>
+    apiFetch("/pipeline/run", { method: "POST" }),
+
+  listPipelineRuns: (): Promise<{ data: PipelineRun[] }> =>
+    apiFetch("/pipeline/runs"),
+
+  getPipelineStats: (): Promise<{ data: PipelineStats }> =>
+    apiFetch("/pipeline/stats"),
 };

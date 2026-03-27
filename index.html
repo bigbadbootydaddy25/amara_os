@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMARA OS - Conversational ASI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>AMARA OS</h1>
+            <p class="subtitle">Voice-Activated Conversational Intelligence</p>
+        </header>
+
+        <div id="singleViewContainer" class="robot-wrapper">
+            <div class="robot-stage">
+                <img id="robotBase" class="robot-base" alt="Robot Base">
+                <canvas id="robotCanvas" class="robot-overlay" width="640" height="640"></canvas>
+                <div id="listeningIndicator" class="listening-indicator">
+                    <div class="pulse-ring"></div>
+                    <div class="listening-text">Listening...</div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <button id="initiateBtn" class="btn-control">Initiate</button>
+                <button id="voiceBtn" class="btn-control btn-voice">
+                    <span class="icon">🎤</span> Voice Chat
+                </button>
+                <button id="videoBtn" class="btn-control">
+                    <span class="icon">📹</span> Record
+                </button>
+                <button id="settingsBtn" class="btn-control">⚙️ Settings</button>
+            </div>
+        </div>
+
+        <!-- Conversation Panel -->
+        <div id="conversationPanel" class="conversation-panel">
+            <div class="conversation-header">
+                <h3>Conversation</h3>
+                <button id="clearConversationBtn" class="btn-clear">Clear</button>
+            </div>
+            <div id="conversationHistory" class="conversation-history"></div>
+            <div class="conversation-input">
+                <input type="text" id="textInput" placeholder="Type your message or use voice..." />
+                <button id="sendBtn" class="btn-send">Send</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Settings</h2>
+                <div class="setting-group">
+                    <label>Voice Recognition Language:</label>
+                    <select id="languageSelect">
+                        <option value="en-US">English (US)</option>
+                        <option value="en-GB">English (UK)</option>
+                        <option value="es-ES">Spanish</option>
+                        <option value="fr-FR">French</option>
+                        <option value="de-DE">German</option>
+                        <option value="ja-JP">Japanese</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Voice Output:</label>
+                    <select id="voiceSelect"></select>
+                </div>
+                <div class="setting-group">
+                    <label>Continuous Listening:</label>
+                    <input type="checkbox" id="continuousListening" />
+                </div>
+                <div class="setting-group">
+                    <label>API Key (Optional - for enhanced AI):</label>
+                    <input type="password" id="apiKeyInput" placeholder="Enter OpenAI API key..." />
+                    <small>Leave empty to use basic responses</small>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorDisplay" class="error-display"></div>
+    </div>
+
+    <script src="main.js"></script>
+    <script src="voice-ai.js"></script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMARA — PropVision Command Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ── Boot Sequence Overlay ───────────────────────────────── -->
+  <div id="boot-overlay" class="boot-overlay">
+    <div class="boot-scan-h"></div>
+    <div class="boot-content">
+      <div class="boot-logo">
+        <span class="boot-pv">PROPVISION</span>
+        <span class="boot-x">×</span>
+        <span class="boot-amara">AMARA</span>
+      </div>
+      <div class="boot-sub">COMMAND INTELLIGENCE SYSTEM · v1.0.0</div>
+      <div class="boot-bar-wrap">
+        <div class="boot-bar"><div class="boot-bar-fill" id="boot-fill"></div></div>
+      </div>
+      <div class="boot-log" id="boot-log">INITIALIZING...</div>
+    </div>
+  </div>
+
+  <!-- ── Main Screen ─────────────────────────────────────────── -->
+  <div id="amara-screen" class="amara-screen hidden">
+
+    <!-- Background layers -->
+    <div class="bg-grid"></div>
+    <div class="bg-vignette"></div>
+    <div class="bg-centerlight" id="bg-light"></div>
+
+    <!-- Tactical corner brackets -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- ── Header ───────────────────────────────────────────── -->
+    <header class="amara-header">
+      <div class="hdr-left">
+        <div class="brand">
+          <span class="brand-pv">PROPVISION</span>
+          <span class="brand-x">×</span>
+          <span class="brand-amara">AMARA</span>
+        </div>
+        <div class="brand-tagline">COMMAND INTELLIGENCE</div>
+      </div>
+
+      <div class="hdr-center">
+        <div class="sys-indicator" id="sys-indicator">
+          <div class="sys-dot" id="sys-dot"></div>
+          <span id="sys-label">SYSTEM NOMINAL</span>
+        </div>
+      </div>
+
+      <div class="hdr-right">
+        <div class="hdr-clock" id="clock">00:00:00</div>
+        <div class="hdr-date" id="date-display">—</div>
+      </div>
+    </header>
+
+    <!-- ── Main Stage ────────────────────────────────────────── -->
+    <main class="amara-stage">
+
+      <!-- Left Panel -->
+      <aside class="side-panel panel-left">
+        <div class="panel-label">SYSTEM STATUS</div>
+
+        <div class="stat-row">
+          <span class="stat-key">MODE</span>
+          <span class="stat-val" id="mode-val">IDLE</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-key">MARKETS</span>
+          <span class="stat-val red">12 ACTIVE</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-key">SIGNALS</span>
+          <span class="stat-val">847</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-key">PRIORITY</span>
+          <span class="stat-val red" id="priority-val">3 FLAGGED</span>
+        </div>
+
+        <div class="panel-rule"></div>
+        <div class="panel-label">MARKET COVERAGE</div>
+
+        <div class="tac-zone">
+          <div class="tac-name">HENDERSON NV</div>
+          <div class="tac-track"><div class="tac-bar" style="width:82%"></div></div>
+          <div class="tac-pct">82</div>
+        </div>
+        <div class="tac-zone">
+          <div class="tac-name">N. LAS VEGAS</div>
+          <div class="tac-track"><div class="tac-bar" style="width:67%"></div></div>
+          <div class="tac-pct">67</div>
+        </div>
+        <div class="tac-zone">
+          <div class="tac-name">PHOENIX AZ</div>
+          <div class="tac-track"><div class="tac-bar" style="width:54%"></div></div>
+          <div class="tac-pct">54</div>
+        </div>
+        <div class="tac-zone">
+          <div class="tac-name">TUCSON AZ</div>
+          <div class="tac-track"><div class="tac-bar" style="width:38%"></div></div>
+          <div class="tac-pct">38</div>
+        </div>
+
+        <div class="panel-rule"></div>
+        <div class="panel-label">INPUT</div>
+        <div class="key-hints">
+          <div class="key-row"><kbd>SPACE</kbd> <span>cycle state</span></div>
+          <div class="key-row"><kbd>A</kbd> <span>alert mode</span></div>
+          <div class="key-row"><kbd>R</kbd> <span>reset idle</span></div>
+        </div>
+      </aside>
+
+      <!-- Center: AMARA Presence -->
+      <section class="amara-core">
+
+        <!-- Halo rings (behind face) -->
+        <div class="halo-wrap" id="halo-wrap">
+          <div class="halo-ring" id="ring1"></div>
+          <div class="halo-ring" id="ring2"></div>
+          <div class="halo-ring" id="ring3"></div>
+          <div class="halo-ring" id="ring4"></div>
+          <div class="halo-orbit" id="orbit"></div>
+        </div>
+
+        <!-- AMARA face -->
+        <div class="avatar-wrap" id="avatar-wrap">
+          <div class="avatar-glow" id="avatar-glow"></div>
+          <div class="scan-line" id="scan-line"></div>
+
+          <svg class="amara-face" id="amara-face" viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="headGrad" cx="42%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#f6f6f8"/>
+                <stop offset="50%" stop-color="#d8d8e2"/>
+                <stop offset="100%" stop-color="#9a9aaa"/>
+              </radialGradient>
+              <radialGradient id="neckGrad" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#707080"/>
+                <stop offset="30%" stop-color="#b0b0c0"/>
+                <stop offset="70%" stop-color="#b8b8c8"/>
+                <stop offset="100%" stop-color="#686878"/>
+              </radialGradient>
+              <radialGradient id="irisGrad" cx="36%" cy="30%" r="65%">
+                <stop offset="0%" stop-color="#b0d8ff"/>
+                <stop offset="30%" stop-color="#4a9aee"/>
+                <stop offset="70%" stop-color="#1860cc"/>
+                <stop offset="100%" stop-color="#0830a0"/>
+              </radialGradient>
+              <filter id="eyeGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+              </filter>
+              <filter id="headDrop" x="-15%" y="-10%" width="130%" height="130%">
+                <feDropShadow dx="-3" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.6"/>
+              </filter>
+              <filter id="blueGlow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="6" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Shoulder silhouette -->
+            <path d="M66,320 Q50,308 24,322 L24,340 L90,340" fill="#585868" opacity="0.7"/>
+            <path d="M174,320 Q190,308 216,322 L216,340 L150,340" fill="#585868" opacity="0.7"/>
+
+            <!-- Neck -->
+            <rect x="88" y="258" width="64" height="76" rx="6" fill="url(#neckGrad)"/>
+            <!-- neck groove lines -->
+            <line x1="88" y1="272" x2="152" y2="272" stroke="#505060" stroke-width="0.8" opacity="0.6"/>
+            <line x1="88" y1="283" x2="152" y2="283" stroke="#505060" stroke-width="0.8" opacity="0.6"/>
+            <line x1="88" y1="294" x2="152" y2="294" stroke="#505060" stroke-width="0.8" opacity="0.6"/>
+            <line x1="88" y1="305" x2="152" y2="305" stroke="#505060" stroke-width="0.8" opacity="0.6"/>
+            <!-- neck center seam -->
+            <line x1="120" y1="260" x2="120" y2="334" stroke="#686878" stroke-width="0.9" opacity="0.5"/>
+            <!-- cable bundles left -->
+            <path d="M88,268 C74,278 68,296 70,314 C72,328 82,336 88,338" stroke="#3a3a48" stroke-width="3.5" fill="none" opacity="0.8"/>
+            <path d="M88,270 C78,284 74,302 76,318 C78,332 84,338 88,340" stroke="#2a2a38" stroke-width="2" fill="none" opacity="0.5"/>
+            <!-- cable bundles right -->
+            <path d="M152,268 C166,278 172,296 170,314 C168,328 158,336 152,338" stroke="#3a3a48" stroke-width="3.5" fill="none" opacity="0.8"/>
+            <path d="M152,270 C162,284 166,302 164,318 C162,332 156,338 152,340" stroke="#2a2a38" stroke-width="2" fill="none" opacity="0.5"/>
+
+            <!-- Side ear panels -->
+            <rect x="18" y="140" width="15" height="48" rx="4" fill="#9898a8"/>
+            <rect x="19" y="142" width="5" height="44" rx="2.5" fill="#4070cc" opacity="0.4"/>
+            <line x1="18" y1="154" x2="33" y2="154" stroke="#c0c0d0" stroke-width="0.6" opacity="0.6"/>
+            <line x1="18" y1="163" x2="33" y2="163" stroke="#c0c0d0" stroke-width="0.6" opacity="0.6"/>
+            <line x1="18" y1="172" x2="33" y2="172" stroke="#c0c0d0" stroke-width="0.6" opacity="0.6"/>
+            <rect x="207" y="140" width="15" height="48" rx="4" fill="#9898a8"/>
+            <rect x="216" y="142" width="5" height="44" rx="2.5" fill="#4070cc" opacity="0.4"/>
+            <line x1="207" y1="154" x2="222" y2="154" stroke="#c0c0d0" stroke-width="0.6" opacity="0.6"/>
+            <line x1="207" y1="163" x2="222" y2="163" stroke="#c0c0d0" stroke-width="0.6" opacity="0.6"/>
+            <line x1="207" y1="172" x2="222" y2="172" stroke="#c0c0d0" stroke-width="0.6" opacity="0.6"/>
+
+            <!-- ── Main cranium ── -->
+            <ellipse cx="120" cy="148" rx="94" ry="120" fill="url(#headGrad)" filter="url(#headDrop)"/>
+
+            <!-- Panel seam lines on head -->
+            <line x1="120" y1="28" x2="120" y2="86" stroke="#aaaabc" stroke-width="0.8" opacity="0.4"/>
+            <path d="M75,86 Q120,80 165,86" stroke="#aaaabc" stroke-width="0.8" fill="none" opacity="0.4"/>
+            <path d="M27,148 Q36,170 34,202" stroke="#aaaabc" stroke-width="0.7" fill="none" opacity="0.3"/>
+            <path d="M213,148 Q204,170 206,202" stroke="#aaaabc" stroke-width="0.7" fill="none" opacity="0.3"/>
+            <path d="M88,250 Q120,258 152,250" stroke="#aaaabc" stroke-width="0.7" fill="none" opacity="0.3"/>
+
+            <!-- Forehead sensor bar -->
+            <rect x="112" y="48" width="16" height="5" rx="2.5" fill="#282838"/>
+            <circle cx="116" cy="50.5" r="2" fill="#3060d0" opacity="0.9"/>
+            <circle cx="124" cy="50.5" r="1.2" fill="#3060d0" opacity="0.5"/>
+
+            <!-- ── Eyes ── -->
+            <!-- left socket -->
+            <ellipse cx="85" cy="148" rx="28" ry="19" fill="#0c0c16"/>
+            <!-- left iris -->
+            <circle cx="85" cy="148" r="14.5" fill="url(#irisGrad)" filter="url(#eyeGlow)"/>
+            <!-- left pupil -->
+            <circle cx="85" cy="148" r="7" fill="#030610"/>
+            <!-- left iris rings -->
+            <circle cx="85" cy="148" r="14.5" fill="none" stroke="#70b8ff" stroke-width="0.6" opacity="0.7"/>
+            <circle cx="85" cy="148" r="10" fill="none" stroke="#4090e8" stroke-width="0.4" opacity="0.4"/>
+            <!-- left highlight -->
+            <ellipse cx="80" cy="143" rx="4" ry="2.5" fill="white" opacity="0.75"/>
+            <circle cx="90" cy="153" r="1.2" fill="white" opacity="0.25"/>
+            <!-- left eyelids -->
+            <path d="M57,148 Q85,128 113,148" stroke="#d8d8e2" stroke-width="1.6" fill="none"/>
+            <path d="M59,148 Q85,164 111,148" stroke="#a8a8b8" stroke-width="0.9" fill="none" opacity="0.7"/>
+            <!-- left corner accent -->
+            <line x1="57" y1="148" x2="52" y2="145" stroke="#c0c0d0" stroke-width="0.8" opacity="0.5"/>
+
+            <!-- right socket -->
+            <ellipse cx="155" cy="148" rx="28" ry="19" fill="#0c0c16"/>
+            <!-- right iris -->
+            <circle cx="155" cy="148" r="14.5" fill="url(#irisGrad)" filter="url(#eyeGlow)"/>
+            <!-- right pupil -->
+            <circle cx="155" cy="148" r="7" fill="#030610"/>
+            <!-- right iris rings -->
+            <circle cx="155" cy="148" r="14.5" fill="none" stroke="#70b8ff" stroke-width="0.6" opacity="0.7"/>
+            <circle cx="155" cy="148" r="10" fill="none" stroke="#4090e8" stroke-width="0.4" opacity="0.4"/>
+            <!-- right highlight -->
+            <ellipse cx="150" cy="143" rx="4" ry="2.5" fill="white" opacity="0.75"/>
+            <circle cx="160" cy="153" r="1.2" fill="white" opacity="0.25"/>
+            <!-- right eyelids -->
+            <path d="M127,148 Q155,128 183,148" stroke="#d8d8e2" stroke-width="1.6" fill="none"/>
+            <path d="M129,148 Q155,164 181,148" stroke="#a8a8b8" stroke-width="0.9" fill="none" opacity="0.7"/>
+            <!-- right corner accent -->
+            <line x1="183" y1="148" x2="188" y2="145" stroke="#c0c0d0" stroke-width="0.8" opacity="0.5"/>
+
+            <!-- ── Nose ── -->
+            <path d="M113,168 L109,200 L111,204" stroke="#989898" stroke-width="0.7" fill="none" opacity="0.45"/>
+            <path d="M127,168 L131,200 L129,204" stroke="#989898" stroke-width="0.7" fill="none" opacity="0.45"/>
+            <path d="M106,206 Q112,213 118,209" stroke="#888898" stroke-width="1" fill="none" opacity="0.4"/>
+            <path d="M134,206 Q128,213 122,209" stroke="#888898" stroke-width="1" fill="none" opacity="0.4"/>
+
+            <!-- ── Mouth ── -->
+            <!-- upper lip -->
+            <path id="upper-lip" d="M95,228 Q108,222 120,223 Q132,222 145,228" stroke="#888898" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <!-- lower lip -->
+            <path id="lower-lip" d="M96,228 Q120,244 144,228" stroke="#9090a0" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- mouth open fill (responding state) -->
+            <path id="mouth-fill" d="M100,228 Q120,234 140,228 Q120,230 100,228" fill="#181824" opacity="0"/>
+            <!-- lip corners -->
+            <circle cx="96" cy="228" r="1.4" fill="#7a7a8a" opacity="0.6"/>
+            <circle cx="144" cy="228" r="1.4" fill="#7a7a8a" opacity="0.6"/>
+
+            <!-- Cheekbone highlights -->
+            <ellipse cx="63" cy="188" rx="24" ry="15" fill="white" opacity="0.04" transform="rotate(-18 63 188)"/>
+            <ellipse cx="177" cy="188" rx="24" ry="15" fill="white" opacity="0.04" transform="rotate(18 177 188)"/>
+          </svg>
+
+          <!-- Scan sweep (thinking state) -->
+          <div class="face-scanline" id="face-scan"></div>
+        </div>
+
+        <!-- State label -->
+        <div class="state-badge-wrap">
+          <div class="state-pip-dot" id="state-dot"></div>
+          <div class="state-badge" id="state-badge">IDLE</div>
+        </div>
+
+        <!-- Voice visualizer canvas -->
+        <div class="viz-wrap">
+          <canvas id="viz-canvas" width="360" height="52"></canvas>
+        </div>
+
+        <!-- AMARA identity -->
+        <div class="amara-id">
+          <div class="amara-name">A · M · A · R · A</div>
+          <div class="amara-role">COMMAND INTELLIGENCE  ·  PROPVISION</div>
+        </div>
+
+      </section>
+
+      <!-- Right Panel: Strategic Brief -->
+      <aside class="side-panel panel-right">
+        <div class="panel-label">STRATEGIC BRIEF</div>
+        <div class="coaching-wrap">
+          <div class="coaching-text" id="coaching-text"></div>
+          <div class="coaching-cursor" id="coaching-cursor">|</div>
+        </div>
+
+        <div class="panel-rule"></div>
+        <div class="panel-label">CONFIDENCE</div>
+        <div class="conf-track">
+          <div class="conf-bar-fill" id="conf-fill" style="width:0%"></div>
+        </div>
+        <div class="conf-val" id="conf-val">—</div>
+
+        <div class="panel-rule"></div>
+        <div class="panel-label">RECOMMENDATION</div>
+        <div class="rec-box" id="rec-box">—</div>
+
+        <div class="panel-rule"></div>
+        <div class="panel-label">PLAY CLOCK</div>
+        <div class="play-clock" id="play-clock">—</div>
+      </aside>
+
+    </main>
+
+    <!-- ── Command Strip ──────────────────────────────────────── -->
+    <footer class="cmd-strip">
+      <button class="cycle-btn" id="cycle-btn" aria-label="Cycle AMARA state">
+        <span class="cycle-icon">◉</span>
+        <span>CYCLE STATE</span>
+      </button>
+
+      <div class="state-track" id="state-track">
+        <div class="state-node active" data-s="idle">IDLE</div>
+        <div class="track-line"></div>
+        <div class="state-node" data-s="listening">LISTENING</div>
+        <div class="track-line"></div>
+        <div class="state-node" data-s="thinking">THINKING</div>
+        <div class="track-line"></div>
+        <div class="state-node" data-s="responding">RESPONDING</div>
+        <div class="track-line"></div>
+        <div class="state-node alert-node" data-s="alert">ALERT</div>
+      </div>
+
+      <div class="cmd-tags">
+        <span class="cmd-tag">AUTONOMOUS MODE</span>
+        <span class="cmd-tag red-tag">DEAL DISCOVERY ACTIVE</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

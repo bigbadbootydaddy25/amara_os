@@ -1,0 +1,56 @@
+/* ─── Reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Root ───────────────────────────────────────────────────────────── */
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  /* Prevent any tap/select highlights on mobile */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* ─── Scene ──────────────────────────────────────────────────────────── */
+/*
+  Full-screen black canvas. overflow: hidden clips the image edges
+  so nothing bleeds outside the viewport on any screen size.
+*/
+.scene {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+/* ─── AMARA figure ───────────────────────────────────────────────────── */
+/*
+  Layout intent:
+    - Image is 16:9 landscape; height drives the scale.
+    - height: 103vh makes the image slightly taller than the screen.
+    - bottom: -10vh pushes the torso below the lower viewport edge,
+      so AMARA appears to emerge from the bottom of the screen.
+    - At this scale, her face center lands at ~50% viewport height.
+    - left: 50% + translateX(-50%) keeps her horizontally centered
+      on every screen width — excess image width is clipped by .scene.
+    - No pointer-events so the image never intercepts interaction.
+    - -webkit-user-drag: none prevents drag-to-desktop on desktop browsers.
+*/
+.amara {
+  position: absolute;
+  bottom: -10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 103vh;
+  width: auto;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}

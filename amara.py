@@ -28,6 +28,7 @@ from system.config import (
 from system.mao_calculator import (
     calculate_sfr_mao,
     calculate_land_spread,
+    calculate_ldp,
     what_buyer_price_is_needed,
 )
 from system.deal_analyzer import analyze_sfr_deal, analyze_land_deal, quick_screen
@@ -200,6 +201,20 @@ def cmd_workflow(_args) -> None:
     print()
 
 
+def cmd_ldp(args) -> None:
+    """Land Development Play underwriting."""
+    result = calculate_ldp(
+        acres=args.acres,
+        median_home_price=args.median_home_price,
+        asking_price=args.asking_price,
+        density=args.density,
+        lot_value_multiplier=args.lot_multiplier,
+        dev_cost_per_lot=args.dev_cost,
+        builder_profit_pct=0.15,
+    )
+    print(result.summary())
+
+
 def cmd_propstream(args) -> None:
     """PropStream import commands."""
     if args.action == "import-buyers":
@@ -370,6 +385,18 @@ def build_parser() -> argparse.ArgumentParser:
     wf_p = sub.add_parser("workflow", help="Print system workflow steps")
     wf_p.set_defaults(func=cmd_workflow)
 
+    # ── ldp ───────────────────────────────────────────────────────────────────
+    ldp_p = sub.add_parser("ldp", help="Land Development Play underwriting")
+    ldp_p.add_argument("--acres", type=float, required=True)
+    ldp_p.add_argument("--median-home-price", type=float, required=True, dest="median_home_price")
+    ldp_p.add_argument("--asking-price", type=float, required=True, dest="asking_price")
+    ldp_p.add_argument("--density", type=float, default=3.5, help="Lots per acre (default 3.5)")
+    ldp_p.add_argument("--lot-multiplier", type=float, default=0.23, dest="lot_multiplier",
+                       help="Lot value as % of median home price (default 0.23)")
+    ldp_p.add_argument("--dev-cost", type=float, default=60_000, dest="dev_cost",
+                       help="Development cost per lot (default $60,000)")
+    ldp_p.set_defaults(func=cmd_ldp)
+
     # ── propstream ────────────────────────────────────────────────────────────
     ps_p = sub.add_parser("propstream", help="PropStream import and session logging")
     ps_p.add_argument("action", choices=["import-buyers", "import-distressed"])
@@ -402,7 +429,7 @@ def main() -> None:
         print("\nAMARA OS — Buyer-First Real Estate Intelligence System")
         print("=" * 55)
         print("Core Rule: No buyer = no deal.\n")
-        print("Commands: mao | analyze | screen | buyer | vault | corridors | workflow | propstream | learn")
+        print("Commands: mao | analyze | screen | ldp | buyer | vault | corridors | workflow | propstream | learn")
         print("\nRun: python amara.py <command> --help")
         print()
         return

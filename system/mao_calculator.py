@@ -172,3 +172,126 @@ def what_buyer_price_is_needed(
     to hit the target assignment fee.
     """
     return offer_price + repairs + target_fee
+
+
+# ─── Land LDP Underwriting ────────────────────────────────────────────────────
+
+from dataclasses import dataclass as _dataclass
+
+
+@_dataclass
+class LDPResult:
+    """Result of a Land Development Play underwriting calculation."""
+    acres: float
+    density: float
+    lots: int
+    median_home_price: float
+    lot_value_multiplier: float
+    lot_value: float
+    gross_value: float
+    dev_cost_per_lot: float
+    development_cost: float
+    builder_profit_pct: float
+    builder_profit: float
+    max_land_value: float
+    asking_price: float
+    spread: float
+    is_viable: bool
+    spread_tier: str  # dead / minimum / preferred / priority
+
+    def summary(self) -> str:
+        tier_labels = {
+            "dead": "DEAD — below minimum",
+            "minimum": "VIABLE (minimum) — proceed cautiously",
+            "preferred": "PREFERRED — pursue actively",
+            "priority": "PRIORITY DEAL — move fast",
+        }
+        lines = [
+            f"{'═' * 55}",
+            f"LAND LDP UNDERWRITING",
+            f"{'─' * 55}",
+            f"Acres:                   {self.acres}",
+            f"Density:                 {self.density} lots/acre",
+            f"Estimated Lots:          {self.lots}",
+            f"Median Home Price:      ${self.median_home_price:>12,.0f}",
+            f"Lot Value ({self.lot_value_multiplier:.0%}):         ${self.lot_value:>12,.0f}",
+            f"{'─' * 55}",
+            f"Gross Value:            ${self.gross_value:>12,.0f}",
+            f"Development Cost:     - ${self.development_cost:>12,.0f}",
+            f"Builder Profit (15%): - ${self.builder_profit:>12,.0f}",
+            f"{'─' * 55}",
+            f"Max Land Value:         ${self.max_land_value:>12,.0f}",
+            f"Asking Price:         - ${self.asking_price:>12,.0f}",
+            f"{'─' * 55}",
+            f"Spread:                 ${self.spread:>12,.0f}",
+            f"",
+            f"Result: {tier_labels.get(self.spread_tier, self.spread_tier)}",
+            f"{'═' * 55}",
+        ]
+        return "\n".join(lines)
+
+
+def calculate_ldp(
+    acres: float,
+    median_home_price: float,
+    asking_price: float,
+    density: float = 3.5,
+    lot_value_multiplier: float = 0.23,
+    dev_cost_per_lot: float = 60_000,
+    builder_profit_pct: float = 0.15,
+) -> LDPResult:
+    """
+    Full Land Development Play underwriting.
+    See playbooks/LAND_LDP_UNDERWRITING_PLAYBOOK.md for formula detail.
+
+    Args:
+        acres: Total acreage of the parcel
+        median_home_price: Median sold home price in the ZIP
+        asking_price: Seller's asking price
+        density: Lots per acre (default 3.5)
+        lot_value_multiplier: Lot value as % of home price (default 0.23 = 23%)
+        dev_cost_per_lot: Development cost per lot (default $60,000)
+        builder_profit_pct: Builder profit % of gross value (default 15%)
+
+    Returns:
+        LDPResult with full breakdown and spread tier
+    """
+    lots = max(1, int(acres * density))
+    lot_value = median_home_price * lot_value_multiplier
+    gross_value = lots * lot_value
+    development_cost = lots * dev_cost_per_lot
+    builder_profit = gross_value * builder_profit_pct
+    max_land_value = gross_value - development_cost - builder_profit
+    spread = max_land_value - asking_price
+
+    if spread < LAND_MIN_SPREAD:
+        tier = "dead"
+        viable = False
+    elif spread < 250_000:
+        tier = "minimum"
+        viable = True
+    elif spread < 1_000_000:
+        tier = "preferred"
+        viable = True
+    else:
+        tier = "priority"
+        viable = True
+
+    return LDPResult(
+        acres=acres,
+        density=density,
+        lots=lots,
+        median_home_price=median_home_price,
+        lot_value_multiplier=lot_value_multiplier,
+        lot_value=lot_value,
+        gross_value=gross_value,
+        dev_cost_per_lot=dev_cost_per_lot,
+        development_cost=development_cost,
+        builder_profit_pct=builder_profit_pct,
+        builder_profit=builder_profit,
+        max_land_value=max_land_value,
+        asking_price=asking_price,
+        spread=spread,
+        is_viable=viable,
+        spread_tier=tier,
+    )

@@ -121,6 +121,24 @@ How to invoke:
 - Do not create buyer files from single-transaction records — 2+ cash purchases required
 - Do not create deal files without a confirmed buyer match in that ZIP
 
+### Comp Intelligence + Fast Underwriting
+Playbooks:
+- `playbooks/comps/sfr_comp_reading.md` — investor comp read, buyer price determination
+- `playbooks/comps/land_comp_logic.md` — 4-signal land demand framework
+- `playbooks/underwriting/sfr_fast_math.md` — MAO decision tree, 60-second rule
+- `playbooks/underwriting/land_ldp.md` — 7-step LDP formula, spread tiers
+Module: `system/comp_intelligence.py`
+
+How to invoke:
+- Use for any deal evaluation — SFR or land
+- All evaluations must complete in under 60 seconds logic time
+- SFR flow: read comps → set buyer price → run fast math → go / negotiate / no-go
+- Land flow: score 4 signals → run LDP → apply signal-adjusted spread threshold → go / no-go
+- Speed > perfection. Do not overanalyze. Do not add steps that don't change the decision.
+- **Enforced minimums — never override:**
+  - SFR assignment fee: $10,000 hard floor
+  - Land spread: $100,000 hard floor
+
 ### Video-to-Playbook Learning
 Playbook: `playbooks/VIDEO_TO_PLAYBOOK.md`
 Module: `system/video_to_playbook.py`

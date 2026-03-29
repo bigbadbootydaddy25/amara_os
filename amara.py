@@ -39,6 +39,13 @@ from system.vault import (
     create_buyer_file,
 )
 from system.zip_corridor import create_corridor, list_hot_corridors
+from system.comp_intelligence import (
+    underwrite_sfr,
+    underwrite_land,
+    fast_repair_estimate,
+    LandSignals,
+    RepairCondition,
+)
 from system.propstream_operator import (
     load_cash_buyer_export,
     load_distressed_property_export,
@@ -201,6 +208,44 @@ def cmd_workflow(_args) -> None:
     print()
 
 
+def cmd_underwrite(args) -> None:
+    """Comp Intelligence + Fast Underwriting — under 60 seconds."""
+    if args.asset_type == "sfr":
+        result = underwrite_sfr(
+            deal_id=getattr(args, "deal_id", "DEAL-???"),
+            address=getattr(args, "address", "Unknown"),
+            zip_code=getattr(args, "zip_code", ""),
+            buyer_id=getattr(args, "buyer_id", ""),
+            buyer_price=args.buyer_price,
+            seller_asking=args.seller_asking,
+            sqft=getattr(args, "sqft", 0) or 0,
+            repairs=getattr(args, "repairs", 0) or 0,
+            condition=getattr(args, "condition", "medium") or "medium",
+            market=getattr(args, "market", "default") or "default",
+        )
+        print(result.summary())
+
+    elif args.asset_type == "land":
+        signals = LandSignals(
+            nearby_builders=getattr(args, "builders", False),
+            active_subdivisions=getattr(args, "subdivisions", False),
+            new_construction_prices_available=getattr(args, "new_construction", False),
+            expansion_direction_confirmed=getattr(args, "expansion", False),
+        )
+        result = underwrite_land(
+            deal_id=getattr(args, "deal_id", "LAND-???"),
+            address=getattr(args, "address", "Unknown"),
+            acres=args.acres,
+            median_home_price=args.median_home_price,
+            asking_price=args.asking_price,
+            signals=signals,
+            density=getattr(args, "density", 3.5) or 3.5,
+            lot_multiplier=getattr(args, "lot_multiplier", 0.23) or 0.23,
+            dev_cost_per_lot=getattr(args, "dev_cost", 60_000) or 60_000,
+        )
+        print(result.summary())
+
+
 def cmd_ldp(args) -> None:
     """Land Development Play underwriting."""
     result = calculate_ldp(
@@ -334,7 +379,7 @@ def build_parser() -> argparse.ArgumentParser:
     # ── mao ──────────────────────────────────────────────────────────────────
     mao_p = sub.add_parser("mao", help="Calculate MAO or land spread")
     mao_p.add_argument("asset_type", choices=["sfr", "land"], help="sfr or land")
-    mao_p.add_argument("--buyer-price", "--retail-value", type=float, dest="buyer_price")
+    mao_p.add_argument("--buyer-price", type=float, dest="buyer_price")
     mao_p.add_argument("--retail-value", type=float, dest="retail_value")
     mao_p.add_argument("--repairs", type=float, default=0)
     mao_p.add_argument("--acquisition", type=float, default=0)
@@ -385,6 +430,35 @@ def build_parser() -> argparse.ArgumentParser:
     wf_p = sub.add_parser("workflow", help="Print system workflow steps")
     wf_p.set_defaults(func=cmd_workflow)
 
+    # ── underwrite ────────────────────────────────────────────────────────────
+    uw_p = sub.add_parser("underwrite", help="Comp Intelligence + Fast Underwriting (<60s)")
+    uw_p.add_argument("asset_type", choices=["sfr", "land"])
+    uw_p.add_argument("--deal-id", default="DEAL-???", dest="deal_id")
+    uw_p.add_argument("--address", default="Unknown")
+    uw_p.add_argument("--zip", default="", dest="zip_code")
+    uw_p.add_argument("--buyer-id", default="", dest="buyer_id")
+    uw_p.add_argument("--market", default="default")
+    # SFR args
+    uw_p.add_argument("--buyer-price", type=float, default=0, dest="buyer_price")
+    uw_p.add_argument("--seller-asking", type=float, default=0, dest="seller_asking")
+    uw_p.add_argument("--repairs", type=float, default=0)
+    uw_p.add_argument("--sqft", type=float, default=0)
+    uw_p.add_argument("--condition", choices=["light", "medium", "heavy"], default="medium")
+    # Land args
+    uw_p.add_argument("--acres", type=float, default=0)
+    uw_p.add_argument("--median-home-price", type=float, default=0, dest="median_home_price")
+    uw_p.add_argument("--asking-price", type=float, default=0, dest="asking_price")
+    uw_p.add_argument("--density", type=float, default=3.5)
+    uw_p.add_argument("--lot-multiplier", type=float, default=0.23, dest="lot_multiplier")
+    uw_p.add_argument("--dev-cost", type=float, default=60_000, dest="dev_cost")
+    # Land signal flags
+    uw_p.add_argument("--builders", action="store_true", help="Nearby builders confirmed")
+    uw_p.add_argument("--subdivisions", action="store_true", help="Active subdivisions confirmed")
+    uw_p.add_argument("--new-construction", action="store_true", dest="new_construction",
+                      help="New construction prices available")
+    uw_p.add_argument("--expansion", action="store_true", help="Expansion direction confirmed")
+    uw_p.set_defaults(func=cmd_underwrite)
+
     # ── ldp ───────────────────────────────────────────────────────────────────
     ldp_p = sub.add_parser("ldp", help="Land Development Play underwriting")
     ldp_p.add_argument("--acres", type=float, required=True)
@@ -429,7 +503,7 @@ def main() -> None:
         print("\nAMARA OS — Buyer-First Real Estate Intelligence System")
         print("=" * 55)
         print("Core Rule: No buyer = no deal.\n")
-        print("Commands: mao | analyze | screen | ldp | buyer | vault | corridors | workflow | propstream | learn")
+        print("Commands: underwrite | mao | analyze | screen | ldp | buyer | vault | corridors | workflow | propstream | learn")
         print("\nRun: python amara.py <command> --help")
         print()
         return

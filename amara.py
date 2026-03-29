@@ -10,10 +10,14 @@ Usage:
     python amara.py buyer new
     python amara.py vault list buyers
     python amara.py vault search buyers "Dallas"
+    python amara.py propstream import-buyers export.csv
+    python amara.py propstream import-distressed export.csv --buyer-zips 77009,77018
+    python amara.py learn transcript.txt --title "Subject-To Investing 101"
 """
 
 import sys
 import argparse
+from pathlib import Path
 
 from system.config import (
     SFR_MIN_ASSIGNMENT_FEE,
@@ -34,6 +38,15 @@ from system.vault import (
     create_buyer_file,
 )
 from system.zip_corridor import create_corridor, list_hot_corridors
+from system.propstream_operator import (
+    load_cash_buyer_export,
+    load_distressed_property_export,
+    create_buyer_from_propstream,
+    screen_distressed_properties,
+    create_deal_stub_from_propstream,
+    log_propstream_session,
+)
+from system.video_to_playbook import process_transcript
 
 
 def cmd_mao(args) -> None:
@@ -187,6 +200,115 @@ def cmd_workflow(_args) -> None:
     print()
 
 
+def cmd_propstream(args) -> None:
+    """PropStream import commands."""
+    if args.action == "import-buyers":
+        csv_path = args.file
+        print(f"\nLoading PropStream cash buyer export: {csv_path}")
+        buyers = load_cash_buyer_export(csv_path)
+        print(f"  Records loaded: {len(buyers)}")
+
+        created = []
+        skipped = 0
+        for buyer in buyers:
+            result = create_buyer_from_propstream(buyer)
+            if result:
+                buyer_id, path = result
+                created.append((buyer_id, buyer.entity_name, path))
+            else:
+                skipped += 1
+
+        print(f"\n  Buyers created: {len(created)}")
+        print(f"  Skipped (did not qualify): {skipped}")
+        for buyer_id, name, path in created:
+            print(f"    {buyer_id} — {name}")
+
+        log_propstream_session(
+            market=getattr(args, "market", "Unknown"),
+            search_type="Cash Buyer Export",
+            records_reviewed=len(buyers),
+            buyers_created=len(created),
+            deals_created=0,
+            observations=[f"{skipped} records skipped (fewer than 2 transactions)"],
+        )
+        print(f"\n  Session logged to observations/")
+
+    elif args.action == "import-distressed":
+        csv_path = args.file
+        buyer_zips = [z.strip() for z in args.buyer_zips.split(",")] if args.buyer_zips else []
+        buyer_id = getattr(args, "buyer_id", "") or ""
+        buyer_name = getattr(args, "buyer_name", "") or "Unknown Buyer"
+
+        print(f"\nLoading PropStream distressed property export: {csv_path}")
+        properties = load_distressed_property_export(csv_path)
+        print(f"  Records loaded: {len(properties)}")
+
+        if buyer_zips:
+            screened = screen_distressed_properties(properties, buyer_zips)
+            print(f"  Passed buyer-first screen: {len(screened)}")
+        else:
+            screened = [p for p in properties if p.has_equity()]
+            print(f"  Passed equity screen: {len(screened)} (no buyer ZIPs provided — limited screen only)")
+
+        if not buyer_id:
+            print("\n  ⚠  No --buyer-id provided. Deal stubs require a confirmed buyer match.")
+            print("     Run: python amara.py buyer list — then re-run with --buyer-id BUY-XXXX")
+            return
+
+        created_deals = []
+        for prop in screened[:20]:  # Cap at 20 stubs per session
+            deal_id, path = create_deal_stub_from_propstream(prop, buyer_id, buyer_name)
+            created_deals.append((deal_id, prop.address, path))
+
+        print(f"\n  Deal stubs created: {len(created_deals)}")
+        for deal_id, address, path in created_deals:
+            print(f"    {deal_id} — {address}")
+
+        log_propstream_session(
+            market=getattr(args, "market", "Unknown"),
+            search_type="Distressed Property Export",
+            records_reviewed=len(properties),
+            buyers_created=0,
+            deals_created=len(created_deals),
+            observations=[
+                f"{len(properties) - len(screened)} records filtered out (no equity or outside buyer ZIPs)",
+                f"Buyer matched: {buyer_id} — {buyer_name}",
+            ],
+        )
+        print(f"\n  Session logged to observations/")
+
+
+def cmd_learn(args) -> None:
+    """Video-to-Playbook learning skill."""
+    transcript_path = args.file
+    path = Path(transcript_path)
+
+    if not path.exists():
+        # Treat input as raw transcript text if not a file path
+        transcript = transcript_path
+    else:
+        transcript = path.read_text(encoding="utf-8")
+
+    title = getattr(args, "title", "") or ""
+    topic = getattr(args, "topic", "") or ""
+
+    print(f"\nProcessing transcript...")
+    if title:
+        print(f"  Title: {title}")
+    print(f"  Words: {len(transcript.split())}")
+
+    result = process_transcript(transcript, video_title=title, topic_override=topic)
+
+    if result["success"]:
+        print(f"\n  Playbook written: {result['playbook_path']}")
+        print(f"  Observation logged: {result['observation_path']}")
+        print(f"  Confidence: {result['confidence']}")
+    else:
+        print(f"\n  Could not extract playbook.")
+        print(f"  Reason: {result['reason']}")
+        print(f"  Provide a longer, more structured transcript.")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="amara",
@@ -248,6 +370,26 @@ def build_parser() -> argparse.ArgumentParser:
     wf_p = sub.add_parser("workflow", help="Print system workflow steps")
     wf_p.set_defaults(func=cmd_workflow)
 
+    # ── propstream ────────────────────────────────────────────────────────────
+    ps_p = sub.add_parser("propstream", help="PropStream import and session logging")
+    ps_p.add_argument("action", choices=["import-buyers", "import-distressed"])
+    ps_p.add_argument("file", help="Path to PropStream CSV export")
+    ps_p.add_argument("--market", default="Unknown", help="Market name for session log")
+    ps_p.add_argument("--buyer-zips", default="", dest="buyer_zips",
+                      help="Comma-separated buyer ZIPs to screen against (import-distressed only)")
+    ps_p.add_argument("--buyer-id", default="", dest="buyer_id",
+                      help="Confirmed buyer ID to match deals to (import-distressed only)")
+    ps_p.add_argument("--buyer-name", default="", dest="buyer_name",
+                      help="Confirmed buyer name (import-distressed only)")
+    ps_p.set_defaults(func=cmd_propstream)
+
+    # ── learn ─────────────────────────────────────────────────────────────────
+    lrn_p = sub.add_parser("learn", help="Process a video transcript into a playbook")
+    lrn_p.add_argument("file", help="Path to transcript .txt file (or raw text)")
+    lrn_p.add_argument("--title", default="", help="Video title")
+    lrn_p.add_argument("--topic", default="", help="Topic override for playbook filename")
+    lrn_p.set_defaults(func=cmd_learn)
+
     return parser
 
 
@@ -260,7 +402,7 @@ def main() -> None:
         print("\nAMARA OS — Buyer-First Real Estate Intelligence System")
         print("=" * 55)
         print("Core Rule: No buyer = no deal.\n")
-        print("Commands: mao | analyze | screen | buyer | vault | corridors | workflow")
+        print("Commands: mao | analyze | screen | buyer | vault | corridors | workflow | propstream | learn")
         print("\nRun: python amara.py <command> --help")
         print()
         return

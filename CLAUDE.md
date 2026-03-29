@@ -108,6 +108,33 @@ Never offer above MAO. Never go under contract without a confirmed buyer.
 
 ---
 
+## System Skills
+
+### PropStream Operator
+Playbook: `playbooks/PROPSTREAM_PLAYBOOK.md`
+Module: `system/propstream_operator.py`
+
+How to invoke:
+- Use when identifying cash buyers by ZIP or pulling distressed property lists
+- Always verify buyer-first before creating deal stubs from PropStream exports
+- Log every PropStream session to `observations/` before ending the session
+- Do not create buyer files from single-transaction records — 2+ cash purchases required
+- Do not create deal files without a confirmed buyer match in that ZIP
+
+### Video-to-Playbook Learning
+Playbook: `playbooks/VIDEO_TO_PLAYBOOK.md`
+Module: `system/video_to_playbook.py`
+
+How to invoke:
+- Use when a training video transcript is provided
+- Do NOT act on video titles, descriptions, or summaries alone — transcript required
+- Run `system/video_to_playbook.py` → `process_transcript()` on the raw text
+- Output goes to `playbooks/` and an observation is logged automatically
+- Vault rules in CLAUDE.md always override extracted video content
+- Extracted playbooks are immediately active as operating procedures
+
+---
+
 ## What Claude Should Never Do
 
 - Pursue a deal without a matched buyer
@@ -117,3 +144,5 @@ Never offer above MAO. Never go under contract without a confirmed buyer.
 - Build UI or voice features
 - Leave observation Action fields blank
 - Ignore vault data in favor of assumptions
+- Act on a video transcript without running it through the Video-to-Playbook skill
+- Create buyer vault files from PropStream records with fewer than 2 transactions

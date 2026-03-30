@@ -121,6 +121,19 @@ How to invoke:
 - Do not create buyer files from single-transaction records — 2+ cash purchases required
 - Do not create deal files without a confirmed buyer match in that ZIP
 
+### Auto Matcher
+Playbook: `playbooks/AUTO_MATCHER_PLAYBOOK.md`
+Modules: `system/auto_matcher.py`, `system/lead_intake.py`, `system/distress_scorer.py`, `system/match_scorer.py`, `system/offer_queue.py`
+Schema: `system/schema.sql`
+
+How to invoke:
+- Use when processing incoming leads from any source (Zillow, XLeads, CSV, manual)
+- Runs all 10 stages automatically: intake → classify → buyer lookup → comp read → underwrite → distress score → match score → approval gate → offer queue
+- Buyer-first enforced at Stage 3 — pipeline stops if no buyer exists in that ZIP
+- Enforced minimums: SFR fee ≥ $10,000, land spread ≥ $100,000
+- Output: queued offer records in `offers/` + auto-created vault stubs in `deals/` or `land/`
+- Does NOT send offers — queues them for human review
+
 ### Comp Intelligence + Fast Underwriting
 Playbooks:
 - `playbooks/comps/sfr_comp_reading.md` — investor comp read, buyer price determination

@@ -39,6 +39,11 @@ from system.vault import (
     create_buyer_file,
 )
 from system.zip_corridor import create_corridor, list_hot_corridors
+from system.auto_matcher import (
+    run_pipeline, run_batch, print_batch_summary, _load_vault_buyers,
+)
+from system.lead_intake import ingest_from_csv, ingest_manual, PropertyType, LeadSource
+from system.offer_queue import get_queue, get_rejections, print_queue_summary
 from system.comp_intelligence import (
     underwrite_sfr,
     underwrite_land,
@@ -206,6 +211,54 @@ def cmd_workflow(_args) -> None:
     for step in WORKFLOW_STEPS:
         print(f"  {step}")
     print()
+
+
+def cmd_match(args) -> None:
+    """Auto Matcher — run the full 10-stage pipeline."""
+    buyers = _load_vault_buyers()
+    print(f"\nBuyers loaded from vault: {len(buyers)}")
+
+    if args.action == "csv":
+        leads = ingest_from_csv(args.file, source=args.source)
+        print(f"Leads loaded: {len(leads)}")
+        results = run_batch(leads, buyers)
+        print_batch_summary(results)
+
+    elif args.action == "manual":
+        lead = ingest_manual(
+            address       = args.address,
+            zip_code      = args.zip,
+            city          = getattr(args, "city", "") or "",
+            state         = getattr(args, "state", "") or "",
+            list_price    = args.price,
+            property_type = getattr(args, "property_type", PropertyType.SFR) or PropertyType.SFR,
+            beds          = getattr(args, "beds", 0) or 0,
+            baths         = getattr(args, "baths", 0) or 0,
+            sqft          = getattr(args, "sqft", 0) or 0,
+            lot_size      = getattr(args, "lot_size", 0) or 0,
+            year_built    = getattr(args, "year_built", 0) or 0,
+            dom           = getattr(args, "dom", 0) or 0,
+            description   = getattr(args, "description", "") or "",
+            source        = LeadSource.MANUAL,
+        )
+        result = run_pipeline(lead, buyers)
+        print(f"\n{result.summary()}")
+        if result.notes:
+            print("\nPipeline stages:")
+            for note in result.notes:
+                print(f"  {note}")
+
+    elif args.action == "queue":
+        print_queue_summary()
+
+    elif args.action == "rejections":
+        rejs = get_rejections()
+        if not rejs:
+            print("No rejections on record.")
+            return
+        print(f"\nRejection Log ({len(rejs)}):")
+        for r in rejs[-20:]:
+            print(f"  [{r.stage.upper()}] {r.address} ({r.zip_code}) — {r.reason}")
 
 
 def cmd_underwrite(args) -> None:
@@ -430,6 +483,26 @@ def build_parser() -> argparse.ArgumentParser:
     wf_p = sub.add_parser("workflow", help="Print system workflow steps")
     wf_p.set_defaults(func=cmd_workflow)
 
+    # ── match ─────────────────────────────────────────────────────────────────
+    mat_p = sub.add_parser("match", help="Auto Matcher — full 10-stage pipeline")
+    mat_p.add_argument("action", choices=["csv", "manual", "queue", "rejections"])
+    mat_p.add_argument("file", nargs="?", default="", help="CSV file path (csv action only)")
+    mat_p.add_argument("--source", default="csv", help="Lead source label")
+    mat_p.add_argument("--address", default="")
+    mat_p.add_argument("--zip", default="")
+    mat_p.add_argument("--city", default="")
+    mat_p.add_argument("--state", default="")
+    mat_p.add_argument("--price", type=float, default=0)
+    mat_p.add_argument("--beds", type=float, default=0)
+    mat_p.add_argument("--baths", type=float, default=0)
+    mat_p.add_argument("--sqft", type=int, default=0)
+    mat_p.add_argument("--lot-size", type=float, default=0, dest="lot_size")
+    mat_p.add_argument("--year-built", type=int, default=0, dest="year_built")
+    mat_p.add_argument("--dom", type=int, default=0)
+    mat_p.add_argument("--description", default="")
+    mat_p.add_argument("--property-type", default="SFR", dest="property_type")
+    mat_p.set_defaults(func=cmd_match)
+
     # ── underwrite ────────────────────────────────────────────────────────────
     uw_p = sub.add_parser("underwrite", help="Comp Intelligence + Fast Underwriting (<60s)")
     uw_p.add_argument("asset_type", choices=["sfr", "land"])
@@ -503,7 +576,7 @@ def main() -> None:
         print("\nAMARA OS — Buyer-First Real Estate Intelligence System")
         print("=" * 55)
         print("Core Rule: No buyer = no deal.\n")
-        print("Commands: underwrite | mao | analyze | screen | ldp | buyer | vault | corridors | workflow | propstream | learn")
+        print("Commands: match | underwrite | mao | screen | ldp | buyer | vault | corridors | propstream | learn | workflow")
         print("\nRun: python amara.py <command> --help")
         print()
         return

@@ -60,6 +60,31 @@ from system.propstream_operator import (
     log_propstream_session,
 )
 from system.video_to_playbook import process_transcript
+from system.buyer_discovery import (
+    score_buyer, infer_buy_box, load_buyers_from_vault,
+    BuyerTransaction,
+)
+from system.zillow_hunter import (
+    process_zillow_export, print_hunt_summary,
+    build_search_criteria_for_zip,
+)
+from system.offer_sender import (
+    process_offer_queue, get_due_followups, print_offer_queue_report,
+)
+from system.learning_engine import (
+    DealOutcome, run_full_learning_protocol,
+)
+from system.entitlement_engine import (
+    quick_entitlement_screen, write_entitlement_to_vault,
+)
+from system.approval_tracker import (
+    create_approval_record, advance_stage, record_revision,
+    record_continuance, get_all_records, print_approval_report,
+)
+from system.orchestrator import (
+    register_builtin_handlers, run_scheduled, dispatch_event,
+    process_events, print_orchestrator_status,
+)
 
 
 def cmd_mao(args) -> None:
@@ -391,6 +416,169 @@ def cmd_propstream(args) -> None:
         print(f"\n  Session logged to observations/")
 
 
+def cmd_hunt(args) -> None:
+    """Zillow distress hunting — score CSV export or show search criteria."""
+    if args.action == "score":
+        if not args.file:
+            print("Error: --file required for 'score' action")
+            return
+        print(f"\nProcessing Zillow export: {args.file}")
+        session = process_zillow_export(args.file, threshold=args.threshold)
+        print_hunt_summary(session)
+
+    elif args.action == "criteria":
+        zip_codes = [z.strip() for z in args.zips.split(",")] if args.zips else []
+        if not zip_codes:
+            # pull from vault buyers
+            vault_buyers = load_buyers_from_vault()
+            for _, _, zips in vault_buyers:
+                zip_codes.extend(zips)
+            zip_codes = list(dict.fromkeys(zip_codes))
+        print(f"\nZillow search criteria for {len(zip_codes)} ZIPs:")
+        for zip_code in zip_codes[:10]:
+            crit = build_search_criteria_for_zip(
+                zip_code  = zip_code,
+                min_price = args.min_price,
+                max_price = args.max_price,
+            )
+            print(f"\n{crit.to_search_string()}")
+
+
+def cmd_close(args) -> None:
+    """Record a closed deal and run the full learning protocol."""
+    print(f"\nRecording closed deal: {args.deal_id}")
+
+    outcome = DealOutcome(
+        deal_id               = args.deal_id,
+        address               = args.address,
+        zip_code              = args.zip,
+        asset_type            = args.asset_type.upper(),
+        buyer_id              = args.buyer_id,
+        buyer_name            = args.buyer_name,
+        projected_buyer_price = args.proj_buyer_price,
+        projected_repairs     = args.proj_repairs,
+        projected_mao         = args.proj_mao,
+        projected_fee         = args.proj_fee,
+        actual_contract_price = args.actual_contract,
+        actual_buyer_price    = args.actual_buyer_price,
+        actual_repairs        = args.actual_repairs,
+        actual_fee            = args.actual_fee,
+        notes                 = getattr(args, "notes", "") or "",
+    )
+
+    report = run_full_learning_protocol(outcome)
+    print(report.summary())
+    print(f"\n  Observation: {report.observation_id}")
+    if report.vault_updates:
+        print(f"  Vault updated: {', '.join(report.vault_updates[:5])}")
+
+
+def cmd_discover(args) -> None:
+    """Buyer discovery — score vault buyers or qualify a new buyer."""
+    if args.action == "rank":
+        vault_buyers = load_buyers_from_vault()
+        print(f"\nVault buyers: {len(vault_buyers)}")
+        print("  (Load transaction history to compute live scores)")
+        print("  To score a buyer: python amara.py discover score --buyer-id BUY-XXXX --csv txns.csv")
+        for bid, name, zips in vault_buyers:
+            print(f"  {bid} — {name} | ZIPs: {', '.join(zips[:4])}")
+
+
+def cmd_entitle(args) -> None:
+    """Entitlement Intelligence — run entitlement analysis on a land deal."""
+    result = quick_entitlement_screen(
+        deal_id      = args.deal_id,
+        address      = args.address,
+        zip_code     = args.zip,
+        zoning       = getattr(args, "zoning", "") or "",
+        has_water    = getattr(args, "water", False),
+        has_sewer    = getattr(args, "sewer", False),
+        has_road     = getattr(args, "road", False),
+        plat_phase   = getattr(args, "plat", "raw") or "raw",
+        dead_paper   = getattr(args, "dead_paper", False),
+        permits_stage= getattr(args, "permits", "not_started") or "not_started",
+    )
+    print(result.summary())
+    if args.write:
+        vault_file = write_entitlement_to_vault(result)
+        print(f"\n  Written to vault: {vault_file}")
+
+
+def cmd_approve(args) -> None:
+    """Approval Tracker — manage land entitlement pipeline stages."""
+    if args.action == "create":
+        record = create_approval_record(
+            deal_id       = args.deal_id,
+            address       = args.address,
+            zip_code      = args.zip,
+            county        = getattr(args, "county", "") or "",
+            initial_stage = getattr(args, "stage", "pre_app") or "pre_app",
+        )
+        print(f"\n  Created: {record.approval_id}")
+        print(f"  Stage: {record.stage_label()}")
+        print(f"  Next: {record.likely_next_step}")
+
+    elif args.action == "advance":
+        try:
+            record = advance_stage(args.id, notes=getattr(args, "notes", "") or "")
+            print(f"\n  {record.approval_id} advanced to: {record.stage_label()}")
+            print(f"  Next: {record.likely_next_step}")
+        except ValueError as e:
+            print(f"\n  Error: {e}")
+
+    elif args.action == "revision":
+        try:
+            record = record_revision(args.id)
+            print(f"\n  Revision #{record.revision_count} recorded for {record.approval_id}")
+            print(f"  Backlog score: {record.backlog_score:.2f}")
+        except ValueError as e:
+            print(f"\n  Error: {e}")
+
+    elif args.action == "list":
+        records = get_all_records()
+        if not records:
+            print("\n  No approval records on file.")
+            return
+        print_approval_report(records)
+
+
+def cmd_orchestrate(args) -> None:
+    """Agent Orchestrator — run workflows and process events."""
+    register_builtin_handlers()
+
+    if args.action == "run":
+        print(f"\nRunning workflow: {args.workflow}")
+        job = run_scheduled(args.workflow)
+        print(f"  Status: {job.status}")
+        print(f"  Result: {job.result_summary or job.error_message}")
+
+    elif args.action == "status":
+        print_orchestrator_status()
+
+    elif args.action == "event":
+        import json
+        payload = {}
+        if getattr(args, "payload", None):
+            try:
+                payload = json.loads(args.payload)
+            except json.JSONDecodeError:
+                print("  Error: --payload must be valid JSON")
+                return
+        evt  = dispatch_event(args.event_name, payload)
+        jobs = process_events()
+        print(f"\n  Event {evt.event_id} dispatched")
+        for job in jobs:
+            print(f"  Job: {job.job_id} — {job.status}")
+            if job.result_summary:
+                print(f"    {job.result_summary}")
+
+    elif args.action == "api":
+        import uvicorn
+        print("\nStarting AMARA OS API server...")
+        print("  Docs: http://localhost:8000/docs")
+        uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=False)
+
+
 def cmd_learn(args) -> None:
     """Video-to-Playbook learning skill."""
     transcript_path = args.file
@@ -564,6 +752,86 @@ def build_parser() -> argparse.ArgumentParser:
     lrn_p.add_argument("--topic", default="", help="Topic override for playbook filename")
     lrn_p.set_defaults(func=cmd_learn)
 
+    # ── hunt ──────────────────────────────────────────────────────────────────
+    hnt_p = sub.add_parser("hunt", help="Zillow distress hunting engine")
+    hnt_p.add_argument("action", choices=["score", "criteria"])
+    hnt_p.add_argument("--file", default="", help="Path to Zillow CSV export (score action)")
+    hnt_p.add_argument("--zips", default="", help="Comma-separated ZIPs (criteria action)")
+    hnt_p.add_argument("--min-price", type=float, default=0, dest="min_price")
+    hnt_p.add_argument("--max-price", type=float, default=0, dest="max_price")
+    hnt_p.add_argument("--threshold", type=float, default=0.30, help="Distress score threshold (default 0.30)")
+    hnt_p.set_defaults(func=cmd_hunt)
+
+    # ── close ─────────────────────────────────────────────────────────────────
+    cls_p = sub.add_parser("close", help="Record a closed deal + run learning protocol")
+    cls_p.add_argument("--deal-id", required=True, dest="deal_id")
+    cls_p.add_argument("--address", required=True)
+    cls_p.add_argument("--zip", required=True)
+    cls_p.add_argument("--asset-type", default="SFR", dest="asset_type")
+    cls_p.add_argument("--buyer-id", required=True, dest="buyer_id")
+    cls_p.add_argument("--buyer-name", required=True, dest="buyer_name")
+    cls_p.add_argument("--proj-buyer-price", type=float, required=True, dest="proj_buyer_price")
+    cls_p.add_argument("--proj-repairs", type=float, required=True, dest="proj_repairs")
+    cls_p.add_argument("--proj-mao", type=float, required=True, dest="proj_mao")
+    cls_p.add_argument("--proj-fee", type=float, required=True, dest="proj_fee")
+    cls_p.add_argument("--actual-contract", type=float, required=True, dest="actual_contract")
+    cls_p.add_argument("--actual-buyer-price", type=float, required=True, dest="actual_buyer_price")
+    cls_p.add_argument("--actual-repairs", type=float, required=True, dest="actual_repairs")
+    cls_p.add_argument("--actual-fee", type=float, required=True, dest="actual_fee")
+    cls_p.add_argument("--notes", default="")
+    cls_p.set_defaults(func=cmd_close)
+
+    # ── discover ──────────────────────────────────────────────────────────────
+    dsc_p = sub.add_parser("discover", help="Buyer Discovery Engine — score and rank buyers")
+    dsc_p.add_argument("action", choices=["rank"])
+    dsc_p.set_defaults(func=cmd_discover)
+
+    # ── entitle ───────────────────────────────────────────────────────────────
+    ent_p = sub.add_parser("entitle", help="Entitlement Intelligence — analyze land entitlement")
+    ent_p.add_argument("--deal-id", required=True, dest="deal_id")
+    ent_p.add_argument("--address", required=True)
+    ent_p.add_argument("--zip", required=True)
+    ent_p.add_argument("--zoning", default="")
+    ent_p.add_argument("--water", action="store_true", help="Water service available")
+    ent_p.add_argument("--sewer", action="store_true", help="Sewer service available")
+    ent_p.add_argument("--road", action="store_true", help="Road access available")
+    ent_p.add_argument("--plat", default="raw",
+                       choices=["raw", "preliminary", "final", "recorded"],
+                       help="Plat phase (default: raw)")
+    ent_p.add_argument("--dead-paper", action="store_true", dest="dead_paper")
+    ent_p.add_argument("--permits",
+                       choices=["not_started", "pre_app", "preliminary_plat",
+                                "final_plat", "permits_issued"],
+                       default="not_started", dest="permits")
+    ent_p.add_argument("--write", action="store_true", help="Write result to vault")
+    ent_p.set_defaults(func=cmd_entitle)
+
+    # ── approve ───────────────────────────────────────────────────────────────
+    apr_p = sub.add_parser("approve", help="Approval Tracker — monitor entitlement pipeline")
+    apr_p.add_argument("action", choices=["create", "advance", "revision", "list"])
+    apr_p.add_argument("--id", default="", help="Approval ID (advance/revision actions)")
+    apr_p.add_argument("--deal-id", default="", dest="deal_id")
+    apr_p.add_argument("--address", default="")
+    apr_p.add_argument("--zip", default="")
+    apr_p.add_argument("--county", default="")
+    apr_p.add_argument("--stage", default="pre_app",
+                       choices=["pre_app", "preliminary_plat", "final_plat",
+                                "permits", "utilities", "complete"])
+    apr_p.add_argument("--notes", default="")
+    apr_p.set_defaults(func=cmd_approve)
+
+    # ── orchestrate ───────────────────────────────────────────────────────────
+    orc_p = sub.add_parser("orchestrate", help="Agent Orchestrator — run workflows")
+    orc_p.add_argument("action", choices=["run", "status", "event", "api"])
+    orc_p.add_argument("--workflow", default="",
+                       help="Workflow name (run action): nightly_buyer_refresh / deal_hunt / "
+                            "morning_offer_queue / followup_sweep / learning_sync")
+    orc_p.add_argument("--event-name", default="", dest="event_name",
+                       help="Event name to dispatch (event action)")
+    orc_p.add_argument("--payload", default="",
+                       help="JSON payload for event (event action)")
+    orc_p.set_defaults(func=cmd_orchestrate)
+
     return parser
 
 
@@ -576,7 +844,12 @@ def main() -> None:
         print("\nAMARA OS — Buyer-First Real Estate Intelligence System")
         print("=" * 55)
         print("Core Rule: No buyer = no deal.\n")
-        print("Commands: match | underwrite | mao | screen | ldp | buyer | vault | corridors | propstream | learn | workflow")
+        print("Pipeline:  match | underwrite | mao | screen | ldp")
+        print("Buyers:    buyer | discover")
+        print("Land:      entitle | approve")
+        print("Learning:  close | learn")
+        print("Hunting:   hunt | propstream")
+        print("System:    vault | corridors | orchestrate | workflow")
         print("\nRun: python amara.py <command> --help")
         print()
         return

@@ -1,0 +1,35 @@
+workflows:
+  sfr_lead_intake:
+    trigger: event.new_property
+    steps:
+      - id: filter
+        service: propvision
+        action: /underwrite/sfr
+      - id: match
+        service: propvision
+        action: /offers/queue
+        depends_on: [filter]
+        condition: filter.approved == true
+
+  nightly_buyer_refresh:
+    trigger: cron("0 2 * * *")
+    steps:
+      - id: refresh
+        service: propvision
+        action: /events
+        payload: {event_name: nightly_buyer_refresh}
+
+  morning_offer_sweep:
+    trigger: cron("0 8 * * 1-5")
+    steps:
+      - id: queue_offers
+        service: propvision
+        action: /offers/queue
+
+  deal_closed:
+    trigger: event.deal_closed
+    steps:
+      - id: learn
+        service: propvision
+        action: /events
+        payload: {event_name: deal_closed}

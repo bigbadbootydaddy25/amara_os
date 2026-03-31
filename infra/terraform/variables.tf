@@ -1,0 +1,10 @@
+variable "aws_region"        { default = "us-east-1" }
+variable "env"               { default = "prod" }
+variable "db_password"       { sensitive = true }
+variable "vpc_cidr"          { default = "10.0.0.0/16" }
+variable "private_subnets"   { default = ["10.0.1.0/24", "10.0.2.0/24"] }
+variable "public_subnets"    { default = ["10.0.10.0/24", "10.0.11.0/24"] }
+variable "api_image"         { default = "amara/api:latest" }
+variable "dispatch_image"    { default = "amara/dispatch:latest" }
+variable "propvision_image"  { default = "amara/propvision:latest" }
+variable "remote_image"      { default = "amara/remote:latest" }

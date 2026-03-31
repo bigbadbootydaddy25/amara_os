@@ -1,0 +1,52 @@
+[
+  {
+    "address": "4812 Crane St, Houston TX",
+    "zip": "77008",
+    "price": 88000,
+    "arv": 161000,
+    "condition": "medium",
+    "repairs": 25000,
+    "mao": 94000,
+    "assignment": 16000,
+    "buyer": {
+      "name": "Marcus Webb",
+      "tier": "A",
+      "zip": "77008",
+      "entity": "Webb Acquisitions LLC",
+      "llcYearsActive": 6
+    },
+    "offerPayload": {
+      "to": "",
+      "subject": "Offer for 4812 Crane St, Houston TX",
+      "body": "Hi Marcus Webb,\n\nWe are cash buyers interested in the property at 4812 Crane St, Houston TX (77008).\n\nOur offer: $94,000 cash — as-is, no repairs, no commissions.\n\nTerms:\n- All cash, no financing contingency\n- 1% earnest money\n- 10-day inspection period\n- 21-day close (flexible)\n- Assignment of contract allowed\n- Close in as-is condition\n\nWe can move quickly and handle all paperwork. No fees to the seller.\n\nPlease reply or call anytime to discuss.\n\nBest,\nAMARA Acquisitions",
+      "offerPrice": 94000,
+      "address": "4812 Crane St, Houston TX",
+      "zip": "77008"
+    }
+  },
+  {
+    "address": "2241 Westmoreland Rd, Dallas TX",
+    "zip": "75211",
+    "price": 95000,
+    "arv": 184000,
+    "condition": "medium",
+    "repairs": 25000,
+    "mao": 103000,
+    "assignment": 18000,
+    "buyer": {
+      "name": "Diana Reyes",
+      "tier": "B",
+      "zip": "75211",
+      "entity": "Reyes Capital Group LLC",
+      "llcYearsActive": 4
+    },
+    "offerPayload": {
+      "to": "",
+      "subject": "Offer for 2241 Westmoreland Rd, Dallas TX",
+      "body": "Hi Diana Reyes,\n\nWe are cash buyers interested in the property at 2241 Westmoreland Rd, Dallas TX (75211).\n\nOur offer: $103,000 cash — as-is, no repairs, no commissions.\n\nTerms:\n- All cash, no financing contingency\n- 1% earnest money\n- 10-day inspection period\n- 21-day close (flexible)\n- Assignment of contract allowed\n- Close in as-is condition\n\nWe can move quickly and handle all paperwork. No fees to the seller.\n\nPlease reply or call anytime to discuss.\n\nBest,\nAMARA Acquisitions",
+      "offerPrice": 103000,
+      "address": "2241 Westmoreland Rd, Dallas TX",
+      "zip": "75211"
+    }
+  }
+]

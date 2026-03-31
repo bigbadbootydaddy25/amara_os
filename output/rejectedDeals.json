@@ -1,0 +1,23 @@
+[
+  {
+    "address": "500 Clean Lane, Dallas TX",
+    "zip": "75201",
+    "price": 350000,
+    "rejectStage": "filter",
+    "rejectReason": "DOM 12 below 60"
+  },
+  {
+    "address": "8904 Fuqua St, Houston TX",
+    "zip": "77033",
+    "price": 62000,
+    "rejectStage": "underwriting",
+    "rejectReason": "Assignment fee $8,000 below $10,000 minimum — list price $62,000 exceeds MAO $60,000"
+  },
+  {
+    "address": "3318 W McDowell, Phoenix AZ",
+    "zip": "85009",
+    "price": 118000,
+    "rejectStage": "underwriting",
+    "rejectReason": "Assignment fee $-23,000 below $10,000 minimum — list price $118,000 exceeds MAO $85,000"
+  }
+]

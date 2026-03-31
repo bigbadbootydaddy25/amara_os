@@ -22,8 +22,29 @@ REHAB_RATES = {"light": 20, "medium": 35, "heavy": 50}
 REHAB_DEFAULT_SQFT = 1_200   # fallback when sqft missing
 DEFAULT_CONDITION = "medium"
 
-# ─── ARV multipliers (applied to asking price when no comp data) ─────────────
-ARV_MULTIPLIERS = {"light": 1.35, "medium": 1.45, "heavy": 1.55}
+# ─── ARV: sqft-based (primary) — reflects renovated comp value, not distressed ask ──
+# $/sqft by market tier (post-renovation retail value)
+ARV_PER_SQFT_BY_STATE: dict[str, dict[str, int]] = {
+    "CA": {"light": 200, "medium": 185, "heavy": 165},
+    "NV": {"light": 145, "medium": 135, "heavy": 118},
+    "AZ": {"light": 135, "medium": 125, "heavy": 110},
+    "NM": {"light": 100, "medium": 90,  "heavy": 78},
+    "TX": {"light": 130, "medium": 120, "heavy": 105},
+    "MI": {"light": 70,  "medium": 60,  "heavy": 50},
+    "IN": {"light": 110, "medium": 100, "heavy": 88},
+    "OH": {"light": 105, "medium": 95,  "heavy": 82},
+    "KY": {"light": 105, "medium": 95,  "heavy": 82},
+    "NC": {"light": 125, "medium": 115, "heavy": 100},
+    "FL": {"light": 145, "medium": 135, "heavy": 118},
+    "AR": {"light": 95,  "medium": 85,  "heavy": 73},
+    "LA": {"light": 95,  "medium": 85,  "heavy": 73},
+    "VA": {"light": 160, "medium": 148, "heavy": 130},
+    "NH": {"light": 180, "medium": 165, "heavy": 145},
+    "TN": {"light": 120, "medium": 110, "heavy": 96},
+    "DEFAULT": {"light": 115, "medium": 105, "heavy": 90},
+}
+# Fallback multiplier when sqft is missing (applied to asking price — less accurate)
+ARV_FALLBACK_MULTIPLIERS = {"light": 1.50, "medium": 1.65, "heavy": 1.80}
 
 # ─── Buyer percent of ARV ─────────────────────────────────────────────────────
 BUYER_PCT = 0.75
@@ -56,10 +77,14 @@ def _estimate_rehab(sqft: int, condition: str) -> int:
     return round(base / 5_000) * 5_000
 
 
-def _estimate_arv(listing: NormalizedListing, condition: str) -> int:
-    multiplier = ARV_MULTIPLIERS[condition]
-    arv = round(listing.price * multiplier / 1_000) * 1_000
-    return arv
+def _estimate_arv(listing: NormalizedListing, condition: str, state: str = "DEFAULT") -> int:
+    rates = ARV_PER_SQFT_BY_STATE.get(state, ARV_PER_SQFT_BY_STATE["DEFAULT"])
+    if listing.sqft > 0:
+        arv = listing.sqft * rates[condition]
+    else:
+        # Fallback: price × multiplier when sqft unknown
+        arv = int(listing.price * ARV_FALLBACK_MULTIPLIERS[condition])
+    return round(arv / 1_000) * 1_000
 
 
 def _calc_roi(arv: int, price: int, rehab: int) -> float:
@@ -125,7 +150,7 @@ def analyze(
     """
     condition = _infer_condition(listing.keywords)
     rehab = _estimate_rehab(listing.sqft, condition)
-    arv = _estimate_arv(listing, condition)
+    arv = _estimate_arv(listing, condition, market.state)
     mao = int((arv * BUYER_PCT) - rehab - MIN_FEE)
     assignment_fee = max(0, int((arv * BUYER_PCT) - rehab - listing.price))
     roi = _calc_roi(arv, listing.price, rehab)

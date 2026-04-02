@@ -75,10 +75,10 @@ export class AnimationLoop {
     const deltaTime = (time - this.lastTime) / 1000;
     this.lastTime = time;
 
-    const { state, audioLevel } = useAmaraStore.getState();
+    const { state, audioLevel, errorPulse } = useAmaraStore.getState();
 
     this.orbRenderer.update(deltaTime, state, audioLevel);
-    this.avatarRenderer.update(deltaTime, state, audioLevel);
+    this.avatarRenderer.update(deltaTime, state, audioLevel, errorPulse);
 
     this.orbCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     this.avatarCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);

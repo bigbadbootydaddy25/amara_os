@@ -20,6 +20,8 @@ export class AvatarRenderer {
   private time = 0;
   private lastBlinkTime = 0;
   private nextBlinkInterval = 3.25;
+  private errorGlow = 0;
+  private lastErrorPulse = 0;
 
   constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
     this.ctx = ctx;
@@ -41,9 +43,21 @@ export class AvatarRenderer {
     this.height = height;
   }
 
-  update(deltaTime: number, amaraState: AmaraState, audioLevel: number): void {
+  update(
+    deltaTime: number,
+    amaraState: AmaraState,
+    audioLevel: number,
+    errorPulse: number,
+  ): void {
     const dt = Math.min(deltaTime, 0.05);
     this.time += dt;
+
+    if (errorPulse !== this.lastErrorPulse) {
+      this.lastErrorPulse = errorPulse;
+      this.errorGlow = 1;
+    } else {
+      this.errorGlow = lerp(this.errorGlow, 0, 1 - Math.exp(-dt / 0.18));
+    }
 
     const breathWave = Math.sin((this.time / 4) * Math.PI * 2);
     const breathScaleTarget = 1 + breathWave * 0.01;
@@ -236,6 +250,7 @@ export class AvatarRenderer {
     const eyeHeight = headHeight * 0.09;
     const irisRadius = eyeHeight * 0.72;
     const blink = easeInOut(this.animState.blinkProgress);
+    const errorGlow = this.errorGlow;
 
     [-1, 1].forEach((direction) => {
       const ex = eyeOffsetX * direction;
@@ -257,11 +272,11 @@ export class AvatarRenderer {
       ctx.save();
       ctx.translate(ex, eyeY + blink * eyeHeight * 0.2);
       ctx.scale(1, clamp(apertureHeight / eyeHeight, 0.12, 1));
-      const irisGradient = ctx.createRadialGradient(-irisRadius * 0.18, -irisRadius * 0.18, irisRadius * 0.08, 0, 0, irisRadius);
-      irisGradient.addColorStop(0, '#00d4ff');
-      irisGradient.addColorStop(0.45, '#1a88ff');
-      irisGradient.addColorStop(0.8, '#0066ff');
-      irisGradient.addColorStop(1, '#001133');
+      const irisGradient = ctx.createRadialGradient(0, 0, irisRadius * 0.1, 0, 0, irisRadius);
+      irisGradient.addColorStop(0, errorGlow > 0.1 ? '#ffb3b3' : '#00d4ff');
+      irisGradient.addColorStop(0.45, errorGlow > 0.1 ? '#ff4d4d' : '#1a88ff');
+      irisGradient.addColorStop(0.8, errorGlow > 0.1 ? '#d10000' : '#0066ff');
+      irisGradient.addColorStop(1, errorGlow > 0.1 ? '#220000' : '#001133');
       ctx.fillStyle = irisGradient;
       ctx.beginPath();
       ctx.arc(0, 0, irisRadius, 0, Math.PI * 2);
@@ -272,7 +287,7 @@ export class AvatarRenderer {
       ctx.arc(0, 0, irisRadius * 0.28, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.strokeStyle = 'rgba(122, 220, 255, 0.28)';
+      ctx.strokeStyle = errorGlow > 0.1 ? `rgba(255, 186, 186, ${0.26 + errorGlow * 0.4})` : 'rgba(122, 220, 255, 0.28)';
       ctx.lineWidth = Math.max(1, irisRadius * 0.08);
       for (let i = 0; i < 12; i += 1) {
         const angle = (Math.PI * 2 * i) / 12;
@@ -291,11 +306,21 @@ export class AvatarRenderer {
       ctx.restore();
 
       ctx.save();
-      const glowRadius = eyeWidth * lerp(0.95, 1.65, this.animState.eyeGlow);
+      const glowRadius = eyeWidth * lerp(0.95, 1.65, this.animState.eyeGlow + errorGlow * 0.2);
       const glowGradient = ctx.createRadialGradient(ex, eyeY, 0, ex, eyeY, glowRadius);
-      glowGradient.addColorStop(0, `rgba(0, 212, 255, ${0.16 + this.animState.eyeGlow * 0.22})`);
-      glowGradient.addColorStop(0.55, `rgba(0, 116, 255, ${0.08 + this.animState.eyeGlow * 0.12})`);
-      glowGradient.addColorStop(1, 'rgba(0, 20, 50, 0)');
+      glowGradient.addColorStop(
+        0,
+        errorGlow > 0.1
+          ? `rgba(255, 74, 74, ${0.24 + errorGlow * 0.36})`
+          : `rgba(0, 212, 255, ${0.16 + this.animState.eyeGlow * 0.22})`,
+      );
+      glowGradient.addColorStop(
+        0.55,
+        errorGlow > 0.1
+          ? `rgba(255, 0, 0, ${0.14 + errorGlow * 0.22})`
+          : `rgba(0, 116, 255, ${0.08 + this.animState.eyeGlow * 0.12})`,
+      );
+      glowGradient.addColorStop(1, errorGlow > 0.1 ? 'rgba(90, 0, 0, 0)' : 'rgba(0, 20, 50, 0)');
       ctx.globalCompositeOperation = 'screen';
       ctx.fillStyle = glowGradient;
       ctx.beginPath();

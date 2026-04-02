@@ -37,6 +37,36 @@ function extractDelta(data: string): string {
   }
 }
 
+function processSseEvents(
+  payload: string,
+  currentResponse: string,
+  onPartial: (text: string) => void,
+): string {
+  let nextResponse = currentResponse;
+
+  for (const event of payload.split('\n\n')) {
+    if (!event.trim()) {
+      continue;
+    }
+
+    for (const line of event.split('\n')) {
+      if (!line.startsWith('data: ')) {
+        continue;
+      }
+
+      const delta = extractDelta(line.slice(6).trim());
+      if (!delta) {
+        continue;
+      }
+
+      nextResponse += delta;
+      onPartial(nextResponse);
+    }
+  }
+
+  return nextResponse;
+}
+
 async function parseSseStream(
   stream: ReadableStream<Uint8Array>,
   onPartial: (text: string) => void,
@@ -56,23 +86,11 @@ async function parseSseStream(
     buffer += decoder.decode(value, { stream: true });
     const events = buffer.split('\n\n');
     buffer = events.pop() || '';
-
-    for (const event of events) {
-      for (const line of event.split('\n')) {
-        if (!line.startsWith('data: ')) {
-          continue;
-        }
-
-        const delta = extractDelta(line.slice(6).trim());
-        if (!delta) {
-          continue;
-        }
-
-        fullResponse += delta;
-        onPartial(fullResponse);
-      }
-    }
+    fullResponse = processSseEvents(events.join('\n\n'), fullResponse, onPartial);
   }
+
+  buffer += decoder.decode();
+  fullResponse = processSseEvents(buffer, fullResponse, onPartial);
 
   return fullResponse.trim();
 }
@@ -125,10 +143,6 @@ export function useConversation({ speak }: UseConversationOptions) {
       store.setResponse('');
       store.setState('thinking');
 
-      historyRef.current = [
-        ...historyRef.current,
-        { role: 'user', content: message } satisfies ConversationMessage,
-      ].slice(-20);
       let fullResponse = '';
 
       try {
@@ -156,6 +170,7 @@ export function useConversation({ speak }: UseConversationOptions) {
 
         historyRef.current = [
           ...historyRef.current,
+          { role: 'user', content: message } satisfies ConversationMessage,
           { role: 'assistant', content: fullResponse } satisfies ConversationMessage,
         ].slice(-20);
         useAmaraStore.getState().setResponse(fullResponse);

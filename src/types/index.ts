@@ -64,3 +64,15 @@ export interface AvatarAnimState {
   breathScale: number;
   thinkingPulse: number;
 }
+
+export interface Plugin {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  author: string;
+  version: string;
+  rating: number;
+  installs: number;
+  tags: string[];
+}

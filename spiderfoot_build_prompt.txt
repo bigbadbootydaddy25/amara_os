@@ -1,0 +1,354 @@
+Do exactly what is listed below. No installs, no git clone, no network access. Create files only. Use only Python standard library (os, json, subprocess, re, datetime, pathlib). Do not ask questions — just build it.
+
+PROJECT ROOT: /Users/user/Downloads/AI Agents/amara
+
+==================================================
+STEP 1 — CREATE DIRECTORIES (using os.makedirs in a bootstrap script, or just create the files and let directories be implied)
+==================================================
+
+Create these directories if they don't exist:
+- outputs/spiderfoot/raw/
+- outputs/spiderfoot/processed/
+
+==================================================
+STEP 2 — CREATE services/spiderfoot_detector.py
+==================================================
+
+"""
+Detects whether SpiderFoot is installed locally.
+Returns dict: {"installed": bool, "path": str or None}
+"""
+import os
+
+CANDIDATE_PATHS = [
+    "/Users/user/Downloads/AI Agents/amara/spiderfoot/sf.py",
+    "/Users/user/spiderfoot/sf.py",
+    "./spiderfoot/sf.py",
+]
+
+def detect_spiderfoot():
+    for path in CANDIDATE_PATHS:
+        if os.path.isfile(path):
+            return {"installed": True, "path": path}
+    return {"installed": False, "path": None}
+
+if __name__ == "__main__":
+    import json
+    result = detect_spiderfoot()
+    print(json.dumps(result, indent=2))
+
+==================================================
+STEP 3 — CREATE services/spiderfoot_runner.py
+==================================================
+
+"""
+Runs or prints instructions for SpiderFoot.
+Usage:
+  python3 services/spiderfoot_runner.py
+  python3 services/spiderfoot_runner.py verify
+"""
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from services.spiderfoot_detector import detect_spiderfoot
+
+def run():
+    result = detect_spiderfoot()
+    if result["installed"]:
+        path = result["path"]
+        print(f"[SPIDERFOOT] Detected at: {path}")
+        print(f"[SPIDERFOOT] Launch command:")
+        print(f'  python3 "{path}" -l 127.0.0.1:5001')
+        print("[SPIDERFOOT] Then open http://127.0.0.1:5001 in your browser to run scans.")
+        print("[SPIDERFOOT] Export scan results as JSON and drop into:")
+        print("  outputs/spiderfoot/raw/")
+    else:
+        print("SPIDERFOOT_NOT_INSTALLED")
+        print()
+        print("[SPIDERFOOT] Manual install instructions (run OUTSIDE this tool):")
+        print("  cd /Users/user")
+        print("  git clone https://github.com/smicallef/spiderfoot.git")
+        print("  cd spiderfoot")
+        print("  pip3 install -r requirements.txt")
+        print("  python3 sf.py -l 127.0.0.1:5001")
+        print()
+        print("[SPIDERFOOT] After install, drop JSON exports into:")
+        print("  /Users/user/Downloads/AI Agents/amara/outputs/spiderfoot/raw/")
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if args and args[0] == "verify":
+        import json
+        from services.spiderfoot_detector import detect_spiderfoot
+        print(json.dumps(detect_spiderfoot(), indent=2))
+    else:
+        run()
+
+==================================================
+STEP 4 — CREATE services/spiderfoot_importer.py
+==================================================
+
+"""
+Imports raw SpiderFoot JSON exports from outputs/spiderfoot/raw/
+and normalizes them into outputs/spiderfoot/processed/spiderfoot_entities.json
+"""
+import os
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+RAW_DIR = Path(__file__).parent.parent / "outputs" / "spiderfoot" / "raw"
+PROCESSED_DIR = Path(__file__).parent.parent / "outputs" / "spiderfoot" / "processed"
+OUTPUT_FILE = PROCESSED_DIR / "spiderfoot_entities.json"
+
+def import_raw_files():
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+
+    raw_files = list(RAW_DIR.glob("*.json"))
+    if not raw_files:
+        print(f"[IMPORTER] No raw JSON files found in {RAW_DIR}")
+        return []
+
+    normalized = []
+    seen = set()
+
+    for raw_file in raw_files:
+        try:
+            with open(raw_file) as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"[IMPORTER] Skipping {raw_file.name}: {e}")
+            continue
+
+        records = data if isinstance(data, list) else data.get("results", data.get("records", []))
+
+        for record in records:
+            entity = str(record.get("data", record.get("entity", ""))).strip()
+            entity_type = str(record.get("type", record.get("entityType", "UNKNOWN"))).strip()
+
+            if not entity or entity in seen:
+                continue
+            seen.add(entity)
+
+            confidence = "high" if record.get("confidence", 0) > 70 else "medium" if record.get("confidence", 0) > 40 else "low"
+
+            normalized.append({
+                "entity": entity,
+                "entityType": entity_type,
+                "source": "spiderfoot",
+                "rawSourceFile": raw_file.name,
+                "confidence": confidence,
+                "capturedAt": datetime.now(timezone.utc).isoformat(),
+                "provenanceVerified": True
+            })
+
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump(normalized, f, indent=2)
+
+    print(f"[IMPORTER] Wrote {len(normalized)} normalized entities to {OUTPUT_FILE}")
+    return normalized
+
+if __name__ == "__main__":
+    import_raw_files()
+
+==================================================
+STEP 5 — CREATE services/spiderfoot_parser.py
+==================================================
+
+"""
+Parses normalized SpiderFoot entities and extracts typed records:
+people, companies, emails, domains, phone numbers.
+"""
+import re
+import json
+from pathlib import Path
+
+PROCESSED_DIR = Path(__file__).parent.parent / "outputs" / "spiderfoot" / "processed"
+ENTITIES_FILE = PROCESSED_DIR / "spiderfoot_entities.json"
+
+EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
+DOMAIN_RE = re.compile(r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$")
+PHONE_RE = re.compile(r"(\+?1?\s?)?(\(?\d{3}\)?[\s.\-]?)(\d{3}[\s.\-]?\d{4})")
+
+PERSON_TYPE_HINTS = {"PERSON", "HUMAN_NAME", "CONTACT", "OWNER"}
+COMPANY_TYPE_HINTS = {"COMPANY", "ORGANIZATION", "ORG", "CORP", "LLC", "INC"}
+
+def classify_entity(entity: dict) -> str:
+    t = entity.get("entityType", "").upper()
+    val = entity.get("entity", "")
+    if any(h in t for h in PERSON_TYPE_HINTS):
+        return "person"
+    if any(h in t for h in COMPANY_TYPE_HINTS):
+        return "company"
+    if EMAIL_RE.fullmatch(val):
+        return "email"
+    if PHONE_RE.search(val):
+        return "phone"
+    if DOMAIN_RE.match(val):
+        return "domain"
+    return "unknown"
+
+def parse():
+    if not ENTITIES_FILE.exists():
+        print(f"[PARSER] No entities file found at {ENTITIES_FILE}. Run importer first.")
+        return []
+
+    with open(ENTITIES_FILE) as f:
+        entities = json.load(f)
+
+    parsed = []
+    seen = set()
+    for e in entities:
+        val = e.get("entity", "").strip()
+        if not val or val in seen:
+            continue
+        seen.add(val)
+        e["classifiedType"] = classify_entity(e)
+        if e["classifiedType"] != "unknown":
+            parsed.append(e)
+
+    output_path = PROCESSED_DIR / "spiderfoot_parsed.json"
+    with open(output_path, "w") as f:
+        json.dump(parsed, f, indent=2)
+
+    print(f"[PARSER] {len(parsed)} typed entities written to {output_path}")
+    return parsed
+
+if __name__ == "__main__":
+    parse()
+
+==================================================
+STEP 6 — CREATE services/spiderfoot_to_amara.py
+==================================================
+
+"""
+Converts parsed SpiderFoot entities into AMARA owner targets.
+Output: outputs/osint_owner_targets.json
+"""
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+
+PROCESSED_DIR = Path(__file__).parent.parent / "outputs" / "spiderfoot" / "processed"
+PARSED_FILE = PROCESSED_DIR / "spiderfoot_parsed.json"
+OUTPUT_FILE = Path(__file__).parent.parent / "outputs" / "osint_owner_targets.json"
+
+TYPE_MAP = {
+    "person": "person",
+    "company": "company",
+    "email": "email",
+    "domain": "domain",
+    "phone": "phone",
+}
+
+def convert():
+    if not PARSED_FILE.exists():
+        print(f"[BRIDGE] No parsed file at {PARSED_FILE}. Run parser first.")
+        return []
+
+    with open(PARSED_FILE) as f:
+        parsed = json.load(f)
+
+    targets = []
+    for e in parsed:
+        classified = e.get("classifiedType", "")
+        if classified not in TYPE_MAP:
+            continue
+        targets.append({
+            "entity": e.get("entity", ""),
+            "type": TYPE_MAP[classified],
+            "source": "spiderfoot",
+            "next_action": "lookup_property_ownership",
+            "provenanceVerified": True
+        })
+
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    # Merge with existing targets if file exists
+    existing = []
+    if OUTPUT_FILE.exists():
+        with open(OUTPUT_FILE) as f:
+            try:
+                existing = json.load(f)
+            except json.JSONDecodeError:
+                existing = []
+
+    existing_entities = {e.get("entity") for e in existing}
+    new_targets = [t for t in targets if t["entity"] not in existing_entities]
+    merged = existing + new_targets
+
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump(merged, f, indent=2)
+
+    print(f"[BRIDGE] {len(new_targets)} new targets merged → {OUTPUT_FILE} (total: {len(merged)})")
+    return merged
+
+if __name__ == "__main__":
+    convert()
+
+==================================================
+STEP 7 — CREATE config/spiderfoot_config.json
+==================================================
+
+{
+  "scan_host": "127.0.0.1",
+  "scan_port": 5001,
+  "raw_import_dir": "outputs/spiderfoot/raw",
+  "processed_dir": "outputs/spiderfoot/processed",
+  "launch_url": "http://127.0.0.1:5001",
+  "export_format": "json",
+  "dedup_enabled": true,
+  "provenance_verified": true
+}
+
+==================================================
+STEP 8 — CREATE outputs/spiderfoot/spiderfoot_audit.md
+==================================================
+
+Run the detector and importer, then write the audit file. Check:
+1. Whether /Users/user/Downloads/AI Agents/amara/spiderfoot/sf.py exists
+2. Whether /Users/user/spiderfoot/sf.py exists
+3. Whether ./spiderfoot/sf.py exists
+4. Whether any *.json files exist in outputs/spiderfoot/raw/
+5. Whether outputs/spiderfoot/processed/spiderfoot_entities.json exists
+6. Whether outputs/osint_owner_targets.json exists
+
+Write the results as a markdown file to outputs/spiderfoot/spiderfoot_audit.md with:
+- ## SpiderFoot Audit
+- Date: (current date)
+- SpiderFoot Installed: Yes/No
+- Detected Path: (path or "Not found")
+- Raw Export Files Found: Yes/No (count)
+- Processed Entities Written: Yes/No
+- AMARA Owner Targets Written: Yes/No
+- Manual Install Command: python3 sf.py -l 127.0.0.1:5001
+- Drop exports here: outputs/spiderfoot/raw/
+- Import command: python3 services/spiderfoot_importer.py
+- Parse command: python3 services/spiderfoot_parser.py
+- Bridge command: python3 services/spiderfoot_to_amara.py
+
+==================================================
+STEP 9 — FINAL PRINT
+==================================================
+
+After all files are created, print:
+
+FILES CREATED:
+- services/spiderfoot_detector.py
+- services/spiderfoot_runner.py
+- services/spiderfoot_importer.py
+- services/spiderfoot_parser.py
+- services/spiderfoot_to_amara.py
+- config/spiderfoot_config.json
+- outputs/spiderfoot/spiderfoot_audit.md
+
+SPIDERFOOT DETECTED: Yes/No
+DETECTED PATH: (path or Not found)
+LAUNCH COMMAND: python3 "<path>" -l 127.0.0.1:5001
+DROP EXPORTS HERE: outputs/spiderfoot/raw/
+IMPORT COMMAND: python3 services/spiderfoot_importer.py
+PARSE COMMAND: python3 services/spiderfoot_parser.py
+BRIDGE COMMAND: python3 services/spiderfoot_to_amara.py
+
+FINAL_STATUS PASS

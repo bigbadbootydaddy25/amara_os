@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# propstream scraper
+scripts/propstream/data/
+scripts/propstream/.env.propstream
+scripts/propstream/screenshots/
+!scripts/propstream/.env.propstream.example

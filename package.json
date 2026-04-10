@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "propstream": "tsx scripts/propstream/main.ts",
+    "propstream:inspect": "tsx scripts/propstream/main.ts --inspect-only",
+    "propstream:scrape": "tsx scripts/propstream/main.ts --scrape-only",
+    "propstream:process": "tsx scripts/propstream/main.ts --process-only",
+    "propstream:airtable": "tsx scripts/propstream/main.ts --airtable-only"
   },
   "dependencies": {
     "next": "16.2.2",
@@ -16,12 +21,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.39",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
+    "playwright": "^1.59.1",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

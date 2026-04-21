@@ -273,6 +273,13 @@ export function AmaraContainer() {
         </button>
       ) : null}
       <StatusIndicator />
+      <a
+        href="/dashboard"
+        className="fixed left-4 top-4 z-30 rounded border border-cyan-500/30 bg-black/50 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-cyan-400/80 backdrop-blur-md hover:text-cyan-300 hover:border-cyan-400/60 transition-colors"
+        style={{ pointerEvents: 'auto' }}
+      >
+        Dashboard
+      </a>
     </main>
   );
 }

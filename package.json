@@ -9,11 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@remotion/cli": "^4.0.450",
     "@remotion/player": "^4.0.450",
     "framer-motion": "^12.38.0",
     "next": "16.2.2",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "remotion": "^4.0.450",
     "zustand": "^5.0.12"
   },

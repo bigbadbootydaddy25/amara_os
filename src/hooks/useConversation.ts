@@ -127,7 +127,8 @@ export function useConversation({ speak }: UseConversationOptions) {
         return;
       }
 
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      const ollamaEnabled = process.env.NEXT_PUBLIC_OLLAMA_ENABLED === 'true';
+      if (typeof navigator !== 'undefined' && !navigator.onLine && !ollamaEnabled) {
         store.setError('Offline. Reconnect to the internet to talk with AMARA.');
         store.setState('idle');
         return;
@@ -141,6 +142,7 @@ export function useConversation({ speak }: UseConversationOptions) {
       store.setTranscript(message);
       store.setInterimTranscript('');
       store.setResponse('');
+      store.setActiveAgent('amara');
       store.setState('thinking');
 
       let fullResponse = '';
@@ -158,6 +160,15 @@ export function useConversation({ speak }: UseConversationOptions) {
 
         if (!response.ok || !response.body) {
           throw new Error(await readErrorMessage(response));
+        }
+
+        const agentHeader = response.headers.get('x-amara-agent');
+        if (agentHeader) {
+          const agentKey = agentHeader.toLowerCase() as import('@/types').AgentName;
+          const validAgents = ['nova', 'hunter', 'geo', 'amara'] as const;
+          if (validAgents.includes(agentKey as (typeof validAgents)[number])) {
+            useAmaraStore.getState().setActiveAgent(agentKey);
+          }
         }
 
         fullResponse = await parseSseStream(response.body, (partialText) => {

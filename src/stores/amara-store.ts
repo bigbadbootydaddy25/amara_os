@@ -12,6 +12,7 @@ export const useAmaraStore = create<AmaraStore>((set) => ({
   response: '',
   error: null,
   errorPulse: 0,
+  activeAgent: 'amara',
   setState: (state) => set({ state }),
   setAudioLevel: (audioLevel) => set({ audioLevel }),
   setMicActive: (isMicActive) => set({ isMicActive }),
@@ -22,4 +23,5 @@ export const useAmaraStore = create<AmaraStore>((set) => ({
   setResponse: (response) => set({ response }),
   setError: (error) => set({ error }),
   triggerErrorPulse: () => set({ errorPulse: Date.now() }),
+  setActiveAgent: (activeAgent) => set({ activeAgent }),
 }));

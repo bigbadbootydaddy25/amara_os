@@ -1,5 +1,6 @@
 export type AmaraState = 'idle' | 'listening' | 'thinking' | 'speaking';
 export type ConversationRole = 'system' | 'user' | 'assistant';
+export type AgentName = 'nova' | 'hunter' | 'geo' | 'amara';
 
 export interface ConversationMessage {
   role: ConversationRole;
@@ -31,6 +32,7 @@ export interface AmaraStore {
   response: string;
   error: string | null;
   errorPulse: number;
+  activeAgent: AgentName;
   setState: (state: AmaraState) => void;
   setAudioLevel: (level: number) => void;
   setMicActive: (active: boolean) => void;
@@ -41,6 +43,7 @@ export interface AmaraStore {
   setResponse: (text: string) => void;
   setError: (error: string | null) => void;
   triggerErrorPulse: () => void;
+  setActiveAgent: (agent: AgentName) => void;
 }
 
 export interface OrbParticle {

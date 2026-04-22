@@ -6,12 +6,12 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'AMARA',
-  description: 'AI Assistant',
+  description: 'Advanced Machine-learning Autonomous Response Architecture — AI Assistant',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en-GB" className="dark">
       <body className={`${inter.className} bg-black text-white overflow-hidden`}>
         {children}
       </body>

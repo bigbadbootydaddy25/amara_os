@@ -4,10 +4,10 @@ import { useAmaraStore } from '@/stores/amara-store';
 import type { AmaraState } from '@/types';
 
 const STATE_STYLES: Record<AmaraState, { label: string; tone: string }> = {
-  idle: { label: 'IDLE', tone: 'text-gray-500' },
-  listening: { label: 'LISTENING...', tone: 'text-cyan-400' },
-  thinking: { label: 'THINKING...', tone: 'text-blue-400' },
-  speaking: { label: 'SPEAKING', tone: 'text-cyan-300' },
+  idle: { label: 'STANDBY', tone: 'text-gray-500' },
+  listening: { label: 'RECEIVING...', tone: 'text-cyan-400' },
+  thinking: { label: 'PROCESSING...', tone: 'text-violet-400' },
+  speaking: { label: 'TRANSMITTING', tone: 'text-cyan-300' },
 };
 
 export function StatusIndicator() {

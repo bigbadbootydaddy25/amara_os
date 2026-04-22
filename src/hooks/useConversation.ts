@@ -128,7 +128,7 @@ export function useConversation({ speak }: UseConversationOptions) {
       }
 
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        store.setError('Offline. Reconnect to the internet to talk with AMARA.');
+        store.setError('AMARA is offline. Please reconnect to the internet to continue.');
         store.setState('idle');
         return;
       }
@@ -183,13 +183,13 @@ export function useConversation({ speak }: UseConversationOptions) {
 
         if (fullResponse) {
           console.error('TTS error:', error);
-          store.setError('Speech output unavailable. Listening for your next question.');
+          store.setError('Voice output is unavailable. Ready to receive your next query.');
           store.setState('idle');
           return;
         }
 
         console.error('Conversation error:', error);
-        store.setError('Failed to get a response from AMARA.');
+        store.setError('Unable to retrieve a response. Please try again.');
         store.triggerErrorPulse();
         store.setState('idle');
       } finally {

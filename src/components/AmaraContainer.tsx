@@ -8,6 +8,7 @@ import { useVoiceOutput } from '@/hooks/useVoiceOutput';
 import { useAmaraStore } from '@/stores/amara-store';
 import type { AmaraState } from '@/types';
 import { StatusIndicator } from '@/components/StatusIndicator';
+import { HudOverlay } from '@/components/HudOverlay';
 
 const DEMO_SEQUENCE: Array<{ state: AmaraState; duration: number }> = [
   { state: 'idle', duration: 4000 },
@@ -204,7 +205,7 @@ export function AmaraContainer() {
       setIsActivated(true);
       setIsActivating(false);
       store.setVoiceSupported(false);
-      store.setError('Voice not supported in this browser. Use Chrome.');
+      store.setError('Voice recognition is unavailable in this browser. Chrome is recommended.');
       return;
     }
 
@@ -224,12 +225,12 @@ export function AmaraContainer() {
         store.setState('idle');
         await startListening();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Activation failed';
+        const message = error instanceof Error ? error.message : 'Initialisation failed';
         store.setState('idle');
         store.setError(
           /permission|denied|notallowed/i.test(message)
-            ? 'Microphone access needed. Allow microphone permission to activate AMARA.'
-            : 'Unable to activate AMARA right now.',
+            ? 'Microphone access is required. Please grant permission and try again.'
+            : 'AMARA initialisation failed. Please try again.',
         );
       } finally {
         setIsActivating(false);
@@ -268,10 +269,11 @@ export function AmaraContainer() {
           className="absolute inset-0 z-40 flex items-center justify-center bg-black/25 text-center transition-opacity duration-500"
         >
           <span className="rounded-full border border-cyan-400/25 bg-black/45 px-6 py-3 text-xs font-mono uppercase tracking-[0.42em] text-cyan-100/85 backdrop-blur-md">
-            {isActivating ? 'Activating AMARA…' : 'Click anywhere to activate AMARA'}
+            {isActivating ? 'Initialising AMARA…' : 'Click anywhere to initialise AMARA'}
           </span>
         </button>
       ) : null}
+      <HudOverlay />
       <StatusIndicator />
     </main>
   );

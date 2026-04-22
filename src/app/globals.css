@@ -3,6 +3,8 @@
 :root {
   --amara-cyan: #00d4ff;
   --amara-blue: #0066ff;
+  --amara-violet: #7c3aed;
+  --amara-purple: #a855f7;
   --amara-dark: #0a0a0f;
 }
 
@@ -31,4 +33,9 @@ body.show-cursor {
 
 canvas {
   display: block;
+}
+
+@keyframes amara-scan {
+  0% { transform: translateY(-2px); }
+  100% { transform: translateY(100vh); }
 }

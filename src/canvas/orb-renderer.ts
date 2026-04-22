@@ -123,6 +123,12 @@ export class OrbRenderer {
   private seedOrb(index: number, phaseSeed: number): OrbParticle {
     const phase = phaseSeed;
     const baseRadius = 4 + Math.random() * 22;
+
+    // Mix of cyan (185–215), blue-violet (225–255), and violet/purple (265–300)
+    const hueRanges: [number, number][] = [[185, 215], [225, 255], [265, 300]];
+    const range = hueRanges[Math.floor(Math.random() * hueRanges.length)];
+    const hue = range[0] + Math.random() * (range[1] - range[0]);
+
     return {
       x: this.width / 2,
       y: this.height / 2,
@@ -132,7 +138,7 @@ export class OrbRenderer {
       speed: 0.12 + Math.random() * 0.5,
       orbitRadius: Math.min(this.width, this.height) * (0.12 + Math.random() * 0.34),
       opacity: 0.18 + Math.random() * 0.16,
-      hue: 190 + Math.random() * 40,
+      hue,
       phase,
     };
   }

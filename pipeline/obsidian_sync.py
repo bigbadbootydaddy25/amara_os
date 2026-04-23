@@ -29,7 +29,7 @@ from typing import Any
 
 import pandas as pd
 
-VAULT_DIR   = Path(__file__).parent.parent / "vault"
+VAULT_DIR   = Path(__file__).parent.parent / "Virtual Markets"
 CLEAN_DIR   = Path(__file__).parent / "data" / "clean"
 REPORTS_DIR = Path(__file__).parent / "reports"
 

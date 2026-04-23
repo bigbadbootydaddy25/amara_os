@@ -1,0 +1,9 @@
+{
+  "promptDelete": false,
+  "trashOption": "local",
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Properties",
+  "attachmentFolderPath": ".",
+  "showUnsupportedFiles": false
+}

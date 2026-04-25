@@ -32,6 +32,7 @@ export class AnimationLoop {
     this.avatarRenderer = new AvatarRenderer(avatarCtx, width, height);
     this.orbRenderer = new OrbRenderer(orbCtx, width, height);
     this.resize();
+    this.avatarRenderer.loadImage('/amara-face.png');
   }
 
   start(): void {

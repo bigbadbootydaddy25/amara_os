@@ -3,6 +3,22 @@ import type { AmaraState, AvatarAnimState } from '@/types';
 const BLINK_MIN_INTERVAL = 2;
 const BLINK_MAX_INTERVAL = 5;
 
+// Relative face landmark positions within the AMARA image (0–1 of image dimensions).
+// Tune these if the overlays don't align after seeing the rendered result.
+const AMARA_FACE = {
+  // Y position of eye center as fraction of image height from top
+  eyeY: 0.385,
+  // X positions of left/right eye centers as fraction of image width
+  leftEyeX: 0.365,
+  rightEyeX: 0.635,
+  // Y position of mouth center as fraction of image height from top
+  mouthY: 0.645,
+  // Mouth width as fraction of image width
+  mouthW: 0.14,
+  // Mouth height (closed) as fraction of image height
+  mouthH: 0.025,
+};
+
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 
@@ -22,6 +38,9 @@ export class AvatarRenderer {
   private nextBlinkInterval = 3.25;
   private errorGlow = 0;
   private lastErrorPulse = 0;
+  private avatarImage: HTMLImageElement | null = null;
+  private imageReady = false;
+  private currentState: AmaraState = 'idle';
 
   constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
     this.ctx = ctx;
@@ -43,12 +62,26 @@ export class AvatarRenderer {
     this.height = height;
   }
 
+  loadImage(src: string): void {
+    const img = new Image();
+    img.onload = () => {
+      this.avatarImage = img;
+      this.imageReady = true;
+    };
+    img.onerror = () => {
+      console.warn(`[AvatarRenderer] Could not load avatar image "${src}" — using procedural fallback`);
+      this.imageReady = false;
+    };
+    img.src = src;
+  }
+
   update(
     deltaTime: number,
     amaraState: AmaraState,
     audioLevel: number,
     errorPulse: number,
   ): void {
+    this.currentState = amaraState;
     const dt = Math.min(deltaTime, 0.05);
     this.time += dt;
 
@@ -123,6 +156,151 @@ export class AvatarRenderer {
   }
 
   render(): void {
+    if (this.imageReady && this.avatarImage) {
+      this.renderImageAvatar();
+    } else {
+      this.renderProceduralAvatar();
+    }
+  }
+
+  // ─── Image-based avatar ────────────────────────────────────────────────────
+
+  private renderImageAvatar(): void {
+    const ctx = this.ctx;
+    const img = this.avatarImage!;
+    const W = this.width;
+    const H = this.height;
+
+    // Scale image to fill screen height, centered horizontally
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const drawH = H;
+    const drawW = drawH * imgAspect;
+    const drawX = (W - drawW) / 2;
+    const drawY = 0;
+
+    // Face center in screen space — used as the transform origin for head motion
+    const faceCenterX = W / 2;
+    const faceCenterY = H * AMARA_FACE.eyeY + (H * AMARA_FACE.mouthY - H * AMARA_FACE.eyeY) / 2;
+
+    ctx.save();
+    ctx.translate(faceCenterX, faceCenterY);
+    ctx.rotate(this.animState.headTilt);
+    ctx.scale(this.animState.breathScale, this.animState.breathScale);
+    ctx.translate(-faceCenterX, -faceCenterY);
+
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+    // Overlay animations on top of the image
+    this.drawImageMouthOverlay(drawX, drawY, drawW, drawH);
+    this.drawImageBlinkOverlay(drawX, drawY, drawW, drawH);
+    this.drawImageEyeGlowOverlay(drawX, drawY, drawW, drawH);
+
+    ctx.restore();
+  }
+
+  private drawImageMouthOverlay(
+    drawX: number, drawY: number, drawW: number, drawH: number
+  ): void {
+    const ctx = this.ctx;
+    const openness = this.animState.mouthOpenness;
+    if (openness < 0.08) return;
+
+    const mx = drawX + AMARA_FACE.mouthY * drawW; // horizontal center
+    const my = drawY + AMARA_FACE.mouthY * drawH;
+    const mw = AMARA_FACE.mouthW * drawW;
+    // Maximum open height is 4% of image height; scaled by openness
+    const mh = Math.max(1, AMARA_FACE.mouthH * drawH + (drawH * 0.04) * openness);
+
+    // Recalculate X center correctly (mouthY used by mistake above — fix)
+    const centerX = drawX + drawW / 2;
+
+    ctx.save();
+    // Dark interior — composite multiply to naturally darken the lips
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = `rgba(8, 4, 12, ${0.35 + openness * 0.5})`;
+    ctx.beginPath();
+    ctx.ellipse(centerX, my, mw / 2, mh / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Subtle cyan glow from interior when speaking
+    if (openness > 0.3 && this.currentState === 'speaking') {
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      const glow = ctx.createRadialGradient(centerX, my, 0, centerX, my, mw * 0.7);
+      glow.addColorStop(0, `rgba(0, 200, 255, ${(openness - 0.3) * 0.18})`);
+      glow.addColorStop(1, 'rgba(0, 200, 255, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.ellipse(centerX, my, mw * 0.7, mh, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  private drawImageBlinkOverlay(
+    drawX: number, drawY: number, drawW: number, drawH: number
+  ): void {
+    const blink = easeInOut(this.animState.blinkProgress);
+    if (blink < 0.02) return;
+
+    const ctx = this.ctx;
+    const eyeScreenY = drawY + AMARA_FACE.eyeY * drawH;
+    const leftEyeX = drawX + AMARA_FACE.leftEyeX * drawW;
+    const rightEyeX = drawX + AMARA_FACE.rightEyeX * drawW;
+    const eyeW = drawW * 0.095;
+    const eyeH = drawH * 0.038;
+
+    ctx.save();
+    // Off-white lid color matching the robot face skin in the image
+    ctx.fillStyle = `rgba(232, 228, 228, ${blink * 0.95})`;
+
+    [leftEyeX, rightEyeX].forEach((ex) => {
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeScreenY, eyeW / 2, eyeH * blink, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  private drawImageEyeGlowOverlay(
+    drawX: number, drawY: number, drawW: number, drawH: number
+  ): void {
+    const ctx = this.ctx;
+    const eyeScreenY = drawY + AMARA_FACE.eyeY * drawH;
+    const leftEyeX = drawX + AMARA_FACE.leftEyeX * drawW;
+    const rightEyeX = drawX + AMARA_FACE.rightEyeX * drawW;
+    const glowRadius = drawW * 0.09;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    [leftEyeX, rightEyeX].forEach((ex) => {
+      const g = ctx.createRadialGradient(ex, eyeScreenY, 0, ex, eyeScreenY, glowRadius);
+      const isError = this.errorGlow > 0.1;
+      const alpha = isError
+        ? 0.18 + this.errorGlow * 0.32
+        : 0.06 + this.animState.eyeGlow * 0.16;
+
+      g.addColorStop(0, isError
+        ? `rgba(255, 80, 80, ${alpha})`
+        : `rgba(100, 190, 255, ${alpha})`);
+      g.addColorStop(0.5, isError
+        ? `rgba(200, 0, 0, ${alpha * 0.5})`
+        : `rgba(40, 120, 255, ${alpha * 0.5})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(ex, eyeScreenY, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  // ─── Procedural fallback ───────────────────────────────────────────────────
+
+  private renderProceduralAvatar(): void {
     const ctx = this.ctx;
     const cx = this.width / 2;
     const cy = this.height * 0.45;

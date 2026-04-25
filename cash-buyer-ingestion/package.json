@@ -1,0 +1,21 @@
+{
+  "name": "amara-cash-buyer-ingestion",
+  "version": "1.0.0",
+  "description": "AMARA cash buyer ingestion layer — public county deed record scraper for 6 target markets",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "scrape": "node main.js",
+    "install-browsers": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0",
+    "axios": "^1.7.0",
+    "pg": "^8.11.5",
+    "robots-parser": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

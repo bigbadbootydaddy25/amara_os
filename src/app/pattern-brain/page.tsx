@@ -2,32 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 
-interface NeuralNode {
-  x: number;
-  y: number;
-  connections: number[];
-  phase: number;
-  speed: number;
-}
-
-interface StreamDef {
-  sx: number;
-  sy: number;
-  ex: number;
-  ey: number;
-  r: number;
-  g: number;
-  b: number;
-}
-
-interface StreamParticle {
-  streamIdx: number;
-  progress: number;
-  speed: number;
-  size: number;
-  trail: { x: number; y: number }[];
-}
-
 export default function PatternBrainPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -40,325 +14,341 @@ export default function PatternBrainPage() {
     let raf: number;
     let t = 0;
     let lastTs = 0;
-    let energyLevel = 0;
+    let energyPulse = 0; // 0-1, spikes when streams arrive
 
-    const nodes: NeuralNode[] = [];
-    let streams: StreamParticle[] = [];
-
-    const bc = () => ({ x: canvas.width / 2, y: canvas.height * 0.47 });
-    const bs = () => Math.min(canvas.width, canvas.height) * 0.29;
-
-    const inBrain = (px: number, py: number): boolean => {
-      const c = bc();
-      const s = bs();
-      const dx = (px - c.x) / (s * 0.88);
-      const dy = (py - c.y) / (s * 0.72);
-      return dx * dx + dy * dy < 1.0;
-    };
-
-    const initNodes = () => {
-      nodes.length = 0;
-      const c = bc();
-      const s = bs();
-      let attempts = 0;
-      while (nodes.length < 65 && attempts < 5000) {
-        attempts++;
-        const px = c.x + (Math.random() * 2 - 1) * s * 0.86;
-        const py = c.y + (Math.random() * 2 - 1) * s * 0.70;
-        if (inBrain(px, py)) {
-          nodes.push({
-            x: px,
-            y: py,
-            connections: [],
-            phase: Math.random(),
-            speed: 0.5 + Math.random() * 1.0,
-          });
-        }
-      }
-      const maxDist = s * 0.36;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          if (nodes[i].connections.length >= 5) break;
-          if (nodes[j].connections.length >= 5) continue;
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          if (Math.sqrt(dx * dx + dy * dy) < maxDist) {
-            nodes[i].connections.push(j);
-          }
-        }
-      }
-    };
-
-    const STREAM_COLORS = [
-      { r: 0, g: 245, b: 255 },
-      { r: 168, g: 85, b: 247 },
-      { r: 34, g: 211, b: 238 },
-      { r: 74, g: 222, b: 128 },
-      { r: 245, g: 158, b: 11 },
-      { r: 236, g: 72, b: 153 },
-      { r: 6, g: 182, b: 212 },
-      { r: 124, g: 58, b: 237 },
-    ];
-
-    const getStreamDefs = (): StreamDef[] => {
-      const c = bc();
-      const w = canvas.width;
-      const h = canvas.height;
-      return [
-        { sx: 0, sy: h * 0.25, ex: c.x, ey: c.y, ...STREAM_COLORS[0] },
-        { sx: 0, sy: h * 0.65, ex: c.x, ey: c.y, ...STREAM_COLORS[1] },
-        { sx: w, sy: h * 0.30, ex: c.x, ey: c.y, ...STREAM_COLORS[2] },
-        { sx: w, sy: h * 0.70, ex: c.x, ey: c.y, ...STREAM_COLORS[3] },
-        { sx: w * 0.25, sy: 0, ex: c.x, ey: c.y, ...STREAM_COLORS[4] },
-        { sx: w * 0.75, sy: 0, ex: c.x, ey: c.y, ...STREAM_COLORS[5] },
-        { sx: w * 0.25, sy: h, ex: c.x, ey: c.y, ...STREAM_COLORS[6] },
-        { sx: w * 0.75, sy: h, ex: c.x, ey: c.y, ...STREAM_COLORS[7] },
-      ];
-    };
-
-    const initStreams = () => {
-      streams = [];
-      for (let si = 0; si < 8; si++) {
-        for (let j = 0; j < 3; j++) {
-          streams.push({
-            streamIdx: si,
-            progress: j / 3 + Math.random() * 0.1,
-            speed: 0.0022 + Math.random() * 0.0018,
-            size: 1.8 + Math.random() * 1.8,
-            trail: [],
-          });
-        }
-      }
-    };
+    // ─── Canvas sizing with DPR ─────────────────────────────────────
+    let W = 0;
+    let H = 0;
+    let dpr = 1;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initNodes();
-      initStreams();
+      dpr = window.devicePixelRatio || 1;
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      canvas.style.width = `${W}px`;
+      canvas.style.height = `${H}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      rebuildNodes();
+      rebuildStreams();
     };
 
+    // ─── Brain geometry (CSS-pixel space) ───────────────────────────
+    const cx = () => W / 2;
+    const cy = () => H * 0.46;
+    const sc = () => Math.min(W, H) * 0.30;
+
+    // ─── Neural nodes ───────────────────────────────────────────────
+    interface Node { x: number; y: number; links: number[]; phase: number; spd: number }
+    let nodes: Node[] = [];
+
+    // Ellipse inclusion test for brain interior
+    const inBrain = (px: number, py: number) => {
+      const dx = (px - cx()) / (sc() * 0.87);
+      const dy = (py - cy()) / (sc() * 0.70);
+      return dx * dx + dy * dy < 1;
+    };
+
+    const rebuildNodes = () => {
+      nodes = [];
+      let tries = 0;
+      while (nodes.length < 70 && tries < 8000) {
+        tries++;
+        const px = cx() + (Math.random() * 2 - 1) * sc() * 0.85;
+        const py = cy() + (Math.random() * 2 - 1) * sc() * 0.68;
+        if (inBrain(px, py)) {
+          nodes.push({ x: px, y: py, links: [], phase: Math.random(), spd: 0.4 + Math.random() });
+        }
+      }
+      const maxD = sc() * 0.34;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          if (nodes[i].links.length >= 5) break;
+          if (nodes[j].links.length >= 5) continue;
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          if (Math.sqrt(dx * dx + dy * dy) < maxD) nodes[i].links.push(j);
+        }
+      }
+    };
+
+    // ─── Energy streams ─────────────────────────────────────────────
+    const COLORS = [
+      [0, 245, 255],   // cyan
+      [168, 85, 247],  // violet
+      [34, 211, 238],  // sky
+      [74, 222, 128],  // green
+      [245, 158, 11],  // amber
+      [236, 72, 153],  // pink
+      [6, 182, 212],   // teal
+      [139, 92, 246],  // purple
+    ] as const;
+
+    interface Stream { sx: number; sy: number; r: number; g: number; b: number; progress: number; speed: number; size: number; trail: {x:number;y:number}[] }
+    let streams: Stream[] = [];
+
+    const rebuildStreams = () => {
+      streams = [];
+      const origins = [
+        [0,      H * 0.22],
+        [0,      H * 0.62],
+        [W,      H * 0.28],
+        [W,      H * 0.68],
+        [W*0.25, 0],
+        [W*0.75, 0],
+        [W*0.22, H],
+        [W*0.78, H],
+      ];
+      origins.forEach(([sx, sy], i) => {
+        const [r, g, b] = COLORS[i % COLORS.length];
+        for (let j = 0; j < 3; j++) {
+          streams.push({ sx, sy, r, g, b, progress: j / 3 + Math.random() * 0.1, speed: 0.0020 + Math.random() * 0.0018, size: 2 + Math.random() * 2, trail: [] });
+        }
+      });
+    };
+
+    // ─── Draw background glow behind brain ─────────────────────────
+    const drawBrainGlow = () => {
+      const g = ctx.createRadialGradient(cx(), cy(), 0, cx(), cy(), sc() * 1.1);
+      g.addColorStop(0, `rgba(0,60,120,${0.22 + energyPulse * 0.18})`);
+      g.addColorStop(0.6, `rgba(0,20,60,${0.10 + energyPulse * 0.08})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(cx(), cy(), sc() * 1.1, sc() * 0.95, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    // ─── Draw brain ─────────────────────────────────────────────────
     const drawBrain = () => {
-      const c = bc();
-      const growth = 1 + energyLevel * 0.028;
-      const s = bs() * growth;
-      const pulse = 1 + Math.sin(t * 0.75) * 0.01;
-      const sp = s * pulse;
+      const bx = cx();
+      const by = cy();
+      const grow = 1 + energyPulse * 0.025;
+      const s = sc() * grow * (1 + Math.sin(t * 0.7) * 0.008);
 
-      ctx.save();
-
+      // Each hemisphere: flip=+1 right, flip=-1 left
       const drawHemi = (flip: number) => {
-        const ox = c.x + flip * sp * 0.03;
-        const oy = c.y;
+        const ox = bx + flip * s * 0.025;
 
-        const drawGyrus = (p: number[][], alpha: number) => {
-          ctx.beginPath();
-          ctx.moveTo(ox + flip * p[0][0] * sp, oy + p[0][1] * sp);
-          ctx.bezierCurveTo(
-            ox + flip * p[1][0] * sp, oy + p[1][1] * sp,
-            ox + flip * p[2][0] * sp, oy + p[2][1] * sp,
-            ox + flip * p[3][0] * sp, oy + p[3][1] * sp,
-          );
-          ctx.strokeStyle = `rgba(0,195,255,${alpha})`;
-          ctx.lineWidth = 0.75;
-          ctx.stroke();
-        };
-
-        // Main hemisphere outline
+        // ── Hemisphere silhouette ────────────────────────────────
         ctx.beginPath();
-        ctx.moveTo(ox, oy + sp * 0.40);
+        ctx.moveTo(ox, by + s * 0.38);
+
+        // temporal lobe → bottom
         ctx.bezierCurveTo(
-          ox + flip * sp * 0.04, oy + sp * 0.68,
-          ox + flip * sp * 0.50, oy + sp * 0.72,
-          ox + flip * sp * 0.70, oy + sp * 0.50,
+          ox + flip * s * 0.03, by + s * 0.68,
+          ox + flip * s * 0.48, by + s * 0.73,
+          ox + flip * s * 0.70, by + s * 0.52,
         );
+        // lower lateral
         ctx.bezierCurveTo(
-          ox + flip * sp * 0.86, oy + sp * 0.30,
-          ox + flip * sp * 0.92, oy + sp * 0.02,
-          ox + flip * sp * 0.84, oy - sp * 0.30,
+          ox + flip * s * 0.86, by + s * 0.32,
+          ox + flip * s * 0.93, by + s * 0.04,
+          ox + flip * s * 0.86, by - s * 0.28,
         );
+        // upper parietal bump
         ctx.bezierCurveTo(
-          ox + flip * sp * 0.74, oy - sp * 0.58,
-          ox + flip * sp * 0.48, oy - sp * 0.82,
-          ox + flip * sp * 0.20, oy - sp * 0.84,
+          ox + flip * s * 0.76, by - s * 0.58,
+          ox + flip * s * 0.50, by - s * 0.83,
+          ox + flip * s * 0.22, by - s * 0.85,
         );
+        // frontal lobe
         ctx.bezierCurveTo(
-          ox + flip * sp * 0.05, oy - sp * 0.84,
-          ox - flip * sp * 0.01, oy - sp * 0.70,
-          ox, oy - sp * 0.44,
+          ox + flip * s * 0.06, by - s * 0.85,
+          ox - flip * s * 0.01, by - s * 0.70,
+          ox, by - s * 0.44,
         );
+        // corpus callosum side
         ctx.bezierCurveTo(
-          ox - flip * sp * 0.01, oy - sp * 0.10,
-          ox - flip * sp * 0.01, oy + sp * 0.20,
-          ox, oy + sp * 0.40,
+          ox - flip * s * 0.01, by - s * 0.10,
+          ox - flip * s * 0.01, by + s * 0.18,
+          ox, by + s * 0.38,
         );
         ctx.closePath();
 
-        // Glass fill
-        const grd = ctx.createRadialGradient(
-          ox + flip * sp * 0.28, oy - sp * 0.28, 0,
-          ox + flip * sp * 0.28, oy, sp,
+        // Fill — dark glass
+        const fillG = ctx.createRadialGradient(
+          ox + flip * s * 0.30, by - s * 0.25, 0,
+          ox + flip * s * 0.30, by, s * 1.1,
         );
-        grd.addColorStop(0, `rgba(0,230,255,${0.11 + energyLevel * 0.07})`);
-        grd.addColorStop(0.5, `rgba(0,100,200,${0.05 + energyLevel * 0.03})`);
-        grd.addColorStop(1, 'rgba(0,10,60,0.02)');
-        ctx.fillStyle = grd;
+        fillG.addColorStop(0, `rgba(0,180,255,${0.18 + energyPulse * 0.10})`);
+        fillG.addColorStop(0.45, `rgba(0,80,180,${0.10 + energyPulse * 0.05})`);
+        fillG.addColorStop(1, 'rgba(0,0,40,0.04)');
+        ctx.fillStyle = fillG;
         ctx.fill();
 
-        // Glowing outer stroke
-        ctx.shadowBlur = 18 + energyLevel * 22;
-        ctx.shadowColor = `rgba(0,200,255,${0.5 + energyLevel * 0.3})`;
-        ctx.strokeStyle = `rgba(0,210,255,${0.44 + Math.sin(t * 0.9 + flip * 0.3) * 0.07 + energyLevel * 0.15})`;
-        ctx.lineWidth = 1.5;
+        // Outer glow stroke — BRIGHT, clearly visible
+        ctx.shadowBlur = 28 + energyPulse * 30;
+        ctx.shadowColor = `rgba(0,210,255,${0.8 + energyPulse * 0.2})`;
+        ctx.strokeStyle = `rgba(0,220,255,${0.82 + energyPulse * 0.18})`;
+        ctx.lineWidth = 2.5;
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // Gyri (cortical folds)
-        const gyA = 0.15 + Math.sin(t * 0.55) * 0.04;
-        drawGyrus([[0.10, -0.60], [0.13, -0.35], [0.15, -0.10], [0.15, 0.06]], gyA);
-        drawGyrus([[0.28, -0.72], [0.35, -0.44], [0.40, -0.14], [0.38, 0.12]], gyA * 0.85);
-        drawGyrus([[0.48, -0.74], [0.56, -0.44], [0.62, -0.12], [0.60, 0.20]], gyA);
-        drawGyrus([[0.68, -0.50], [0.74, -0.24], [0.74, 0.04], [0.68, 0.28]], gyA * 0.8);
-        drawGyrus([[0.20, 0.28], [0.40, 0.34], [0.56, 0.36], [0.64, 0.32]], gyA * 0.75);
+        // Second inner stroke for depth
+        ctx.strokeStyle = `rgba(0,180,255,0.30)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-        // Glass highlight (top-left shimmer)
-        const hx = ox + flip * sp * 0.18;
-        const hy = oy - sp * 0.58;
-        const hgrd = ctx.createRadialGradient(hx, hy, 0, hx, hy, sp * 0.30);
-        hgrd.addColorStop(0, 'rgba(200,245,255,0.08)');
-        hgrd.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = hgrd;
+        // ── Gyri (cortical folds) ────────────────────────────────
+        const gyA = 0.45 + Math.sin(t * 0.5) * 0.08;
+
+        const gyrus = (pts: [number, number][]) => {
+          ctx.beginPath();
+          ctx.moveTo(ox + flip * pts[0][0] * s, by + pts[0][1] * s);
+          ctx.bezierCurveTo(
+            ox + flip * pts[1][0] * s, by + pts[1][1] * s,
+            ox + flip * pts[2][0] * s, by + pts[2][1] * s,
+            ox + flip * pts[3][0] * s, by + pts[3][1] * s,
+          );
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = 'rgba(0,200,255,0.4)';
+          ctx.strokeStyle = `rgba(0,200,255,${gyA})`;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        };
+
+        gyrus([[0.10, -0.58], [0.13, -0.33], [0.14, -0.08], [0.14, 0.08]]);
+        gyrus([[0.28, -0.71], [0.35, -0.43], [0.40, -0.14], [0.38, 0.14]]);
+        gyrus([[0.48, -0.74], [0.57, -0.45], [0.62, -0.13], [0.60, 0.22]]);
+        gyrus([[0.66, -0.52], [0.72, -0.26], [0.74, 0.02], [0.70, 0.28]]);
+        gyrus([[0.20, 0.28], [0.40, 0.35], [0.56, 0.38], [0.65, 0.34]]);
+
+        // ── Specular highlight (top-left glass shine) ─────────────
+        const hx = ox + flip * s * 0.18;
+        const hy = by - s * 0.58;
+        const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, s * 0.28);
+        hg.addColorStop(0, 'rgba(180,240,255,0.12)');
+        hg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = hg;
         ctx.beginPath();
-        ctx.ellipse(hx, hy, sp * 0.20, sp * 0.12, flip * -0.3, 0, Math.PI * 2);
+        ctx.ellipse(hx, hy, s * 0.18, s * 0.10, flip * -0.28, 0, Math.PI * 2);
         ctx.fill();
       };
 
+      ctx.save();
       drawHemi(1);
       drawHemi(-1);
 
       // Interhemispheric fissure
       ctx.beginPath();
-      ctx.moveTo(c.x, c.y - sp * 0.44);
-      ctx.lineTo(c.x, c.y + sp * 0.40);
-      ctx.strokeStyle = 'rgba(0,180,255,0.22)';
-      ctx.lineWidth = 1;
+      ctx.moveTo(bx, by - s * 0.44);
+      ctx.lineTo(bx, by + s * 0.38);
+      ctx.strokeStyle = 'rgba(0,200,255,0.35)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
       // Brainstem
       ctx.beginPath();
-      ctx.moveTo(c.x - sp * 0.10, c.y + sp * 0.54);
-      ctx.bezierCurveTo(
-        c.x - sp * 0.07, c.y + sp * 0.72,
-        c.x + sp * 0.07, c.y + sp * 0.72,
-        c.x + sp * 0.10, c.y + sp * 0.54,
-      );
-      ctx.strokeStyle = 'rgba(0,180,255,0.28)';
-      ctx.lineWidth = 1;
+      ctx.moveTo(bx - s * 0.11, by + s * 0.52);
+      ctx.bezierCurveTo(bx - s * 0.07, by + s * 0.74, bx + s * 0.07, by + s * 0.74, bx + s * 0.11, by + s * 0.52);
+      ctx.strokeStyle = 'rgba(0,190,255,0.40)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
       ctx.restore();
     };
 
+    // ─── Draw neural network ─────────────────────────────────────────
     const drawNeural = (dt: number) => {
       ctx.save();
 
-      nodes.forEach((n) => {
-        n.phase = (n.phase + dt * n.speed) % 1;
-      });
+      nodes.forEach(n => { n.phase = (n.phase + dt * n.spd) % 1; });
 
-      nodes.forEach((n) => {
-        n.connections.forEach((j) => {
+      // Connections + traveling signal
+      nodes.forEach(n => {
+        n.links.forEach(j => {
           const m = nodes[j];
           if (!m) return;
-          const alpha = 0.04 + Math.max(Math.sin(n.phase * Math.PI * 2), 0) * 0.10;
-
+          const pulse = Math.max(Math.sin(n.phase * Math.PI * 2), 0);
           ctx.beginPath();
           ctx.moveTo(n.x, n.y);
           ctx.lineTo(m.x, m.y);
-          ctx.strokeStyle = `rgba(0,200,255,${alpha})`;
-          ctx.lineWidth = 0.45;
+          ctx.strokeStyle = `rgba(0,200,255,${0.06 + pulse * 0.12})`;
+          ctx.lineWidth = 0.6;
           ctx.stroke();
 
-          const prog = n.phase;
-          const px = n.x + (m.x - n.x) * prog;
-          const py = n.y + (m.y - n.y) * prog;
+          // Signal dot
+          const px = n.x + (m.x - n.x) * n.phase;
+          const py = n.y + (m.y - n.y) * n.phase;
           ctx.beginPath();
-          ctx.arc(px, py, 0.7, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(100,240,255,${0.30 + prog * 0.25})`;
+          ctx.arc(px, py, 1.0, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(120,240,255,${0.4 + pulse * 0.3})`;
           ctx.fill();
         });
       });
 
-      nodes.forEach((n) => {
-        const glow = 0.38 + Math.sin(n.phase * Math.PI * 2) * 0.32;
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = '#00e0ff';
+      // Node dots
+      nodes.forEach(n => {
+        const g = 0.45 + Math.sin(n.phase * Math.PI * 2) * 0.35;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#00e8ff';
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 1.4, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,220,255,${glow})`;
+        ctx.arc(n.x, n.y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,230,255,${g})`;
         ctx.fill();
       });
 
       ctx.restore();
     };
 
+    // ─── Draw energy streams ─────────────────────────────────────────
     const drawStreams = () => {
-      const defs = getStreamDefs();
       ctx.save();
-
-      streams.forEach((sp) => {
-        const def = defs[sp.streamIdx];
-        if (!def) return;
-
+      streams.forEach(sp => {
         sp.progress += sp.speed;
-        if (sp.progress >= 1.0) {
+        if (sp.progress >= 1) {
           sp.progress = 0;
           sp.trail = [];
-          energyLevel = Math.min(1, energyLevel + 0.12);
+          energyPulse = Math.min(1, energyPulse + 0.18);
           return;
         }
-
         const et = sp.progress * sp.progress * (3 - 2 * sp.progress);
-        const x = def.sx + (def.ex - def.sx) * et;
-        const y = def.sy + (def.ey - def.sy) * et;
+        const x = sp.sx + (cx() - sp.sx) * et;
+        const y = sp.sy + (cy() - sp.sy) * et;
 
         sp.trail.push({ x, y });
-        if (sp.trail.length > 28) sp.trail.shift();
+        if (sp.trail.length > 30) sp.trail.shift();
 
+        // Trail
         for (let k = 1; k < sp.trail.length; k++) {
-          const alpha = (k / sp.trail.length) * 0.55;
+          const a = (k / sp.trail.length) * 0.6;
           ctx.beginPath();
           ctx.moveTo(sp.trail[k - 1].x, sp.trail[k - 1].y);
           ctx.lineTo(sp.trail[k].x, sp.trail[k].y);
-          ctx.strokeStyle = `rgba(${def.r},${def.g},${def.b},${alpha})`;
-          ctx.lineWidth = sp.size * (k / sp.trail.length) * 0.75;
-          ctx.shadowBlur = 5;
-          ctx.shadowColor = `rgba(${def.r},${def.g},${def.b},0.8)`;
+          ctx.strokeStyle = `rgba(${sp.r},${sp.g},${sp.b},${a})`;
+          ctx.lineWidth = sp.size * (k / sp.trail.length) * 0.8;
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = `rgba(${sp.r},${sp.g},${sp.b},0.9)`;
           ctx.stroke();
         }
 
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = `rgba(${def.r},${def.g},${def.b},1)`;
+        // Head
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = `rgba(${sp.r},${sp.g},${sp.b},1)`;
         ctx.beginPath();
-        ctx.arc(x, y, sp.size * 0.85, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${def.r},${def.g},${def.b},0.9)`;
+        ctx.arc(x, y, sp.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${sp.r},${sp.g},${sp.b},0.95)`;
         ctx.fill();
         ctx.shadowBlur = 0;
       });
-
       ctx.restore();
     };
 
+    // ─── Render loop ─────────────────────────────────────────────────
     const render = (ts: number) => {
       const dt = Math.min((ts - lastTs) / 1000, 0.05);
       lastTs = ts;
       t += dt;
-      energyLevel = Math.max(0, energyLevel - dt * 0.35);
+      energyPulse = Math.max(0, energyPulse - dt * 0.5);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
 
+      drawBrainGlow();
       drawStreams();
       drawBrain();
       drawNeural(dt);
@@ -377,8 +367,8 @@ export default function PatternBrainPage() {
   }, []);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#000000', overflow: 'hidden' }}>
-      <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
+    <div style={{ position: 'fixed', inset: 0, background: '#000', overflow: 'hidden' }}>
+      <canvas ref={canvasRef} />
     </div>
   );
 }

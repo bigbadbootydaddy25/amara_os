@@ -1,0 +1,6 @@
+{
+  "tool": "Ollama",
+  "status": "not_configured",
+  "message": "connector placeholder ready \u2014 Ollama unreachable at http://localhost:11434: <urlopen error [Errno 111] Connection refused>",
+  "timestamp": "2026-04-28T00:36:47.112699"
+}

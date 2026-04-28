@@ -1,0 +1,6 @@
+{
+  "tool": "Neo4j",
+  "status": "not_configured",
+  "message": "connector placeholder ready \u2014 set NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD",
+  "timestamp": "2026-04-28T00:36:47.113443"
+}

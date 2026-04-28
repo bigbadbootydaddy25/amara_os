@@ -1,0 +1,10 @@
+{
+  "tool": "OpenClaw_Bridge",
+  "backend": "Ollama",
+  "model": "llama3.2:3b",
+  "prompt": "AMARA brain online. Confirm local OpenClaw/Ollama connection.",
+  "timestamp": "2026-04-28T00:36:48.316732",
+  "status": "error",
+  "error": "<urlopen error [Errno 111] Connection refused>",
+  "message": "connector placeholder ready \u2014 Ollama unreachable"
+}

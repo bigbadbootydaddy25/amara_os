@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createOpenAIChatStream } from '@/lib/openai-client';
 import { createOpenClawChatStream } from '@/lib/openclaw-client';
+import { createOllamaChatStream, toSseFromOllamaStream } from '@/lib/ollama-client';
 import type { ChatRequestBody, ConversationMessage, ConversationRole } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -144,6 +145,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Ollama (primary local backend)
+    try {
+      const ollamaResponse = await createOllamaChatStream(messages, request.signal);
+      if (ollamaResponse.ok) {
+        return await toSseFromOllamaStream(ollamaResponse);
+      }
+    } catch {
+      // Ollama not running — fall through to OpenAI
+    }
+
     if (process.env.OPENAI_API_KEY?.trim()) {
       try {
         const response = await createOpenAIChatStream(messages, request.signal);
@@ -166,8 +177,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: openClawError
-          ? `OpenClaw failed and OpenAI is not configured: ${openClawError}`
-          : 'No AI backend configured',
+          ? `OpenClaw failed and no fallback configured: ${openClawError}`
+          : 'No AI backend configured (set OLLAMA_BASE_URL, OPENCLAW_GATEWAY_URL, or OPENAI_API_KEY)',
       },
       { status: 500 },
     );

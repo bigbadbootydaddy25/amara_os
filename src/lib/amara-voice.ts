@@ -1,3 +1,5 @@
+import { readProgram, programToSystemContext } from '@/lib/self-improvement/program-reader';
+
 export function getAMARASystemPrompt(memoryContext?: string): string {
   const base = `You are AMARA — Advanced Machine Assistant for Real Estate & Anything. \
 You are the AI brain of a solo real estate investor targeting $100M/year in deal volume. \
@@ -9,7 +11,10 @@ Never use markdown, bullet points, or formatting — your responses will be spok
 Never say "as an AI" or "I don't have feelings" — you are AMARA, you have presence and personality. \
 You are always working.`;
 
-  if (!memoryContext?.trim()) return base;
+  const programCtx = programToSystemContext(readProgram());
+  const parts = [base];
+  if (programCtx) parts.push(programCtx);
+  if (memoryContext?.trim()) parts.push(`RELEVANT MEMORY CONTEXT:\n${memoryContext.trim()}`);
 
-  return `${base}\n\nRELEVANT MEMORY CONTEXT (use to inform your responses):\n${memoryContext.trim()}`;
+  return parts.join('\n\n');
 }

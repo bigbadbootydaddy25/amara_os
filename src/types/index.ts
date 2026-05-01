@@ -1,4 +1,22 @@
-export type AmaraState = 'idle' | 'listening' | 'thinking' | 'speaking';
+export type AmaraState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'ingesting' | 'alert';
+
+export interface DealCard {
+  address: string;
+  score: number;
+  buyer: string | null;
+  mao: number | null;
+  price: number | null;
+  weight?: number;
+}
+
+export interface IQEvent {
+  type: 'IQ_GAIN' | 'IQ_CURRENT' | 'IQ_MILESTONE';
+  iq?: number;
+  before?: number;
+  after?: number;
+  amount?: number;
+  reason?: string;
+}
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
 export interface ConversationMessage {

@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimationLoop } from '@/canvas/animation-loop';
 import { useConversation } from '@/hooks/useConversation';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useVoiceOutput } from '@/hooks/useVoiceOutput';
 import { useAmaraStore } from '@/stores/amara-store';
-import type { AmaraState } from '@/types';
+import type { AmaraState, DealCard } from '@/types';
 import { StatusIndicator } from '@/components/StatusIndicator';
+import { IQDisplay } from '@/components/IQDisplay';
+import { FloatingText, DealCardDisplay, MicIndicator } from '@/components/FloatingInfo';
 
 const DEMO_SEQUENCE: Array<{ state: AmaraState; duration: number }> = [
   { state: 'idle', duration: 4000 },
   { state: 'listening', duration: 3000 },
   { state: 'thinking', duration: 2500 },
+  { state: 'ingesting', duration: 3500 },
+  { state: 'alert', duration: 2000 },
   { state: 'speaking', duration: 5000 },
 ];
 
@@ -24,13 +28,27 @@ export function AmaraContainer() {
   const avatarCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isActivated, setIsActivated] = useState(process.env.NEXT_PUBLIC_DEMO_MODE === 'true');
   const [isActivating, setIsActivating] = useState(false);
+  const [activeDeal, setActiveDeal] = useState<DealCard | null>(null);
+  const [floatingText, setFloatingText] = useState('');
+  const [showFloatingText, setShowFloatingText] = useState(false);
+  const floatingTextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const state = useAmaraStore((store) => store.state);
   const error = useAmaraStore((store) => store.error);
   const isOnline = useAmaraStore((store) => store.isOnline);
   const isVoiceSupported = useAmaraStore((store) => store.isVoiceSupported);
   const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
   const { primeAudio, speak, stopSpeaking } = useVoiceOutput();
-  const { cancelPending, handleSpeechComplete } = useConversation({ speak });
+
+  // Show AMARA's spoken response as floating text and auto-dismiss 3s after speaking ends
+  const speakWithFloat = useCallback(async (text: string) => {
+    setFloatingText(text);
+    setShowFloatingText(true);
+    if (floatingTextTimer.current) clearTimeout(floatingTextTimer.current);
+    await speak(text);
+    floatingTextTimer.current = setTimeout(() => setShowFloatingText(false), 3000);
+  }, [speak]);
+
+  const { cancelPending, handleSpeechComplete } = useConversation({ speak: speakWithFloat });
   const { isSupported, startListening, stopListening } = useVoiceInput({
     enabled: !isDemoMode && isActivated,
     onSpeechComplete: handleSpeechComplete,
@@ -272,6 +290,14 @@ export function AmaraContainer() {
           </span>
         </button>
       ) : null}
+      <IQDisplay onMilestone={(line) => speakWithFloat(line)} />
+      <FloatingText text={floatingText} visible={showFloatingText} />
+      <DealCardDisplay
+        deal={activeDeal}
+        onYes={() => setActiveDeal(null)}
+        onNo={() => setActiveDeal(null)}
+      />
+      <MicIndicator active={state === 'listening'} />
       <StatusIndicator />
     </main>
   );

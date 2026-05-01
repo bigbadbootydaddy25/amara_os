@@ -5,6 +5,7 @@ import { SfrDomAgent } from './sfr-dom-agent';
 import { LandSubdivisionAgent } from './land-subdivision-agent';
 import { OsintAgent } from './osint-agent';
 import type { AgentConfig, AgentRunResult } from './agent-base';
+import { gainIQ } from '@/lib/iq/iq-engine';
 
 export interface MarketConfig {
   name: string;
@@ -160,6 +161,10 @@ ${orchestratorResult.results
 `;
 
   writeReport(masterReport, path.resolve(process.cwd(), `reports/HERMES_MASTER_${date}.md`));
+
+  // IQ gain — 1–3 per market scanned, +10 bonus if all 37 markets covered
+  const iqGain = orchestratorResult.marketsSucceeded + (orchestratorResult.marketsRun >= 37 ? 10 : 0);
+  await gainIQ(iqGain, `Hermes sweep — ${orchestratorResult.marketsSucceeded} markets`).catch(() => {});
 
   return orchestratorResult;
 }

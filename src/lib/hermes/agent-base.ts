@@ -1,6 +1,8 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { runQuery } from '@/lib/neural-graph/neo4j-client';
+import { getLangfuse, writeLocalTrace } from '@/lib/observability/langfuse-client';
+import { recordUsage } from '@/lib/observability/cost-tracker';
 
 export interface AgentConfig {
   market: string;
@@ -81,14 +83,35 @@ export abstract class HermesAgent {
     }
   }
 
-  // Stub for LangFuse tracing — wire real client when LANGFUSE_PUBLIC_KEY is set
   protected trace(event: string, data?: unknown): void {
-    if (process.env.LANGFUSE_PUBLIC_KEY) {
-      // TODO: initialise LangFuse client and emit trace
+    const lf = getLangfuse();
+    if (lf) {
+      lf.event({
+        traceId: `${this.config.market}_${this.config.strategy}_${Date.now()}`,
+        name: event,
+        input: data,
+        metadata: { market: this.config.market, strategy: this.config.strategy },
+      });
     }
-    if (process.env.NODE_ENV !== 'production') {
-      console.debug(`[HERMES:${this.config.market}] ${event}`, data ?? '');
-    }
+    // Always write local fallback
+    writeLocalTrace({
+      agentName: `${this.config.strategy}@${this.config.market}`,
+      market: this.config.market,
+      event,
+      data,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  protected recordTokenUsage(model: string, inputTokens: number, outputTokens: number): void {
+    recordUsage({
+      model,
+      inputTokens,
+      outputTokens,
+      agentName: this.config.strategy,
+      market: this.config.market,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   abstract run(): Promise<AgentRunResult>;

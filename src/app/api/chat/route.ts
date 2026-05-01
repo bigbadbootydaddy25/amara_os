@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAnthropicChatStream } from '@/lib/anthropic-client';
 import { getAMARASystemPrompt } from '@/lib/amara-voice';
+import { createOllamaChatStream } from '@/lib/ollama-client';
 import { createOpenAIChatStream } from '@/lib/openai-client';
 import { createOpenClawChatStream } from '@/lib/openclaw-client';
 import type { ChatRequestBody, ConversationMessage, ConversationRole } from '@/types';
@@ -62,6 +63,80 @@ function createSyntheticSseResponse(content: string): Response {
   });
 
   return makeSseResponse(stream);
+}
+
+/**
+ * Converts Ollama's NDJSON stream to OpenAI-compatible SSE so the frontend
+ * parser works unchanged. Ollama sends newline-delimited JSON objects:
+ * {"message":{"content":"..."},"done":false}
+ */
+function ollamaToSseStream(ollamaBody: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const reader = ollamaBody.getReader();
+  let buffer = '';
+
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          // flush any remaining buffer
+          if (buffer.trim()) {
+            try {
+              const obj = JSON.parse(buffer.trim()) as {
+                message?: { content?: string };
+                done?: boolean;
+              };
+              const text = obj.message?.content;
+              if (text) {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`,
+                  ),
+                );
+              }
+            } catch {
+              // ignore malformed trailing chunk
+            }
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+          return;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const obj = JSON.parse(line) as {
+              message?: { content?: string };
+              done?: boolean;
+            };
+            const text = obj.message?.content;
+            if (text) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`,
+                ),
+              );
+            }
+          } catch {
+            // ignore malformed chunk
+          }
+        }
+
+        return; // yield control back to the runtime
+      }
+    },
+    cancel() {
+      reader.cancel();
+    },
+  });
 }
 
 async function toSseResponse(response: Response): Promise<Response> {
@@ -127,20 +202,29 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message },
     ];
 
-    // 1. Prefer OpenClaw gateway when configured
+    // 1. OpenClaw gateway — when configured, always first
     if (process.env.OPENCLAW_GATEWAY_URL?.trim()) {
       try {
         const response = await createOpenClawChatStream(messages, request.signal);
-
         if (response.ok) {
           return await toSseResponse(response);
         }
       } catch {
-        // fall through to Claude
+        // fall through
       }
     }
 
-    // 2. Claude API — primary AI brain
+    // 2. Ollama — primary local brain
+    try {
+      const response = await createOllamaChatStream(messages, request.signal);
+      if (response.ok && response.body) {
+        return makeSseResponse(ollamaToSseStream(response.body));
+      }
+    } catch {
+      // Ollama not running — fall through to Claude
+    }
+
+    // 3. Claude API — fallback when Ollama is unavailable
     if (process.env.ANTHROPIC_API_KEY?.trim()) {
       try {
         const stream = createAnthropicChatStream(messages, request.signal);
@@ -151,7 +235,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. OpenAI fallback
+    // 4. OpenAI — last resort fallback
     if (process.env.OPENAI_API_KEY?.trim()) {
       try {
         const response = await createOpenAIChatStream(messages, request.signal);

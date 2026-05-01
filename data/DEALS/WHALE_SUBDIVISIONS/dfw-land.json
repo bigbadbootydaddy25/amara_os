@@ -1,0 +1,41 @@
+[
+  {
+    "address": "CR 412 — 47 Acres, Denton County, TX 76201",
+    "city": "Denton",
+    "state": "TX",
+    "zip": "76201",
+    "market": "DFW",
+    "price": 1450000,
+    "arv": 4200000,
+    "propertyType": "LAND",
+    "description": "Dead paper subdivision — 47-acre ghost plat filed 1987, never developed. Water and sewer at road. Investor opportunity. Seller motivated.",
+    "dom": 210,
+    "source": "COUNTY_CLERK"
+  },
+  {
+    "address": "FM 2931 — 23 Acres, Collin County, TX 75069",
+    "city": "McKinney",
+    "state": "TX",
+    "zip": "75069",
+    "market": "DFW",
+    "price": 890000,
+    "arv": 2800000,
+    "propertyType": "LAND",
+    "description": "Ghost subdivision plat — 23 acres with 78 approved lots. Entitlements lapsed 2019. In path of McKinney growth corridor.",
+    "dom": 184,
+    "source": "PLANNING_ZONING"
+  },
+  {
+    "address": "Old Orchard Rd — 68 Acres, Frisco, TX 75035",
+    "city": "Frisco",
+    "state": "TX",
+    "zip": "75035",
+    "market": "DFW",
+    "price": 3200000,
+    "arv": 9500000,
+    "propertyType": "LAND",
+    "description": "68-acre unplatted tract adjacent to master-planned community. Seller has held 22 years. As-is, cash only.",
+    "dom": 312,
+    "source": "REALTOR"
+  }
+]

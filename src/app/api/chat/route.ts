@@ -4,6 +4,8 @@ import { getAMARASystemPrompt } from '@/lib/amara-voice';
 import { createOllamaChatStream } from '@/lib/ollama-client';
 import { createOpenAIChatStream } from '@/lib/openai-client';
 import { createOpenClawChatStream } from '@/lib/openclaw-client';
+import { getSessionContext } from '@/lib/memory/memory-reader';
+import { writeMemory } from '@/lib/memory/memory-writer';
 import type { ChatRequestBody, ConversationMessage, ConversationRole } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -196,11 +198,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No message provided' }, { status: 400 });
     }
 
+    // Load Mem0 session context (non-blocking — no-op when MEM0_API_KEY not set)
+    const memoryContext = await getSessionContext().catch(() => '');
+
     const messages: ConversationMessage[] = [
-      { role: 'system', content: getAMARASystemPrompt() },
+      { role: 'system', content: getAMARASystemPrompt(memoryContext) },
       ...sanitiseHistory(body.history).slice(-20),
       { role: 'user', content: message },
     ];
+
+    // Fire-and-forget: write this user message to Mem0 so AMARA remembers it next session
+    writeMemory({ content: `User said: ${message}`, category: 'preference' }).catch(() => {});
 
     // 1. OpenClaw gateway — when configured, always first
     if (process.env.OPENCLAW_GATEWAY_URL?.trim()) {

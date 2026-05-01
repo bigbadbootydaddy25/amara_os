@@ -1,0 +1,34 @@
+[
+  {
+    "address": "4412 Westpark Dr, Houston, TX 77478",
+    "city": "Houston",
+    "state": "TX",
+    "zip": "77478",
+    "market": "HOUSTON",
+    "price": 105000,
+    "arv": 188000,
+    "beds": 3,
+    "baths": 2,
+    "sqft": 1180,
+    "dom": 118,
+    "description": "As-is. Seller needs to close fast. Investor pricing.",
+    "propertyType": "SFR",
+    "source": "ZILLOW"
+  },
+  {
+    "address": "7703 Chimney Rock Rd, Richmond, TX 77469",
+    "city": "Richmond",
+    "state": "TX",
+    "zip": "77469",
+    "market": "HOUSTON",
+    "price": 92000,
+    "arv": 162000,
+    "beds": 3,
+    "baths": 1,
+    "sqft": 1010,
+    "dom": 96,
+    "description": "Cash only. Needs full rehab. Estate sale, no repairs will be made.",
+    "propertyType": "SFR",
+    "source": "REDFIN"
+  }
+]

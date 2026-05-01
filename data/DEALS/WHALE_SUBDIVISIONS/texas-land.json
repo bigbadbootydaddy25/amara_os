@@ -1,0 +1,28 @@
+[
+  {
+    "address": "IH-35 Frontage — 31 Acres, New Braunfels, TX 78130",
+    "city": "New Braunfels",
+    "state": "TX",
+    "zip": "78130",
+    "market": "SAN ANTONIO",
+    "price": 1750000,
+    "arv": 5600000,
+    "propertyType": "LAND",
+    "description": "31-acre IH-35 frontage tract. Dead paper subdivision filed 1994, 112 lots approved. City says re-entitlement is straightforward.",
+    "dom": 267,
+    "source": "COUNTY_CLERK"
+  },
+  {
+    "address": "SH-130 Corridor — 85 Acres, Pflugerville, TX 78660",
+    "city": "Pflugerville",
+    "state": "TX",
+    "zip": "78660",
+    "market": "AUSTIN",
+    "price": 4800000,
+    "arv": 14000000,
+    "propertyType": "LAND",
+    "description": "85 acres in SH-130 growth path. Ghost plat with 230 lots from 2002. Utilities at boundary. Seller in estate, needs to close.",
+    "dom": 198,
+    "source": "PLANNING_ZONING"
+  }
+]

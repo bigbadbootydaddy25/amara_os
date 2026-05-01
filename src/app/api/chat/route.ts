@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createAnthropicChatStream } from '@/lib/anthropic-client';
+import { getAMARASystemPrompt } from '@/lib/amara-voice';
 import { createOpenAIChatStream } from '@/lib/openai-client';
 import { createOpenClawChatStream } from '@/lib/openclaw-client';
 import type { ChatRequestBody, ConversationMessage, ConversationRole } from '@/types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-const AMARA_SYSTEM_PROMPT = `You are AMARA, an advanced AI assistant. You speak with a confident, warm, and slightly formal British tone.
-Keep responses concise and conversational — you're speaking out loud, not writing an essay.
-Aim for 1-3 sentences per response unless the user asks for detail.
-Never use markdown, bullet points, or formatting — your responses will be spoken aloud.
-Never say "as an AI" or "I don't have feelings" — you are AMARA, you have presence and personality.`;
 
 function isConversationRole(role: string): role is ConversationRole {
   return role === 'system' || role === 'user' || role === 'assistant';
@@ -40,6 +36,17 @@ function sanitiseHistory(history: unknown): ConversationMessage[] {
     .filter((entry) => entry.content.length > 0 && entry.role !== 'system');
 }
 
+function makeSseResponse(stream: ReadableStream<Uint8Array>): Response {
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
+  });
+}
+
 function createSyntheticSseResponse(content: string): Response {
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
@@ -49,20 +56,12 @@ function createSyntheticSseResponse(content: string): Response {
           encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`),
         );
       }
-
       controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       controller.close();
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    },
-  });
+  return makeSseResponse(stream);
 }
 
 async function toSseResponse(response: Response): Promise<Response> {
@@ -123,13 +122,12 @@ export async function POST(request: NextRequest) {
     }
 
     const messages: ConversationMessage[] = [
-      { role: 'system', content: AMARA_SYSTEM_PROMPT },
+      { role: 'system', content: getAMARASystemPrompt() },
       ...sanitiseHistory(body.history).slice(-20),
       { role: 'user', content: message },
     ];
 
-    let openClawError: string | null = null;
-
+    // 1. Prefer OpenClaw gateway when configured
     if (process.env.OPENCLAW_GATEWAY_URL?.trim()) {
       try {
         const response = await createOpenClawChatStream(messages, request.signal);
@@ -137,13 +135,23 @@ export async function POST(request: NextRequest) {
         if (response.ok) {
           return await toSseResponse(response);
         }
-
-        openClawError = await readUpstreamError(response);
-      } catch (error) {
-        openClawError = error instanceof Error ? error.message : 'OpenClaw request failed';
+      } catch {
+        // fall through to Claude
       }
     }
 
+    // 2. Claude API — primary AI brain
+    if (process.env.ANTHROPIC_API_KEY?.trim()) {
+      try {
+        const stream = createAnthropicChatStream(messages, request.signal);
+        return makeSseResponse(stream);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Anthropic request failed';
+        return NextResponse.json({ error: msg }, { status: 500 });
+      }
+    }
+
+    // 3. OpenAI fallback
     if (process.env.OPENAI_API_KEY?.trim()) {
       try {
         const response = await createOpenAIChatStream(messages, request.signal);
@@ -158,19 +166,12 @@ export async function POST(request: NextRequest) {
 
         return await toSseResponse(response);
       } catch (error) {
-        const messageText = error instanceof Error ? error.message : 'OpenAI request failed';
-        return NextResponse.json({ error: messageText }, { status: 500 });
+        const msg = error instanceof Error ? error.message : 'OpenAI request failed';
+        return NextResponse.json({ error: msg }, { status: 500 });
       }
     }
 
-    return NextResponse.json(
-      {
-        error: openClawError
-          ? `OpenClaw failed and OpenAI is not configured: ${openClawError}`
-          : 'No AI backend configured',
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'No AI backend configured' }, { status: 500 });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Chat request failed';
     return NextResponse.json({ error: message }, { status: 500 });

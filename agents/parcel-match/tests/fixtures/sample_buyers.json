@@ -1,0 +1,137 @@
+{
+  "generated_at": "2026-05-08T00:00:00Z",
+  "total_profiles": 6,
+  "quarantined_records": 1,
+  "profiles": [
+    {
+      "owner_name": "MESA RIDGE CONSTRUCTION LLC",
+      "parcel_count": 3,
+      "parcel_ids": ["001-001-001", "001-001-002", "001-001-003"],
+      "zip_codes": ["85001"],
+      "acquisition_dates": ["2024-03-15", "2024-03-22", "2024-04-01"],
+      "total_spend": 263000,
+      "builder_score": 100,
+      "investor_score": 100,
+      "is_verified_builder": true,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "VERIFIED BUILDER and POSSIBLE CASH BUYER.",
+      "signal_evidence": [
+        {"type": "LLC_COMPANY", "value": "LLC", "weight": 15, "evidence": "Owner name contains LLC"},
+        {"type": "BUILDER_KEYWORD", "value": "CONSTRUCTION", "weight": 20, "evidence": "Contains CONSTRUCTION"},
+        {"type": "VACANT_LAND", "value": "is_vacant=True", "weight": 15, "evidence": "Parcel flagged as vacant"},
+        {"type": "PERMIT_ACTIVITY", "value": "2", "weight": 25, "evidence": "2 permits on file"},
+        {"type": "MAILING_MISMATCH", "value": "PO BOX 5500", "weight": 20, "evidence": "Mailing differs from property"},
+        {"type": "REPEAT_ACQUISITIONS", "value": "3", "weight": 15, "evidence": "3 parcels acquired"},
+        {"type": "MULTIPLE_NEARBY_PARCELS", "value": "85001", "weight": 20, "evidence": "3 parcels in ZIP 85001"},
+        {"type": "INFILL_ACTIVITY", "value": "2 parcels / 3 permits", "weight": 25, "evidence": "Permits on vacant parcels"},
+        {"type": "VACANT_LAND_CONCENTRATION", "value": "3", "weight": 20, "evidence": "3 vacant parcels"}
+      ]
+    },
+    {
+      "owner_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+      "parcel_count": 2,
+      "parcel_ids": ["004-001-001", "004-001-002"],
+      "zip_codes": ["86046"],
+      "acquisition_dates": ["2024-06-01", "2024-06-15"],
+      "total_spend": 255000,
+      "builder_score": 100,
+      "investor_score": 90,
+      "is_verified_builder": true,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "VERIFIED BUILDER with infill activity in Williams AZ.",
+      "signal_evidence": [
+        {"type": "LLC_COMPANY", "value": "INC", "weight": 15, "evidence": "Contains INC"},
+        {"type": "BUILDER_KEYWORD", "value": "HOMES", "weight": 20, "evidence": "Contains HOMES"},
+        {"type": "VACANT_LAND", "value": "is_vacant=True", "weight": 15, "evidence": "Vacant parcel"},
+        {"type": "PERMIT_ACTIVITY", "value": "3", "weight": 25, "evidence": "3 permits"},
+        {"type": "MAILING_MISMATCH", "value": "333 N LEROUX ST", "weight": 20, "evidence": "Mailing differs"},
+        {"type": "INFILL_ACTIVITY", "value": "2 parcels / 5 permits", "weight": 25, "evidence": "Permits on vacant"},
+        {"type": "VACANT_LAND_CONCENTRATION", "value": "2", "weight": 20, "evidence": "2 vacant parcels"},
+        {"type": "MULTIPLE_NEARBY_PARCELS", "value": "86046", "weight": 20, "evidence": "2 parcels in ZIP 86046"}
+      ]
+    },
+    {
+      "owner_name": "SUNBELT ACQUISITIONS CAPITAL LLC",
+      "parcel_count": 3,
+      "parcel_ids": ["002-001-001", "002-001-002", "002-001-003"],
+      "zip_codes": ["85031", "85043"],
+      "acquisition_dates": ["2024-01-10", "2024-01-18", "2024-02-05"],
+      "total_spend": 770000,
+      "builder_score": 58,
+      "investor_score": 100,
+      "is_verified_builder": false,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "POSSIBLE CASH BUYER with repeat acquisitions.",
+      "signal_evidence": [
+        {"type": "LLC_COMPANY", "value": "ACQUISITIONS", "weight": 15, "evidence": "Contains ACQUISITIONS"},
+        {"type": "INVESTOR_KEYWORD", "value": "ACQUISITIONS", "weight": 10, "evidence": "Investor keyword"},
+        {"type": "MAILING_MISMATCH", "value": "1800 N CENTRAL AVE", "weight": 20, "evidence": "Mailing differs"},
+        {"type": "REPEAT_ACQUISITIONS", "value": "3", "weight": 15, "evidence": "3 parcels"},
+        {"type": "MULTIPLE_NEARBY_PARCELS", "value": "85031", "weight": 20, "evidence": "2 parcels in ZIP 85031"},
+        {"type": "RECENT_PURCHASE_CLUSTERING", "value": "3 within 90 days", "weight": 10, "evidence": "3 purchases clustered"}
+      ]
+    },
+    {
+      "owner_name": "RIVERSTONE INVESTMENTS LLC",
+      "parcel_count": 2,
+      "parcel_ids": ["006-001-001", "006-001-002"],
+      "zip_codes": ["85016", "85012"],
+      "acquisition_dates": ["2024-08-10", "2024-09-02"],
+      "total_spend": 975000,
+      "builder_score": 15,
+      "investor_score": 75,
+      "is_verified_builder": false,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "POSSIBLE CASH BUYER — commercial investor.",
+      "signal_evidence": [
+        {"type": "LLC_COMPANY", "value": "LLC", "weight": 15, "evidence": "Contains LLC"},
+        {"type": "INVESTOR_KEYWORD", "value": "INVESTMENTS", "weight": 10, "evidence": "Investor keyword"},
+        {"type": "MAILING_MISMATCH", "value": "20 W KINZIE ST CHICAGO", "weight": 20, "evidence": "Out-of-state mailing"},
+        {"type": "RECENT_PURCHASE_CLUSTERING", "value": "2 within 90 days", "weight": 10, "evidence": "2 purchases clustered"}
+      ]
+    },
+    {
+      "owner_name": "JOHN SMITH",
+      "parcel_count": 1,
+      "parcel_ids": ["003-001-001"],
+      "zip_codes": ["85281"],
+      "acquisition_dates": ["2023-11-20"],
+      "total_spend": 312000,
+      "builder_score": 0,
+      "investor_score": 0,
+      "is_verified_builder": false,
+      "is_possible_cash_buyer": false,
+      "is_quarantined": true,
+      "quarantine_reason": "Only 0 signals detected",
+      "summary": "",
+      "signal_evidence": []
+    },
+    {
+      "owner_name": "SARAH JONES",
+      "parcel_count": 1,
+      "parcel_ids": ["007-001-001"],
+      "zip_codes": ["85251"],
+      "acquisition_dates": ["2022-05-14"],
+      "total_spend": 418000,
+      "builder_score": 0,
+      "investor_score": 0,
+      "is_verified_builder": false,
+      "is_possible_cash_buyer": false,
+      "is_quarantined": true,
+      "quarantine_reason": "Only 0 signals detected",
+      "summary": "",
+      "signal_evidence": []
+    }
+  ],
+  "quarantine": [
+    {"parcel_id": "005-001-001", "owner_name": "", "reason": "Missing required field: owner_name"}
+  ]
+}

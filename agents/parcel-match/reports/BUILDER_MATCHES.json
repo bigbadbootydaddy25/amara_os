@@ -1,0 +1,706 @@
+{
+  "generated_at": "2026-05-08T23:07:43.403518Z",
+  "infill_parcel_count": 6,
+  "parcels": [
+    {
+      "parcel_id": "P-INFILL-001",
+      "address": "129 VACANT LOT RD",
+      "zip_code": "85001",
+      "land_use": "VACANT LAND",
+      "acres": 0.25,
+      "effective_price": 92000.0,
+      "builder_matches": [
+        {
+          "parcel_id": "P-INFILL-001",
+          "buyer_name": "MESA RIDGE CONSTRUCTION LLC",
+          "match_score": 100,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 100/100 for 'MESA RIDGE CONSTRUCTION LLC'. Parcel P-INFILL-001 at 129 VACANT LOT RD. Active signals: ENTITY_TYPE_MATCH, PRICE_FIT, ZIP_MATCH, HIGH_BUILDER_SCORE, LAND_USE_ALIGNMENT, NEARBY_BUILDER_ACTIVITY, PERMIT_ALIGNMENT, INFILL_OPPORTUNITY.",
+          "signal_evidence": [
+            {
+              "type": "ZIP_MATCH",
+              "value": "85001",
+              "weight": 25,
+              "evidence": "Parcel ZIP 85001 matches buyer's active ZIP codes: 85001"
+            },
+            {
+              "type": "PRICE_FIT",
+              "value": "$92,000",
+              "weight": 20,
+              "evidence": "Parcel price $92,000 is within buyer's historical range $52,600\u2013$122,733 (avg $87,667)"
+            },
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "VACANT LAND",
+              "weight": 20,
+              "evidence": "Vacant/unimproved parcel aligns with verified builder profile 'MESA RIDGE CONSTRUCTION LLC'"
+            },
+            {
+              "type": "INFILL_OPPORTUNITY",
+              "value": "builder_score=100",
+              "weight": 20,
+              "evidence": "Vacant infill opportunity for 'MESA RIDGE CONSTRUCTION LLC' (builder score 100/100)"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'MESA RIDGE CONSTRUCTION LLC' matched to investment-grade parcel (VACANT LAND)"
+            },
+            {
+              "type": "HIGH_BUILDER_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High builder confidence score 100/100 for vacant parcel at 129 VACANT LOT RD"
+            },
+            {
+              "type": "PERMIT_ALIGNMENT",
+              "value": "PERMIT_HISTORY",
+              "weight": 15,
+              "evidence": "Builder 'MESA RIDGE CONSTRUCTION LLC' has permit history \u2014 aligned with vacant parcel P-INFILL-001"
+            },
+            {
+              "type": "NEARBY_BUILDER_ACTIVITY",
+              "value": "85001",
+              "weight": 20,
+              "evidence": "Active builder(s) in ZIP 85001: MESA RIDGE CONSTRUCTION LLC"
+            }
+          ]
+        },
+        {
+          "parcel_id": "P-INFILL-001",
+          "buyer_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+          "match_score": 100,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 100/100 for 'VERDE VALLEY HOMES DEVELOPMENT INC'. Parcel P-INFILL-001 at 129 VACANT LOT RD. Active signals: ENTITY_TYPE_MATCH, PRICE_BELOW_AVG, PRICE_FIT, HIGH_BUILDER_SCORE, LAND_USE_ALIGNMENT, NEARBY_BUILDER_ACTIVITY, PERMIT_ALIGNMENT, INFILL_OPPORTUNITY.",
+          "signal_evidence": [
+            {
+              "type": "PRICE_FIT",
+              "value": "$92,000",
+              "weight": 20,
+              "evidence": "Parcel price $92,000 is within buyer's historical range $76,500\u2013$178,500 (avg $127,500)"
+            },
+            {
+              "type": "PRICE_BELOW_AVG",
+              "value": "$92,000",
+              "weight": 10,
+              "evidence": "Parcel price $92,000 is below buyer's average acquisition of $127,500"
+            },
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "VACANT LAND",
+              "weight": 20,
+              "evidence": "Vacant/unimproved parcel aligns with verified builder profile 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            },
+            {
+              "type": "INFILL_OPPORTUNITY",
+              "value": "builder_score=100",
+              "weight": 20,
+              "evidence": "Vacant infill opportunity for 'VERDE VALLEY HOMES DEVELOPMENT INC' (builder score 100/100)"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'VERDE VALLEY HOMES DEVELOPMENT INC' matched to investment-grade parcel (VACANT LAND)"
+            },
+            {
+              "type": "HIGH_BUILDER_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High builder confidence score 100/100 for vacant parcel at 129 VACANT LOT RD"
+            },
+            {
+              "type": "PERMIT_ALIGNMENT",
+              "value": "PERMIT_HISTORY",
+              "weight": 15,
+              "evidence": "Builder 'VERDE VALLEY HOMES DEVELOPMENT INC' has permit history \u2014 aligned with vacant parcel P-INFILL-001"
+            },
+            {
+              "type": "NEARBY_BUILDER_ACTIVITY",
+              "value": "85001",
+              "weight": 20,
+              "evidence": "Active builder(s) in ZIP 85001: MESA RIDGE CONSTRUCTION LLC"
+            }
+          ]
+        }
+      ],
+      "disposition_paths": [
+        {
+          "path_type": "INFILL_BUILD",
+          "confidence": 80,
+          "evidence": [
+            "Parcel is vacant/unimproved (land use: VACANT LAND)",
+            "Top builder match: 'MESA RIDGE CONSTRUCTION LLC' (score 100/100)",
+            "Parcel size 0.25 acres \u2014 typical infill lot"
+          ],
+          "recommended_buyers": [
+            "MESA RIDGE CONSTRUCTION LLC",
+            "VERDE VALLEY HOMES DEVELOPMENT INC"
+          ]
+        },
+        {
+          "path_type": "WHOLESALE_TO_INVESTOR",
+          "confidence": 15,
+          "evidence": [
+            "Cash buyer available: 'SUNBELT ACQUISITIONS CAPITAL LLC' (investor score 45/100)"
+          ],
+          "recommended_buyers": [
+            "SUNBELT ACQUISITIONS CAPITAL LLC",
+            "RIVERSTONE INVESTMENTS LLC"
+          ]
+        }
+      ]
+    },
+    {
+      "parcel_id": "P-DISTRESSED-001",
+      "address": "4410 W THOMAS RD",
+      "zip_code": "85031",
+      "land_use": "SINGLE FAMILY",
+      "acres": 0.18,
+      "effective_price": 195000.0,
+      "builder_matches": [
+        {
+          "parcel_id": "P-DISTRESSED-001",
+          "buyer_name": "MESA RIDGE CONSTRUCTION LLC",
+          "match_score": 45,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 45/100 for 'MESA RIDGE CONSTRUCTION LLC'. Parcel P-DISTRESSED-001 at 4410 W THOMAS RD. Active signals: LAND_USE_ALIGNMENT, HIGH_INVESTOR_SCORE, DISTRESSED_MATCH.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "SINGLE FAMILY",
+              "weight": 20,
+              "evidence": "Improved parcel aligns with cash-buyer/investor profile 'MESA RIDGE CONSTRUCTION LLC'"
+            },
+            {
+              "type": "HIGH_INVESTOR_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High investor confidence score 100/100 for improved parcel at 4410 W THOMAS RD"
+            },
+            {
+              "type": "DISTRESSED_MATCH",
+              "value": "DISTRESSED",
+              "weight": 10,
+              "evidence": "Distressed parcel P-DISTRESSED-001 matched to cash buyer 'MESA RIDGE CONSTRUCTION LLC'"
+            }
+          ]
+        },
+        {
+          "parcel_id": "P-DISTRESSED-001",
+          "buyer_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+          "match_score": 45,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 45/100 for 'VERDE VALLEY HOMES DEVELOPMENT INC'. Parcel P-DISTRESSED-001 at 4410 W THOMAS RD. Active signals: LAND_USE_ALIGNMENT, HIGH_INVESTOR_SCORE, DISTRESSED_MATCH.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "SINGLE FAMILY",
+              "weight": 20,
+              "evidence": "Improved parcel aligns with cash-buyer/investor profile 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            },
+            {
+              "type": "HIGH_INVESTOR_SCORE",
+              "value": "90",
+              "weight": 15,
+              "evidence": "High investor confidence score 90/100 for improved parcel at 4410 W THOMAS RD"
+            },
+            {
+              "type": "DISTRESSED_MATCH",
+              "value": "DISTRESSED",
+              "weight": 10,
+              "evidence": "Distressed parcel P-DISTRESSED-001 matched to cash buyer 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            }
+          ]
+        }
+      ],
+      "disposition_paths": [
+        {
+          "path_type": "WHOLESALE_TO_INVESTOR",
+          "confidence": 80,
+          "evidence": [
+            "Parcel is flagged as distressed",
+            "Parcel has been on market 120 days (\u226590 \u2014 motivated seller indicator)",
+            "Cash buyer available: 'SUNBELT ACQUISITIONS CAPITAL LLC' (investor score 100/100)",
+            "ARV $285,000 vs price $195,000 (46% spread)"
+          ],
+          "recommended_buyers": [
+            "SUNBELT ACQUISITIONS CAPITAL LLC",
+            "RIVERSTONE INVESTMENTS LLC"
+          ]
+        },
+        {
+          "path_type": "REHAB_FLIP",
+          "confidence": 80,
+          "evidence": [
+            "Distressed parcel with ARV spread: $285,000 / $195,000 = 46% upside",
+            "Investor match: 'SUNBELT ACQUISITIONS CAPITAL LLC' (score 100/100)",
+            "120 days on market"
+          ],
+          "recommended_buyers": [
+            "SUNBELT ACQUISITIONS CAPITAL LLC",
+            "RIVERSTONE INVESTMENTS LLC"
+          ]
+        }
+      ]
+    },
+    {
+      "parcel_id": "P-INFILL-002",
+      "address": "815 E ROUTE 66",
+      "zip_code": "86046",
+      "land_use": "VACANT",
+      "acres": 0.3,
+      "effective_price": 118000.0,
+      "builder_matches": [
+        {
+          "parcel_id": "P-INFILL-002",
+          "buyer_name": "MESA RIDGE CONSTRUCTION LLC",
+          "match_score": 100,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 100/100 for 'MESA RIDGE CONSTRUCTION LLC'. Parcel P-INFILL-002 at 815 E ROUTE 66. Active signals: ENTITY_TYPE_MATCH, PRICE_FIT, HIGH_BUILDER_SCORE, LAND_USE_ALIGNMENT, NEARBY_BUILDER_ACTIVITY, PERMIT_ALIGNMENT, INFILL_OPPORTUNITY.",
+          "signal_evidence": [
+            {
+              "type": "PRICE_FIT",
+              "value": "$118,000",
+              "weight": 20,
+              "evidence": "Parcel price $118,000 is within buyer's historical range $52,600\u2013$122,733 (avg $87,667)"
+            },
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "VACANT",
+              "weight": 20,
+              "evidence": "Vacant/unimproved parcel aligns with verified builder profile 'MESA RIDGE CONSTRUCTION LLC'"
+            },
+            {
+              "type": "INFILL_OPPORTUNITY",
+              "value": "builder_score=100",
+              "weight": 20,
+              "evidence": "Vacant infill opportunity for 'MESA RIDGE CONSTRUCTION LLC' (builder score 100/100)"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'MESA RIDGE CONSTRUCTION LLC' matched to investment-grade parcel (VACANT)"
+            },
+            {
+              "type": "HIGH_BUILDER_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High builder confidence score 100/100 for vacant parcel at 815 E ROUTE 66"
+            },
+            {
+              "type": "PERMIT_ALIGNMENT",
+              "value": "PERMIT_HISTORY",
+              "weight": 15,
+              "evidence": "Builder 'MESA RIDGE CONSTRUCTION LLC' has permit history \u2014 aligned with vacant parcel P-INFILL-002"
+            },
+            {
+              "type": "NEARBY_BUILDER_ACTIVITY",
+              "value": "86046",
+              "weight": 20,
+              "evidence": "Active builder(s) in ZIP 86046: VERDE VALLEY HOMES DEVELOPMENT INC"
+            }
+          ]
+        },
+        {
+          "parcel_id": "P-INFILL-002",
+          "buyer_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+          "match_score": 100,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 100/100 for 'VERDE VALLEY HOMES DEVELOPMENT INC'. Parcel P-INFILL-002 at 815 E ROUTE 66. Active signals: ENTITY_TYPE_MATCH, PRICE_BELOW_AVG, PRICE_FIT, ZIP_MATCH, HIGH_BUILDER_SCORE, LAND_USE_ALIGNMENT, NEARBY_BUILDER_ACTIVITY, PERMIT_ALIGNMENT, INFILL_OPPORTUNITY.",
+          "signal_evidence": [
+            {
+              "type": "ZIP_MATCH",
+              "value": "86046",
+              "weight": 25,
+              "evidence": "Parcel ZIP 86046 matches buyer's active ZIP codes: 86046"
+            },
+            {
+              "type": "PRICE_FIT",
+              "value": "$118,000",
+              "weight": 20,
+              "evidence": "Parcel price $118,000 is within buyer's historical range $76,500\u2013$178,500 (avg $127,500)"
+            },
+            {
+              "type": "PRICE_BELOW_AVG",
+              "value": "$118,000",
+              "weight": 10,
+              "evidence": "Parcel price $118,000 is below buyer's average acquisition of $127,500"
+            },
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "VACANT",
+              "weight": 20,
+              "evidence": "Vacant/unimproved parcel aligns with verified builder profile 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            },
+            {
+              "type": "INFILL_OPPORTUNITY",
+              "value": "builder_score=100",
+              "weight": 20,
+              "evidence": "Vacant infill opportunity for 'VERDE VALLEY HOMES DEVELOPMENT INC' (builder score 100/100)"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'VERDE VALLEY HOMES DEVELOPMENT INC' matched to investment-grade parcel (VACANT)"
+            },
+            {
+              "type": "HIGH_BUILDER_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High builder confidence score 100/100 for vacant parcel at 815 E ROUTE 66"
+            },
+            {
+              "type": "PERMIT_ALIGNMENT",
+              "value": "PERMIT_HISTORY",
+              "weight": 15,
+              "evidence": "Builder 'VERDE VALLEY HOMES DEVELOPMENT INC' has permit history \u2014 aligned with vacant parcel P-INFILL-002"
+            },
+            {
+              "type": "NEARBY_BUILDER_ACTIVITY",
+              "value": "86046",
+              "weight": 20,
+              "evidence": "Active builder(s) in ZIP 86046: VERDE VALLEY HOMES DEVELOPMENT INC"
+            }
+          ]
+        }
+      ],
+      "disposition_paths": [
+        {
+          "path_type": "INFILL_BUILD",
+          "confidence": 90,
+          "evidence": [
+            "Parcel is vacant/unimproved (land use: VACANT)",
+            "Top builder match: 'MESA RIDGE CONSTRUCTION LLC' (score 100/100)",
+            "Existing permit activity (1 permit(s))",
+            "Parcel size 0.30 acres \u2014 typical infill lot"
+          ],
+          "recommended_buyers": [
+            "MESA RIDGE CONSTRUCTION LLC",
+            "VERDE VALLEY HOMES DEVELOPMENT INC"
+          ]
+        },
+        {
+          "path_type": "WHOLESALE_TO_INVESTOR",
+          "confidence": 15,
+          "evidence": [
+            "Cash buyer available: 'SUNBELT ACQUISITIONS CAPITAL LLC' (investor score 45/100)"
+          ],
+          "recommended_buyers": [
+            "SUNBELT ACQUISITIONS CAPITAL LLC",
+            "RIVERSTONE INVESTMENTS LLC"
+          ]
+        }
+      ]
+    },
+    {
+      "parcel_id": "P-INVEST-001",
+      "address": "2215 E CAMELBACK RD",
+      "zip_code": "85016",
+      "land_use": "COMMERCIAL",
+      "acres": 0.5,
+      "effective_price": 495000.0,
+      "builder_matches": [
+        {
+          "parcel_id": "P-INVEST-001",
+          "buyer_name": "MESA RIDGE CONSTRUCTION LLC",
+          "match_score": 50,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 50/100 for 'MESA RIDGE CONSTRUCTION LLC'. Parcel P-INVEST-001 at 2215 E CAMELBACK RD. Active signals: LAND_USE_ALIGNMENT, HIGH_INVESTOR_SCORE, ENTITY_TYPE_MATCH.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "COMMERCIAL",
+              "weight": 20,
+              "evidence": "Improved parcel aligns with cash-buyer/investor profile 'MESA RIDGE CONSTRUCTION LLC'"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'MESA RIDGE CONSTRUCTION LLC' matched to investment-grade parcel (COMMERCIAL)"
+            },
+            {
+              "type": "HIGH_INVESTOR_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High investor confidence score 100/100 for improved parcel at 2215 E CAMELBACK RD"
+            }
+          ]
+        },
+        {
+          "parcel_id": "P-INVEST-001",
+          "buyer_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+          "match_score": 50,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 50/100 for 'VERDE VALLEY HOMES DEVELOPMENT INC'. Parcel P-INVEST-001 at 2215 E CAMELBACK RD. Active signals: LAND_USE_ALIGNMENT, HIGH_INVESTOR_SCORE, ENTITY_TYPE_MATCH.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "COMMERCIAL",
+              "weight": 20,
+              "evidence": "Improved parcel aligns with cash-buyer/investor profile 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'VERDE VALLEY HOMES DEVELOPMENT INC' matched to investment-grade parcel (COMMERCIAL)"
+            },
+            {
+              "type": "HIGH_INVESTOR_SCORE",
+              "value": "90",
+              "weight": 15,
+              "evidence": "High investor confidence score 90/100 for improved parcel at 2215 E CAMELBACK RD"
+            }
+          ]
+        }
+      ],
+      "disposition_paths": [
+        {
+          "path_type": "WHOLESALE_TO_INVESTOR",
+          "confidence": 30,
+          "evidence": [
+            "Cash buyer available: 'RIVERSTONE INVESTMENTS LLC' (investor score 95/100)"
+          ],
+          "recommended_buyers": [
+            "RIVERSTONE INVESTMENTS LLC",
+            "SUNBELT ACQUISITIONS CAPITAL LLC"
+          ]
+        },
+        {
+          "path_type": "RETAIL_LISTING",
+          "confidence": 30,
+          "evidence": [
+            "Improved COMMERCIAL parcel at 2215 E CAMELBACK RD",
+            "Entity buyers present but standard retail path also viable"
+          ],
+          "recommended_buyers": [
+            "RIVERSTONE INVESTMENTS LLC",
+            "MESA RIDGE CONSTRUCTION LLC"
+          ]
+        }
+      ]
+    },
+    {
+      "parcel_id": "P-LARGE-001",
+      "address": "1200 S RURAL RD",
+      "zip_code": "85225",
+      "land_use": "VACANT",
+      "acres": 3.5,
+      "effective_price": 650000.0,
+      "builder_matches": [
+        {
+          "parcel_id": "P-LARGE-001",
+          "buyer_name": "MESA RIDGE CONSTRUCTION LLC",
+          "match_score": 85,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 85/100 for 'MESA RIDGE CONSTRUCTION LLC'. Parcel P-LARGE-001 at 1200 S RURAL RD. Active signals: ENTITY_TYPE_MATCH, HIGH_BUILDER_SCORE, LAND_USE_ALIGNMENT, PERMIT_ALIGNMENT, INFILL_OPPORTUNITY.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "VACANT",
+              "weight": 20,
+              "evidence": "Vacant/unimproved parcel aligns with verified builder profile 'MESA RIDGE CONSTRUCTION LLC'"
+            },
+            {
+              "type": "INFILL_OPPORTUNITY",
+              "value": "builder_score=100",
+              "weight": 20,
+              "evidence": "Vacant infill opportunity for 'MESA RIDGE CONSTRUCTION LLC' (builder score 100/100)"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'MESA RIDGE CONSTRUCTION LLC' matched to investment-grade parcel (VACANT)"
+            },
+            {
+              "type": "HIGH_BUILDER_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High builder confidence score 100/100 for vacant parcel at 1200 S RURAL RD"
+            },
+            {
+              "type": "PERMIT_ALIGNMENT",
+              "value": "PERMIT_HISTORY",
+              "weight": 15,
+              "evidence": "Builder 'MESA RIDGE CONSTRUCTION LLC' has permit history \u2014 aligned with vacant parcel P-LARGE-001"
+            }
+          ]
+        },
+        {
+          "parcel_id": "P-LARGE-001",
+          "buyer_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+          "match_score": 85,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 85/100 for 'VERDE VALLEY HOMES DEVELOPMENT INC'. Parcel P-LARGE-001 at 1200 S RURAL RD. Active signals: ENTITY_TYPE_MATCH, HIGH_BUILDER_SCORE, LAND_USE_ALIGNMENT, PERMIT_ALIGNMENT, INFILL_OPPORTUNITY.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "VACANT",
+              "weight": 20,
+              "evidence": "Vacant/unimproved parcel aligns with verified builder profile 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            },
+            {
+              "type": "INFILL_OPPORTUNITY",
+              "value": "builder_score=100",
+              "weight": 20,
+              "evidence": "Vacant infill opportunity for 'VERDE VALLEY HOMES DEVELOPMENT INC' (builder score 100/100)"
+            },
+            {
+              "type": "ENTITY_TYPE_MATCH",
+              "value": "LLC_ENTITY",
+              "weight": 15,
+              "evidence": "LLC/entity buyer 'VERDE VALLEY HOMES DEVELOPMENT INC' matched to investment-grade parcel (VACANT)"
+            },
+            {
+              "type": "HIGH_BUILDER_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High builder confidence score 100/100 for vacant parcel at 1200 S RURAL RD"
+            },
+            {
+              "type": "PERMIT_ALIGNMENT",
+              "value": "PERMIT_HISTORY",
+              "weight": 15,
+              "evidence": "Builder 'VERDE VALLEY HOMES DEVELOPMENT INC' has permit history \u2014 aligned with vacant parcel P-LARGE-001"
+            }
+          ]
+        }
+      ],
+      "disposition_paths": [
+        {
+          "path_type": "INFILL_BUILD",
+          "confidence": 70,
+          "evidence": [
+            "Parcel is vacant/unimproved (land use: VACANT)",
+            "Top builder match: 'MESA RIDGE CONSTRUCTION LLC' (score 85/100)"
+          ],
+          "recommended_buyers": [
+            "MESA RIDGE CONSTRUCTION LLC",
+            "VERDE VALLEY HOMES DEVELOPMENT INC"
+          ]
+        },
+        {
+          "path_type": "HOLD_FOR_DEVELOPMENT",
+          "confidence": 35,
+          "evidence": [
+            "Large vacant parcel: 3.50 acres (\u22651.0 acre threshold)",
+            "Some buyer interest present but large-scale development may be optimal",
+            "Zoning: C-2"
+          ],
+          "recommended_buyers": [
+            "MESA RIDGE CONSTRUCTION LLC",
+            "VERDE VALLEY HOMES DEVELOPMENT INC"
+          ]
+        },
+        {
+          "path_type": "WHOLESALE_TO_INVESTOR",
+          "confidence": 26,
+          "evidence": [
+            "Parcel has been on market 210 days (\u226590 \u2014 motivated seller indicator)",
+            "Cash buyer available: 'SUNBELT ACQUISITIONS CAPITAL LLC' (investor score 35/100)"
+          ],
+          "recommended_buyers": [
+            "SUNBELT ACQUISITIONS CAPITAL LLC",
+            "RIVERSTONE INVESTMENTS LLC"
+          ]
+        }
+      ]
+    },
+    {
+      "parcel_id": "P-STD-001",
+      "address": "11 MAPLE AVE",
+      "zip_code": "85251",
+      "land_use": "SINGLE FAMILY",
+      "acres": 0.22,
+      "effective_price": 425000.0,
+      "builder_matches": [
+        {
+          "parcel_id": "P-STD-001",
+          "buyer_name": "MESA RIDGE CONSTRUCTION LLC",
+          "match_score": 35,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 35/100 for 'MESA RIDGE CONSTRUCTION LLC'. Parcel P-STD-001 at 11 MAPLE AVE. Active signals: LAND_USE_ALIGNMENT, HIGH_INVESTOR_SCORE.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "SINGLE FAMILY",
+              "weight": 20,
+              "evidence": "Improved parcel aligns with cash-buyer/investor profile 'MESA RIDGE CONSTRUCTION LLC'"
+            },
+            {
+              "type": "HIGH_INVESTOR_SCORE",
+              "value": "100",
+              "weight": 15,
+              "evidence": "High investor confidence score 100/100 for improved parcel at 11 MAPLE AVE"
+            }
+          ]
+        },
+        {
+          "parcel_id": "P-STD-001",
+          "buyer_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+          "match_score": 35,
+          "match_type": "BUILDER",
+          "disposition_path": "",
+          "summary": "BUILDER match score 35/100 for 'VERDE VALLEY HOMES DEVELOPMENT INC'. Parcel P-STD-001 at 11 MAPLE AVE. Active signals: LAND_USE_ALIGNMENT, HIGH_INVESTOR_SCORE.",
+          "signal_evidence": [
+            {
+              "type": "LAND_USE_ALIGNMENT",
+              "value": "SINGLE FAMILY",
+              "weight": 20,
+              "evidence": "Improved parcel aligns with cash-buyer/investor profile 'VERDE VALLEY HOMES DEVELOPMENT INC'"
+            },
+            {
+              "type": "HIGH_INVESTOR_SCORE",
+              "value": "90",
+              "weight": 15,
+              "evidence": "High investor confidence score 90/100 for improved parcel at 11 MAPLE AVE"
+            }
+          ]
+        }
+      ],
+      "disposition_paths": [
+        {
+          "path_type": "RETAIL_LISTING",
+          "confidence": 40,
+          "evidence": [
+            "Improved SINGLE FAMILY parcel at 11 MAPLE AVE",
+            "Entity buyers present but standard retail path also viable",
+            "Recently listed (12 days on market)"
+          ],
+          "recommended_buyers": [
+            "RIVERSTONE INVESTMENTS LLC",
+            "MESA RIDGE CONSTRUCTION LLC"
+          ]
+        },
+        {
+          "path_type": "WHOLESALE_TO_INVESTOR",
+          "confidence": 21,
+          "evidence": [
+            "Cash buyer available: 'RIVERSTONE INVESTMENTS LLC' (investor score 65/100)"
+          ],
+          "recommended_buyers": [
+            "RIVERSTONE INVESTMENTS LLC",
+            "SUNBELT ACQUISITIONS CAPITAL LLC"
+          ]
+        }
+      ]
+    }
+  ]
+}

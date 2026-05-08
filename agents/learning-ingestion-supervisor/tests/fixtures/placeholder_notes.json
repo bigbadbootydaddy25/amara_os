@@ -1,0 +1,17 @@
+{
+  "ingestion_id": "vid-002",
+  "title": "Machine Learning Fundamentals",
+  "agent_source": "universal-skill-learner",
+  "transcript": "This video covers the basics of machine learning including supervised and unsupervised learning methods gradient descent and neural networks.",
+  "notes": "[placeholder] Auto-generated summary pending review. TODO: fill in key concepts.",
+  "workflows": [
+    {
+      "name": "Train a simple model",
+      "steps": ["[Insert step here]", "[placeholder]"]
+    }
+  ],
+  "cognitive_gym_score": 0.3,
+  "authenticity_gate": {"passed": true},
+  "source_url": "https://example.com/video/ml-fundamentals",
+  "source_evidence": "universal-skill-learner/run-2024-01-16.log"
+}

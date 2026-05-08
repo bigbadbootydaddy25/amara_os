@@ -1,0 +1,35 @@
+{
+  "ingestion_id": "vid-005",
+  "title": "Building a REST API with FastAPI",
+  "agent_source": "universal-skill-learner",
+  "transcript": "FastAPI is a modern Python web framework for building APIs. It leverages Python type hints for automatic validation and documentation generation. In this tutorial we will build a complete REST API from scratch covering path parameters query parameters request bodies response models dependency injection and authentication. We will also cover async database access with SQLAlchemy and write integration tests using pytest and httpx. By the end you will have a production-ready API structure.",
+  "notes": "Key concepts: path operations, Pydantic models, dependency injection, OAuth2 with JWT, async SQLAlchemy sessions, pytest fixtures for testing.",
+  "workflows": [
+    {
+      "name": "Scaffold a new FastAPI project",
+      "steps": [
+        "Create a virtual environment: python -m venv venv && source venv/bin/activate",
+        "Install dependencies: pip install fastapi uvicorn sqlalchemy asyncpg pydantic",
+        "Create main.py with FastAPI() app instance",
+        "Define Pydantic models for request/response in schemas.py",
+        "Implement CRUD router in routers/items.py",
+        "Wire router into app: app.include_router(items.router)",
+        "Run dev server: uvicorn main:app --reload"
+      ]
+    },
+    {
+      "name": "Add JWT authentication",
+      "steps": [
+        "Install python-jose and passlib: pip install python-jose[cryptography] passlib[bcrypt]",
+        "Create auth.py with password hashing and JWT token generation",
+        "Add /token endpoint that returns access_token",
+        "Create get_current_user dependency using OAuth2PasswordBearer",
+        "Protect routes by injecting Depends(get_current_user)"
+      ]
+    }
+  ],
+  "cognitive_gym_score": 0.91,
+  "authenticity_gate": {"passed": true},
+  "source_url": "https://example.com/video/fastapi-tutorial",
+  "source_evidence": "universal-skill-learner/run-2024-01-20.log"
+}

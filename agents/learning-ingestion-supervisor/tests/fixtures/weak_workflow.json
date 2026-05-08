@@ -1,0 +1,14 @@
+{
+  "ingestion_id": "vid-004",
+  "title": "Docker Compose for Development",
+  "agent_source": "universal-skill-learner",
+  "transcript": "Docker Compose simplifies running multi-container applications. You define services in a YAML file and bring everything up with a single command.",
+  "notes": "Covers docker-compose.yml structure.",
+  "workflows": [
+    {
+      "name": "Start services",
+      "steps": ["Run docker compose up"]
+    }
+  ],
+  "cognitive_gym_score": 0.18
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "ingestion_id": "vid-003-original",
+    "title": "Kubernetes Networking Deep Dive",
+    "agent_source": "video-ingestion-orchestrator",
+    "transcript": "In this session we explore Kubernetes networking including pod to pod communication service discovery DNS resolution and network policies that govern traffic between namespaces and pods in a cluster environment.",
+    "notes": "Key topics: pod networking, CNI plugins, service mesh, ingress controllers.",
+    "workflows": [
+      {
+        "name": "Set up a NetworkPolicy",
+        "steps": [
+          "Create a NetworkPolicy manifest targeting your pod selector",
+          "Define ingress rules to allow traffic from permitted namespaces",
+          "Apply with kubectl apply -f networkpolicy.yaml",
+          "Verify with kubectl describe networkpolicy"
+        ]
+      }
+    ],
+    "cognitive_gym_score": 0.82,
+    "authenticity_gate": true,
+    "source_url": "https://example.com/video/k8s-networking",
+    "source_evidence": "video-ingestion-orchestrator/run-2024-01-17.log"
+  },
+  {
+    "ingestion_id": "vid-003-duplicate",
+    "title": "Kubernetes Networking Deep Dive (re-ingested)",
+    "agent_source": "video-ingestion-orchestrator",
+    "transcript": "In this session we explore Kubernetes networking including pod to pod communication service discovery DNS resolution and network policies that govern traffic between namespaces and pods in a cluster environment.",
+    "notes": "Key topics: pod networking, CNI plugins, service mesh, ingress controllers.",
+    "workflows": [
+      {
+        "name": "Set up a NetworkPolicy",
+        "steps": [
+          "Create a NetworkPolicy manifest targeting your pod selector",
+          "Define ingress rules to allow traffic from permitted namespaces",
+          "Apply with kubectl apply -f networkpolicy.yaml",
+          "Verify with kubectl describe networkpolicy"
+        ]
+      }
+    ],
+    "cognitive_gym_score": 0.82,
+    "authenticity_gate": true,
+    "source_url": "https://example.com/video/k8s-networking",
+    "source_evidence": "video-ingestion-orchestrator/run-2024-01-18.log"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "ingestion_id": "vid-001",
+  "title": "Advanced Python Async Patterns",
+  "agent_source": "video-ingestion-orchestrator",
+  "transcript": "",
+  "notes": "",
+  "workflows": [],
+  "source_url": "https://example.com/video/python-async",
+  "source_evidence": "video-ingestion-orchestrator/run-2024-01-15.log"
+}

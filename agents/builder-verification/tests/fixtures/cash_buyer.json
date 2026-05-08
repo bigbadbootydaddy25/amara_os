@@ -1,0 +1,16 @@
+{
+  "record_id": "rec-002",
+  "owner_name": "Westside Capital Holdings LLC",
+  "parcel_id": "09-14-215-003",
+  "parcel_address": "87 Maple Ave, Riverside, IL 60546",
+  "mailing_address": "1 Financial Plaza, Chicago, IL 60602",
+  "sale_price": 125000,
+  "sale_date": "2024-01-08",
+  "land_use": "vacant",
+  "permit_count": 0,
+  "entity_type": "LLC",
+  "nearby_parcel_count": 1,
+  "prior_acquisitions": 8,
+  "purchase_cluster_days": 41,
+  "source_file": "county_records/2024_Q1_sales.csv"
+}

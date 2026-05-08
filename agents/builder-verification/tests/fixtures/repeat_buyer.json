@@ -1,0 +1,15 @@
+{
+  "record_id": "rec-003",
+  "owner_name": "Robert Chen",
+  "parcel_id": "05-08-112-019",
+  "parcel_address": "204 Oak Lane, Belleville, IL 62220",
+  "mailing_address": "204 Oak Lane, Belleville, IL 62220",
+  "sale_price": 92000,
+  "sale_date": "2024-02-20",
+  "land_use": "residential",
+  "permit_count": 0,
+  "entity_type": "INDIVIDUAL",
+  "nearby_parcel_count": 0,
+  "prior_acquisitions": 4,
+  "source_file": "county_records/2024_Q1_sales.csv"
+}

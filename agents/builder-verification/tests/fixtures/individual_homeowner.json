@@ -1,0 +1,15 @@
+{
+  "record_id": "rec-005",
+  "owner_name": "Maria Santos",
+  "parcel_id": "02-17-088-004",
+  "parcel_address": "631 Pine Street, Alton, IL 62002",
+  "mailing_address": "631 Pine Street, Alton, IL 62002",
+  "sale_price": 215000,
+  "sale_date": "2024-04-01",
+  "land_use": "residential",
+  "permit_count": 0,
+  "entity_type": "INDIVIDUAL",
+  "nearby_parcel_count": 0,
+  "prior_acquisitions": 1,
+  "source_file": "county_records/2024_Q2_sales.csv"
+}

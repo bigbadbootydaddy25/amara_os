@@ -1,0 +1,10 @@
+{
+  "record_id": "rec-004",
+  "owner_name": "",
+  "parcel_id": "11-33-400-001",
+  "parcel_address": "Unknown",
+  "land_use": "vacant",
+  "permit_count": 2,
+  "entity_type": "LLC",
+  "source_file": "county_records/2024_Q1_sales.csv"
+}

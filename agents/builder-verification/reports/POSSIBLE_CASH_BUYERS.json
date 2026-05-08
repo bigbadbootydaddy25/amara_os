@@ -1,0 +1,310 @@
+{
+  "generated_at": "2026-05-08T22:44:37.764933Z",
+  "count": 4,
+  "cash_buyers": [
+    {
+      "owner_name": "MESA RIDGE CONSTRUCTION LLC",
+      "parcel_count": 3,
+      "parcel_ids": [
+        "001-001-001",
+        "001-001-002",
+        "001-001-003"
+      ],
+      "zip_codes": [
+        "85001"
+      ],
+      "acquisition_dates": [
+        "2024-03-15",
+        "2024-03-22",
+        "2024-04-01"
+      ],
+      "total_spend": 263000.0,
+      "builder_score": 100,
+      "investor_score": 100,
+      "is_verified_builder": true,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "VERIFIED BUILDER (score 100/100). POSSIBLE CASH BUYER (investor score 100/100). Holds 3 parcel(s) across 1 ZIP code(s). Total recorded spend: $263,000. Active signals: RECENT_PURCHASE_CLUSTERING, PERMIT_ACTIVITY, MULTIPLE_NEARBY_PARCELS, REPEAT_ACQUISITIONS, ROUND_SALE_PRICE, MAILING_MISMATCH, BUILDER_KEYWORD, INFILL_ACTIVITY, VACANT_LAND_CONCENTRATION, LLC_COMPANY, VACANT_LAND.",
+      "signal_evidence": [
+        {
+          "type": "LLC_COMPANY",
+          "value": "LLC",
+          "weight": 15,
+          "evidence": "Owner name 'MESA RIDGE CONSTRUCTION LLC' contains entity suffix 'LLC'"
+        },
+        {
+          "type": "BUILDER_KEYWORD",
+          "value": "CONSTRUCTION",
+          "weight": 20,
+          "evidence": "Owner name 'MESA RIDGE CONSTRUCTION LLC' contains builder keyword 'CONSTRUCTION'"
+        },
+        {
+          "type": "VACANT_LAND",
+          "value": "is_vacant=True",
+          "weight": 15,
+          "evidence": "Parcel 001-001-001 flagged as vacant"
+        },
+        {
+          "type": "PERMIT_ACTIVITY",
+          "value": "2",
+          "weight": 25,
+          "evidence": "Parcel 001-001-001 has 2 permit(s) on file"
+        },
+        {
+          "type": "MAILING_MISMATCH",
+          "value": "PO BOX 5500 PHOENIX AZ 85001",
+          "weight": 20,
+          "evidence": "Mailing 'PO BOX 5500 PHOENIX AZ 85001' differs from property address '123 VACANT LOT RD PHOENIX AZ 85001'"
+        },
+        {
+          "type": "ROUND_SALE_PRICE",
+          "value": "85000.0",
+          "weight": 5,
+          "evidence": "Sale price $85,000 is a round number (cash indicator)"
+        },
+        {
+          "type": "REPEAT_ACQUISITIONS",
+          "value": "3",
+          "weight": 15,
+          "evidence": "Owner 'MESA RIDGE CONSTRUCTION LLC' acquired 3 parcels"
+        },
+        {
+          "type": "MULTIPLE_NEARBY_PARCELS",
+          "value": "85001",
+          "weight": 20,
+          "evidence": "Owner 'MESA RIDGE CONSTRUCTION LLC' holds 3 parcels in ZIP 85001"
+        },
+        {
+          "type": "RECENT_PURCHASE_CLUSTERING",
+          "value": "3 purchases within 90 days",
+          "weight": 10,
+          "evidence": "Owner 'MESA RIDGE CONSTRUCTION LLC' made 3 purchases within a 90-day window starting 2024-03-15"
+        },
+        {
+          "type": "VACANT_LAND_CONCENTRATION",
+          "value": "3",
+          "weight": 20,
+          "evidence": "Owner 'MESA RIDGE CONSTRUCTION LLC' owns 3 vacant/unimproved parcels"
+        },
+        {
+          "type": "INFILL_ACTIVITY",
+          "value": "2 parcels / 3 permits",
+          "weight": 25,
+          "evidence": "Owner 'MESA RIDGE CONSTRUCTION LLC' has permits on 2 vacant parcel(s) \u2014 indicates infill development"
+        }
+      ]
+    },
+    {
+      "owner_name": "SUNBELT ACQUISITIONS CAPITAL LLC",
+      "parcel_count": 3,
+      "parcel_ids": [
+        "002-001-001",
+        "002-001-002",
+        "002-001-003"
+      ],
+      "zip_codes": [
+        "85031",
+        "85043"
+      ],
+      "acquisition_dates": [
+        "2024-01-10",
+        "2024-01-18",
+        "2024-02-05"
+      ],
+      "total_spend": 770000.0,
+      "builder_score": 58,
+      "investor_score": 100,
+      "is_verified_builder": true,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "VERIFIED BUILDER (score 58/100). POSSIBLE CASH BUYER (investor score 100/100). Holds 3 parcel(s) across 2 ZIP code(s). Total recorded spend: $770,000. Active signals: RECENT_PURCHASE_CLUSTERING, MULTIPLE_NEARBY_PARCELS, INVESTOR_KEYWORD, REPEAT_ACQUISITIONS, ROUND_SALE_PRICE, MAILING_MISMATCH, LLC_COMPANY.",
+      "signal_evidence": [
+        {
+          "type": "LLC_COMPANY",
+          "value": "ACQUISITIONS",
+          "weight": 15,
+          "evidence": "Owner name 'SUNBELT ACQUISITIONS CAPITAL LLC' contains entity suffix 'ACQUISITIONS'"
+        },
+        {
+          "type": "INVESTOR_KEYWORD",
+          "value": "ACQUISITIONS",
+          "weight": 10,
+          "evidence": "Owner name 'SUNBELT ACQUISITIONS CAPITAL LLC' contains investor keyword 'ACQUISITIONS'"
+        },
+        {
+          "type": "MAILING_MISMATCH",
+          "value": "1800 N CENTRAL AVE STE 200 PHOENIX AZ 85012",
+          "weight": 20,
+          "evidence": "Mailing '1800 N CENTRAL AVE STE 200 PHOENIX AZ 85012' differs from property address '4400 W THOMAS RD PHOENIX AZ 85031'"
+        },
+        {
+          "type": "ROUND_SALE_PRICE",
+          "value": "250000.0",
+          "weight": 5,
+          "evidence": "Sale price $250,000 is a round number (cash indicator)"
+        },
+        {
+          "type": "REPEAT_ACQUISITIONS",
+          "value": "3",
+          "weight": 15,
+          "evidence": "Owner 'SUNBELT ACQUISITIONS CAPITAL LLC' acquired 3 parcels"
+        },
+        {
+          "type": "MULTIPLE_NEARBY_PARCELS",
+          "value": "85031",
+          "weight": 20,
+          "evidence": "Owner 'SUNBELT ACQUISITIONS CAPITAL LLC' holds 2 parcels in ZIP 85031"
+        },
+        {
+          "type": "RECENT_PURCHASE_CLUSTERING",
+          "value": "3 purchases within 90 days",
+          "weight": 10,
+          "evidence": "Owner 'SUNBELT ACQUISITIONS CAPITAL LLC' made 3 purchases within a 90-day window starting 2024-01-10"
+        }
+      ]
+    },
+    {
+      "owner_name": "VERDE VALLEY HOMES DEVELOPMENT INC",
+      "parcel_count": 2,
+      "parcel_ids": [
+        "004-001-001",
+        "004-001-002"
+      ],
+      "zip_codes": [
+        "86046"
+      ],
+      "acquisition_dates": [
+        "2024-06-01",
+        "2024-06-15"
+      ],
+      "total_spend": 255000.0,
+      "builder_score": 100,
+      "investor_score": 90,
+      "is_verified_builder": true,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "VERIFIED BUILDER (score 100/100). POSSIBLE CASH BUYER (investor score 90/100). Holds 2 parcel(s) across 1 ZIP code(s). Total recorded spend: $255,000. Active signals: RECENT_PURCHASE_CLUSTERING, PERMIT_ACTIVITY, MULTIPLE_NEARBY_PARCELS, ROUND_SALE_PRICE, MAILING_MISMATCH, BUILDER_KEYWORD, INFILL_ACTIVITY, VACANT_LAND_CONCENTRATION, LLC_COMPANY, VACANT_LAND.",
+      "signal_evidence": [
+        {
+          "type": "LLC_COMPANY",
+          "value": "INC",
+          "weight": 15,
+          "evidence": "Owner name 'VERDE VALLEY HOMES DEVELOPMENT INC' contains entity suffix 'INC'"
+        },
+        {
+          "type": "BUILDER_KEYWORD",
+          "value": "HOMES",
+          "weight": 20,
+          "evidence": "Owner name 'VERDE VALLEY HOMES DEVELOPMENT INC' contains builder keyword 'HOMES'"
+        },
+        {
+          "type": "VACANT_LAND",
+          "value": "is_vacant=True",
+          "weight": 15,
+          "evidence": "Parcel 004-001-001 flagged as vacant"
+        },
+        {
+          "type": "PERMIT_ACTIVITY",
+          "value": "3",
+          "weight": 25,
+          "evidence": "Parcel 004-001-001 has 3 permit(s) on file"
+        },
+        {
+          "type": "MAILING_MISMATCH",
+          "value": "333 N LEROUX ST FLAGSTAFF AZ 86001",
+          "weight": 20,
+          "evidence": "Mailing '333 N LEROUX ST FLAGSTAFF AZ 86001' differs from property address '800 E ROUTE 66 WILLIAMS AZ 86046'"
+        },
+        {
+          "type": "ROUND_SALE_PRICE",
+          "value": "125000.0",
+          "weight": 5,
+          "evidence": "Sale price $125,000 is a round number (cash indicator)"
+        },
+        {
+          "type": "MULTIPLE_NEARBY_PARCELS",
+          "value": "86046",
+          "weight": 20,
+          "evidence": "Owner 'VERDE VALLEY HOMES DEVELOPMENT INC' holds 2 parcels in ZIP 86046"
+        },
+        {
+          "type": "RECENT_PURCHASE_CLUSTERING",
+          "value": "2 purchases within 90 days",
+          "weight": 10,
+          "evidence": "Owner 'VERDE VALLEY HOMES DEVELOPMENT INC' made 2 purchases within a 90-day window starting 2024-06-01"
+        },
+        {
+          "type": "VACANT_LAND_CONCENTRATION",
+          "value": "2",
+          "weight": 20,
+          "evidence": "Owner 'VERDE VALLEY HOMES DEVELOPMENT INC' owns 2 vacant/unimproved parcels"
+        },
+        {
+          "type": "INFILL_ACTIVITY",
+          "value": "2 parcels / 5 permits",
+          "weight": 25,
+          "evidence": "Owner 'VERDE VALLEY HOMES DEVELOPMENT INC' has permits on 2 vacant parcel(s) \u2014 indicates infill development"
+        }
+      ]
+    },
+    {
+      "owner_name": "RIVERSTONE INVESTMENTS LLC",
+      "parcel_count": 2,
+      "parcel_ids": [
+        "006-001-001",
+        "006-001-002"
+      ],
+      "zip_codes": [
+        "85012",
+        "85016"
+      ],
+      "acquisition_dates": [
+        "2024-08-10",
+        "2024-09-02"
+      ],
+      "total_spend": 975000.0,
+      "builder_score": 25,
+      "investor_score": 75,
+      "is_verified_builder": false,
+      "is_possible_cash_buyer": true,
+      "is_quarantined": false,
+      "quarantine_reason": "",
+      "summary": "POSSIBLE CASH BUYER (investor score 75/100). Holds 2 parcel(s) across 2 ZIP code(s). Total recorded spend: $975,000. Active signals: RECENT_PURCHASE_CLUSTERING, INVESTOR_KEYWORD, ROUND_SALE_PRICE, MAILING_MISMATCH, LLC_COMPANY.",
+      "signal_evidence": [
+        {
+          "type": "LLC_COMPANY",
+          "value": "LLC",
+          "weight": 15,
+          "evidence": "Owner name 'RIVERSTONE INVESTMENTS LLC' contains entity suffix 'LLC'"
+        },
+        {
+          "type": "INVESTOR_KEYWORD",
+          "value": "INVESTMENTS",
+          "weight": 10,
+          "evidence": "Owner name 'RIVERSTONE INVESTMENTS LLC' contains investor keyword 'INVESTMENTS'"
+        },
+        {
+          "type": "MAILING_MISMATCH",
+          "value": "20 W KINZIE ST CHICAGO IL 60654",
+          "weight": 20,
+          "evidence": "Mailing '20 W KINZIE ST CHICAGO IL 60654' differs from property address '2201 E CAMELBACK RD PHOENIX AZ 85016'"
+        },
+        {
+          "type": "ROUND_SALE_PRICE",
+          "value": "500000.0",
+          "weight": 5,
+          "evidence": "Sale price $500,000 is a round number (cash indicator)"
+        },
+        {
+          "type": "RECENT_PURCHASE_CLUSTERING",
+          "value": "2 purchases within 90 days",
+          "weight": 10,
+          "evidence": "Owner 'RIVERSTONE INVESTMENTS LLC' made 2 purchases within a 90-day window starting 2024-08-10"
+        }
+      ]
+    }
+  ]
+}

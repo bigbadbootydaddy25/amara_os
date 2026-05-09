@@ -1,0 +1,41 @@
+[
+  {
+    "record_id": "cv-001",
+    "source_type": "code_violation",
+    "parcel_id": "22-41-100-005",
+    "address": "318 Pine Street, Springfield, IL 62703",
+    "owner_name": "Harold Trent",
+    "violation_type": "structural_deficiency",
+    "violation_date": "2026-11-10",
+    "violation_status": "open",
+    "is_severe": true,
+    "source_name": "Springfield Code Enforcement",
+    "source_url": "https://springfield.gov/code/cv-001"
+  },
+  {
+    "record_id": "cv-002",
+    "source_type": "code_violation",
+    "parcel_id": "22-41-100-005",
+    "address": "318 Pine Street, Springfield, IL 62703",
+    "owner_name": "Harold Trent",
+    "violation_type": "exterior_maintenance",
+    "violation_date": "2026-12-01",
+    "violation_status": "open",
+    "is_severe": false,
+    "source_name": "Springfield Code Enforcement",
+    "source_url": "https://springfield.gov/code/cv-002"
+  },
+  {
+    "record_id": "cv-003",
+    "source_type": "nuisance_violation",
+    "parcel_id": "22-41-100-005",
+    "address": "318 Pine Street, Springfield, IL 62703",
+    "owner_name": "Harold Trent",
+    "violation_type": "debris_accumulation",
+    "violation_date": "2027-01-20",
+    "violation_status": "open",
+    "is_severe": false,
+    "source_name": "Springfield Code Enforcement",
+    "source_url": "https://springfield.gov/code/cv-003"
+  }
+]

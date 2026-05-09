@@ -1,0 +1,65 @@
+[
+  {
+    "record_id": "fd-001",
+    "source_type": "notice_of_trustee_sale",
+    "parcel_id": "55-22-310-007",
+    "address": "900 Market Place Drive, Springfield, IL 62706",
+    "owner_name": "Bernard Kowalski",
+    "trustee_name": "Midwest Foreclosure Services LLC",
+    "substitute_trustee": null,
+    "trustee_firm": "Midwest Foreclosure Services LLC",
+    "sale_date": "2027-06-01",
+    "source_name": "Sangamon County Recorder",
+    "source_url": "https://sangamoncounty.net/recorder/fd-001"
+  },
+  {
+    "record_id": "fd-002",
+    "source_type": "substitute_trustee_record",
+    "parcel_id": "55-22-310-007",
+    "address": "900 Market Place Drive, Springfield, IL 62706",
+    "owner_name": "Bernard Kowalski",
+    "substitute_trustee": "Central Illinois Trustee Services Inc",
+    "trustee_firm": "Central Illinois Trustee Services Inc",
+    "sale_date": "2027-06-01",
+    "source_name": "Sangamon County Recorder",
+    "source_url": "https://sangamoncounty.net/recorder/fd-002"
+  },
+  {
+    "record_id": "fd-003",
+    "source_type": "code_violation",
+    "parcel_id": "55-22-310-007",
+    "address": "900 Market Place Drive, Springfield, IL 62706",
+    "owner_name": "Bernard Kowalski",
+    "violation_type": "structural_deficiency",
+    "violation_date": "2026-10-05",
+    "violation_status": "open",
+    "is_severe": true,
+    "source_name": "Springfield Code Enforcement",
+    "source_url": "https://springfield.gov/code/fd-003"
+  },
+  {
+    "record_id": "fd-004",
+    "source_type": "code_violation",
+    "parcel_id": "55-22-310-007",
+    "address": "900 Market Place Drive, Springfield, IL 62706",
+    "owner_name": "Bernard Kowalski",
+    "violation_type": "exterior_maintenance",
+    "violation_date": "2026-11-20",
+    "violation_status": "open",
+    "is_severe": false,
+    "source_name": "Springfield Code Enforcement",
+    "source_url": "https://springfield.gov/code/fd-004"
+  },
+  {
+    "record_id": "fd-005",
+    "source_type": "municipal_lien",
+    "parcel_id": "55-22-310-007",
+    "address": "900 Market Place Drive, Springfield, IL 62706",
+    "owner_name": "Bernard Kowalski",
+    "municipal_lien": true,
+    "lien_amount": 4200.00,
+    "lien_date": "2027-01-08",
+    "source_name": "City of Springfield Finance",
+    "source_url": "https://springfield.gov/finance/lien/fd-005"
+  }
+]

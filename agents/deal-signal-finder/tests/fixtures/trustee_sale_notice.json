@@ -1,0 +1,13 @@
+{
+  "record_id": "ts-001",
+  "source_type": "notice_of_trustee_sale",
+  "parcel_id": "11-33-200-010",
+  "address": "742 Elm Street, Springfield, IL 62701",
+  "owner_name": "James Owens",
+  "trustee_name": "First National Trust Corp",
+  "substitute_trustee": null,
+  "trustee_firm": "First National Trust Corp",
+  "sale_date": "2027-06-05",
+  "source_name": "Sangamon County Recorder",
+  "source_url": "https://sangamoncounty.net/recorder/ts-001"
+}

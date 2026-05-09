@@ -1,0 +1,13 @@
+{
+  "record_id": "dem-001",
+  "source_type": "demolition_condemnation",
+  "parcel_id": "33-12-050-009",
+  "address": "88 Vacant Lot Road, Springfield, IL 62704",
+  "owner_name": "Dorothy Vance",
+  "violation_type": "condemnation",
+  "violation_date": "2027-02-14",
+  "violation_status": "active",
+  "is_severe": true,
+  "source_name": "Springfield Building Department",
+  "source_url": "https://springfield.gov/building/dem-001"
+}

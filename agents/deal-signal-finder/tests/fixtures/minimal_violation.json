@@ -1,0 +1,13 @@
+{
+  "record_id": "nuisance-001",
+  "source_type": "nuisance_violation",
+  "parcel_id": "44-88-200-001",
+  "address": "512 Birch Court, Springfield, IL 62705",
+  "owner_name": "Patricia Nguyen",
+  "violation_type": "graffiti",
+  "violation_date": "2027-03-10",
+  "violation_status": "open",
+  "is_severe": false,
+  "source_name": "Springfield Code Enforcement",
+  "source_url": "https://springfield.gov/code/nuisance-001"
+}

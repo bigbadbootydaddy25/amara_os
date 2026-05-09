@@ -13,6 +13,10 @@ Coverage:
   - Output file generation
   - CLI entry point (dry-run, bad path, bad stdin)
   - Mixed-batch counts
+  - Research evidence extraction (SOS, website, profiles, county records)
+  - Source-backed confidence scoring and boosts
+  - Entity matching across batches
+  - Entity intelligence report generation
 """
 
 import json
@@ -28,7 +32,17 @@ from run import (
     BUILDER_THRESHOLD,
     INVESTOR_THRESHOLD,
     REPEAT_BUYER_MIN,
+    _MAX_BUILDER_BOOST,
+    _MAX_INVESTOR_BOOST,
+    _WR_SOS_ACTIVE,
+    _WR_CONSTRUCTION_PROFILE,
+    _WR_WEBSITE_CONSTRUCTION,
+    _WR_COUNTY_PERMIT_HEAVY,
+    _WR_CORROBORATION_3PLUS,
     BuyerType,
+    SourceType,
+    SourceCitation,
+    ResearchEvidence,
     BuilderVerificationAgent,
     BuyerSignals,
     _detect_builder_keywords,
@@ -36,6 +50,10 @@ from run import (
     _addresses_mismatch,
     _normalize_owner,
     _extract_signals,
+    _extract_research_evidence,
+    _research_confidence,
+    _research_builder_boost,
+    _research_investor_boost,
     _builder_score,
     _investor_score,
     _route,
@@ -748,6 +766,580 @@ class TestCLI(unittest.TestCase):
             self.assertEqual(code, 0)
         finally:
             os.unlink(fname)
+
+
+# ---------------------------------------------------------------------------
+# Load research fixtures
+# ---------------------------------------------------------------------------
+
+SOURCED_BUILDER  = _load("sourced_builder")
+PARTIAL_RESEARCH = _load("partial_research")
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: SourceType enum
+# ---------------------------------------------------------------------------
+
+
+class TestSourceType(unittest.TestCase):
+
+    def test_all_five_types_exist(self):
+        types = {
+            SourceType.SECRETARY_OF_STATE,
+            SourceType.WEBSITE,
+            SourceType.BUSINESS_PROFILE,
+            SourceType.SOCIAL_PROFILE,
+            SourceType.COUNTY_RECORDS,
+        }
+        self.assertEqual(len(types), 5)
+
+    def test_str_serialisable(self):
+        # str(Enum) returns repr in some Python versions; use .value for the raw string
+        self.assertEqual(SourceType.SECRETARY_OF_STATE.value, "secretary_of_state")
+
+    def test_used_as_dict_key(self):
+        d = {SourceType.WEBSITE: 0.72}
+        self.assertEqual(d[SourceType.WEBSITE], 0.72)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: SourceCitation
+# ---------------------------------------------------------------------------
+
+
+class TestSourceCitation(unittest.TestCase):
+
+    def test_fields_populated(self):
+        sc = SourceCitation(
+            source_type=SourceType.SECRETARY_OF_STATE,
+            name="Illinois SOS",
+            url="https://apps.ilsos.gov/",
+            reliability=0.97,
+        )
+        self.assertEqual(sc.source_type, SourceType.SECRETARY_OF_STATE)
+        self.assertEqual(sc.reliability, 0.97)
+
+    def test_url_optional(self):
+        sc = SourceCitation(source_type=SourceType.WEBSITE, name="site")
+        self.assertIsNone(sc.url)
+
+    def test_reliability_default_zero(self):
+        sc = SourceCitation(source_type=SourceType.SOCIAL_PROFILE, name="LinkedIn")
+        self.assertEqual(sc.reliability, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: ResearchEvidence
+# ---------------------------------------------------------------------------
+
+
+class TestResearchEvidence(unittest.TestCase):
+
+    def test_source_count_distinct_types(self):
+        ev = ResearchEvidence()
+        ev.sources.append(
+            SourceCitation(source_type=SourceType.SECRETARY_OF_STATE, name="SOS", reliability=0.97)
+        )
+        ev.sources.append(
+            SourceCitation(source_type=SourceType.WEBSITE, name="web", reliability=0.72)
+        )
+        # Two of the same type should still count as 1
+        ev.sources.append(
+            SourceCitation(source_type=SourceType.WEBSITE, name="web2", reliability=0.72)
+        )
+        self.assertEqual(ev.source_count, 2)
+
+    def test_default_booleans_false(self):
+        ev = ResearchEvidence()
+        self.assertFalse(ev.sos_registered)
+        self.assertFalse(ev.sos_active)
+        self.assertFalse(ev.website_construction)
+
+    def test_construction_profile_platforms_default_empty(self):
+        ev = ResearchEvidence()
+        self.assertEqual(ev.construction_profile_platforms, [])
+
+    def test_county_counts_default_zero(self):
+        ev = ResearchEvidence()
+        self.assertEqual(ev.county_deed_count, 0)
+        self.assertEqual(ev.county_permit_count, 0)
+
+    def test_source_count_zero_when_empty(self):
+        ev = ResearchEvidence()
+        self.assertEqual(ev.source_count, 0)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: _extract_research_evidence
+# ---------------------------------------------------------------------------
+
+
+class TestExtractResearchEvidence(unittest.TestCase):
+
+    def test_returns_none_when_no_research_key(self):
+        self.assertIsNone(_extract_research_evidence({"owner_name": "Foo"}))
+
+    def test_returns_none_when_research_is_empty_dict(self):
+        self.assertIsNone(_extract_research_evidence({"research": {}}))
+
+    def test_returns_none_when_research_is_none(self):
+        self.assertIsNone(_extract_research_evidence({"research": None}))
+
+    def test_parses_sos_active(self):
+        record = {
+            "research": {
+                "secretary_of_state": {
+                    "registered": True,
+                    "status": "active",
+                    "legal_name": "TEST LLC",
+                    "state": "IL",
+                    "source_name": "IL SOS",
+                }
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertTrue(ev.sos_registered)
+        self.assertTrue(ev.sos_active)
+        self.assertEqual(ev.sos_legal_name, "TEST LLC")
+        self.assertEqual(ev.sos_state, "IL")
+
+    def test_sos_inactive_when_status_not_active(self):
+        record = {
+            "research": {
+                "secretary_of_state": {
+                    "registered": True,
+                    "status": "dissolved",
+                    "legal_name": "OLD LLC",
+                    "source_name": "SOS",
+                }
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertTrue(ev.sos_registered)
+        self.assertFalse(ev.sos_active)
+
+    def test_parses_website_with_construction(self):
+        record = {
+            "research": {
+                "website": {"url": "https://example.com", "mentions_construction": True}
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertEqual(ev.website_url, "https://example.com")
+        self.assertTrue(ev.website_construction)
+
+    def test_parses_website_without_construction(self):
+        record = {
+            "research": {
+                "website": {"url": "https://example.com", "mentions_construction": False}
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertFalse(ev.website_construction)
+
+    def test_parses_construction_business_profiles(self):
+        record = {
+            "research": {
+                "business_profiles": [
+                    {"platform": "BBB", "categories": ["General Contractor"]},
+                    {"platform": "Houzz", "categories": ["General Contractor"]},
+                ]
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertIn("BBB", ev.construction_profile_platforms)
+        self.assertIn("Houzz", ev.construction_profile_platforms)
+
+    def test_non_construction_profile_not_in_platforms(self):
+        record = {
+            "research": {
+                "business_profiles": [
+                    {"platform": "Yelp", "categories": ["Restaurant"]},
+                ]
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertNotIn("Yelp", ev.construction_profile_platforms)
+        self.assertEqual(len(ev.sources), 1)
+
+    def test_parses_county_records(self):
+        record = {
+            "research": {
+                "county_records": {
+                    "deed_count": 14,
+                    "permit_count": 8,
+                    "source_name": "Sangamon County",
+                }
+            }
+        }
+        ev = _extract_research_evidence(record)
+        self.assertIsNotNone(ev)
+        self.assertEqual(ev.county_deed_count, 14)
+        self.assertEqual(ev.county_permit_count, 8)
+        self.assertEqual(ev.county_source_name, "Sangamon County")
+
+    def test_source_count_reflects_distinct_types(self):
+        ev = _extract_research_evidence(SOURCED_BUILDER)
+        # SOS + website + business_profiles (2 but 1 type) + county = 4 types
+        self.assertEqual(ev.source_count, 4)
+
+    def test_multiple_business_profiles_each_add_citation(self):
+        ev = _extract_research_evidence(SOURCED_BUILDER)
+        bp_citations = [s for s in ev.sources if s.source_type == SourceType.BUSINESS_PROFILE]
+        self.assertEqual(len(bp_citations), 2)  # BBB + Houzz
+
+    def test_sos_only_gives_source_count_one(self):
+        ev = _extract_research_evidence(PARTIAL_RESEARCH)
+        self.assertEqual(ev.source_count, 1)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: _research_confidence
+# ---------------------------------------------------------------------------
+
+
+class TestResearchConfidence(unittest.TestCase):
+
+    def test_returns_zero_for_no_sources(self):
+        ev = ResearchEvidence()
+        self.assertEqual(_research_confidence(ev), 0.0)
+
+    def test_sos_only_returns_high_confidence(self):
+        ev = _extract_research_evidence(PARTIAL_RESEARCH)
+        rc = _research_confidence(ev)
+        # SOS reliability=0.97, no corroboration bonus
+        self.assertAlmostEqual(rc, 0.97, places=4)
+
+    def test_corroboration_bonus_applied_for_multiple_types(self):
+        # Build two evidence sets with equal per-source reliability but different counts
+        ev_one = ResearchEvidence()
+        ev_one.sources.append(
+            SourceCitation(source_type=SourceType.SECRETARY_OF_STATE, name="SOS", reliability=0.80)
+        )
+        ev_two = ResearchEvidence()
+        ev_two.sources.append(
+            SourceCitation(source_type=SourceType.SECRETARY_OF_STATE, name="SOS", reliability=0.80)
+        )
+        ev_two.sources.append(
+            SourceCitation(source_type=SourceType.WEBSITE, name="web", reliability=0.80)
+        )
+        # Same average reliability but ev_two has corroboration bonus → higher score
+        self.assertGreater(_research_confidence(ev_two), _research_confidence(ev_one))
+
+    def test_confidence_capped_at_one(self):
+        ev = ResearchEvidence()
+        for st in SourceType:
+            ev.sources.append(SourceCitation(source_type=st, name=st, reliability=1.0))
+        self.assertLessEqual(_research_confidence(ev), 1.0)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: _research_builder_boost
+# ---------------------------------------------------------------------------
+
+
+class TestResearchBuilderBoost(unittest.TestCase):
+
+    def _ev_with(self, **kwargs) -> ResearchEvidence:
+        ev = ResearchEvidence(**kwargs)
+        return ev
+
+    def test_zero_when_no_evidence(self):
+        self.assertEqual(_research_builder_boost(ResearchEvidence()), 0.0)
+
+    def test_sos_active_only(self):
+        ev = ResearchEvidence(sos_active=True)
+        self.assertAlmostEqual(_research_builder_boost(ev), _WR_SOS_ACTIVE, places=4)
+
+    def test_construction_profiles_only(self):
+        ev = ResearchEvidence(construction_profile_platforms=["BBB"])
+        self.assertAlmostEqual(
+            _research_builder_boost(ev), _WR_CONSTRUCTION_PROFILE, places=4
+        )
+
+    def test_website_construction_only(self):
+        ev = ResearchEvidence(website_construction=True)
+        self.assertAlmostEqual(
+            _research_builder_boost(ev), _WR_WEBSITE_CONSTRUCTION, places=4
+        )
+
+    def test_county_permit_heavy(self):
+        ev = ResearchEvidence(county_permit_count=5)
+        self.assertAlmostEqual(
+            _research_builder_boost(ev), _WR_COUNTY_PERMIT_HEAVY, places=4
+        )
+
+    def test_county_permit_below_threshold_no_boost(self):
+        ev = ResearchEvidence(county_permit_count=4)
+        self.assertEqual(_research_builder_boost(ev), 0.0)
+
+    def test_capped_at_max_builder_boost(self):
+        ev = _extract_research_evidence(SOURCED_BUILDER)
+        # Sum would be > 0.20 without cap
+        boost = _research_builder_boost(ev)
+        self.assertLessEqual(boost, _MAX_BUILDER_BOOST)
+        self.assertAlmostEqual(boost, _MAX_BUILDER_BOOST, places=4)
+
+    def test_three_sources_add_corroboration(self):
+        ev = ResearchEvidence()
+        for st in (SourceType.SECRETARY_OF_STATE, SourceType.WEBSITE, SourceType.COUNTY_RECORDS):
+            ev.sources.append(SourceCitation(source_type=st, name=st, reliability=0.9))
+        boost = _research_builder_boost(ev)
+        self.assertGreaterEqual(boost, _WR_CORROBORATION_3PLUS)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: _research_investor_boost
+# ---------------------------------------------------------------------------
+
+
+class TestResearchInvestorBoost(unittest.TestCase):
+
+    def test_zero_when_no_evidence(self):
+        self.assertEqual(_research_investor_boost(ResearchEvidence()), 0.0)
+
+    def test_sos_active_boost(self):
+        ev = ResearchEvidence(sos_active=True)
+        boost = _research_investor_boost(ev)
+        self.assertAlmostEqual(boost, 0.05, places=4)
+
+    def test_county_deed_heavy_boost(self):
+        ev = ResearchEvidence(county_deed_count=5)
+        boost = _research_investor_boost(ev)
+        self.assertAlmostEqual(boost, 0.06, places=4)
+
+    def test_capped_at_max_investor_boost(self):
+        ev = _extract_research_evidence(SOURCED_BUILDER)
+        boost = _research_investor_boost(ev)
+        self.assertLessEqual(boost, _MAX_INVESTOR_BOOST)
+
+
+# ---------------------------------------------------------------------------
+# Integration tests: sourced_builder (full research)
+# ---------------------------------------------------------------------------
+
+
+class TestSourcedBuilderIntegration(unittest.TestCase):
+
+    def setUp(self):
+        self.agent = BuilderVerificationAgent()
+        self.report = self.agent.run([SOURCED_BUILDER])
+
+    def test_classified_as_verified_builder(self):
+        self.assertEqual(len(self.report.verified_builders), 1)
+
+    def test_builder_confidence_is_max(self):
+        profile = self.report.verified_builders[0]
+        self.assertAlmostEqual(profile.builder_confidence, 1.0, places=4)
+
+    def test_research_evidence_present(self):
+        profile = self.report.verified_builders[0]
+        self.assertIsNotNone(profile.signals.research_evidence)
+
+    def test_sos_active_flag(self):
+        profile = self.report.verified_builders[0]
+        self.assertTrue(profile.signals.research_evidence.sos_active)
+
+    def test_construction_profiles_populated(self):
+        profile = self.report.verified_builders[0]
+        platforms = profile.signals.research_evidence.construction_profile_platforms
+        self.assertIn("BBB", platforms)
+        self.assertIn("Houzz", platforms)
+
+    def test_county_permit_count_extracted(self):
+        profile = self.report.verified_builders[0]
+        self.assertEqual(profile.signals.research_evidence.county_permit_count, 8)
+
+    def test_entity_matches_contains_sos_legal_name(self):
+        profile = self.report.verified_builders[0]
+        self.assertIn("APEX CONSTRUCTION LLC", profile.entity_matches)
+
+    def test_research_confidence_above_zero(self):
+        profile = self.report.verified_builders[0]
+        self.assertGreater(profile.research_confidence, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# Integration tests: partial_research (SOS-only elevates borderline record)
+# ---------------------------------------------------------------------------
+
+
+class TestPartialResearchIntegration(unittest.TestCase):
+
+    def setUp(self):
+        self.agent = BuilderVerificationAgent()
+        self.report = self.agent.run([PARTIAL_RESEARCH])
+
+    def test_classified_as_verified_builder_with_research(self):
+        # With SOS boost, 0.63 + 0.05 = 0.68 ≥ BUILDER_THRESHOLD
+        self.assertEqual(len(self.report.verified_builders), 1)
+
+    def test_base_score_without_research_is_below_threshold(self):
+        no_research = {k: v for k, v in PARTIAL_RESEARCH.items() if k != "research"}
+        report_no_research = self.agent.run([no_research])
+        self.assertEqual(len(report_no_research.verified_builders), 0)
+
+    def test_research_confidence_is_sos_reliability(self):
+        profile = self.report.verified_builders[0]
+        self.assertAlmostEqual(profile.research_confidence, 0.97, places=4)
+
+    def test_sos_active_true(self):
+        profile = self.report.verified_builders[0]
+        self.assertTrue(profile.signals.research_evidence.sos_active)
+
+    def test_entity_matches_contains_sos_legal_name(self):
+        profile = self.report.verified_builders[0]
+        self.assertIn("SUMMIT BUILDERS LLC", profile.entity_matches)
+
+    def test_builder_boost_is_sos_active_only(self):
+        profile = self.report.verified_builders[0]
+        ev = profile.signals.research_evidence
+        boost = _research_builder_boost(ev)
+        self.assertAlmostEqual(boost, _WR_SOS_ACTIVE, places=4)
+
+
+# ---------------------------------------------------------------------------
+# Entity matching tests
+# ---------------------------------------------------------------------------
+
+
+class TestEntityMatching(unittest.TestCase):
+
+    def setUp(self):
+        self.agent = BuilderVerificationAgent()
+
+    def test_sourced_record_self_matches_sos_legal_name(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        profile = report.verified_builders[0]
+        self.assertTrue(profile.entity_matches)
+
+    def test_unresearched_record_matches_sos_name_from_batch_peer(self):
+        # verified_builder (no research) shares the same owner name "Apex Construction LLC"
+        # with sourced_builder (has SOS legal_name = "APEX CONSTRUCTION LLC")
+        report = self.agent.run([SOURCED_BUILDER, VERIFIED_BUILDER])
+        all_profiles = report.verified_builders
+        # Both records should have entity matches
+        has_match = [p for p in all_profiles if p.entity_matches]
+        self.assertGreater(len(has_match), 0)
+
+    def test_record_with_no_research_has_no_entity_matches_in_isolation(self):
+        report = self.agent.run([VERIFIED_BUILDER])
+        profile = report.verified_builders[0]
+        # No SOS data in the batch → no entity index → no matches
+        self.assertEqual(profile.entity_matches, [])
+
+    def test_entity_index_built_from_sos_data(self):
+        report = self.agent.run([SOURCED_BUILDER, PARTIAL_RESEARCH])
+        # Both have distinct SOS legal names; each should match their own name
+        all_builders = report.verified_builders
+        names = {n for p in all_builders for n in p.entity_matches}
+        self.assertIn("APEX CONSTRUCTION LLC", names)
+        self.assertIn("SUMMIT BUILDERS LLC", names)
+
+
+# ---------------------------------------------------------------------------
+# Entity intelligence report tests
+# ---------------------------------------------------------------------------
+
+
+class TestEntityIntelligenceReport(unittest.TestCase):
+
+    def setUp(self):
+        import tempfile
+        self.tmp_dir = Path(tempfile.mkdtemp())
+        self.agent = BuilderVerificationAgent(reports_dir=self.tmp_dir)
+
+    def test_entity_intelligence_report_created(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        self.assertTrue(
+            (self.tmp_dir / "ENTITY_INTELLIGENCE_REPORT.md").exists()
+        )
+
+    def test_report_contains_sos_legal_name(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        content = (self.tmp_dir / "ENTITY_INTELLIGENCE_REPORT.md").read_text()
+        self.assertIn("APEX CONSTRUCTION LLC", content)
+
+    def test_report_contains_source_names(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        content = (self.tmp_dir / "ENTITY_INTELLIGENCE_REPORT.md").read_text()
+        self.assertIn("Illinois Secretary of State", content)
+
+    def test_report_contains_research_confidence(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        content = (self.tmp_dir / "ENTITY_INTELLIGENCE_REPORT.md").read_text()
+        self.assertIn("Research confidence", content)
+
+    def test_empty_research_batch_still_creates_file(self):
+        report = self.agent.run([HOMEOWNER])
+        self.agent.write_outputs(report)
+        path = self.tmp_dir / "ENTITY_INTELLIGENCE_REPORT.md"
+        self.assertTrue(path.exists())
+        content = path.read_text()
+        self.assertIn("No research-backed", content)
+
+    def test_report_contains_builder_boost(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        content = (self.tmp_dir / "ENTITY_INTELLIGENCE_REPORT.md").read_text()
+        self.assertIn("research boost", content)
+
+
+# ---------------------------------------------------------------------------
+# Research fields in output files
+# ---------------------------------------------------------------------------
+
+
+class TestResearchInOutputFiles(unittest.TestCase):
+
+    def setUp(self):
+        import tempfile
+        self.tmp_dir = Path(tempfile.mkdtemp())
+        self.agent = BuilderVerificationAgent(reports_dir=self.tmp_dir)
+
+    def test_research_confidence_in_confidence_scores_json(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        data = json.loads(
+            (self.tmp_dir / "BUYER_CONFIDENCE_SCORES.json").read_text()
+        )
+        score_entry = data["scores"][0]
+        self.assertIn("research_confidence", score_entry)
+        self.assertGreater(score_entry["research_confidence"], 0.0)
+
+    def test_entity_matches_in_verified_builders_json(self):
+        report = self.agent.run([SOURCED_BUILDER])
+        self.agent.write_outputs(report)
+        data = json.loads(
+            (self.tmp_dir / "VERIFIED_BUILDERS.json").read_text()
+        )
+        self.assertIn("entity_matches", data[0])
+        self.assertIn("APEX CONSTRUCTION LLC", data[0]["entity_matches"])
+
+    def test_five_output_files_created_when_research_present(self):
+        report = self.agent.run([SOURCED_BUILDER, HOMEOWNER])
+        self.agent.write_outputs(report)
+        expected = [
+            "VERIFIED_BUILDERS.json",
+            "POSSIBLE_CASH_BUYERS.json",
+            "BUYER_ACTIVITY_REPORT.md",
+            "BUYER_CONFIDENCE_SCORES.json",
+            "ENTITY_INTELLIGENCE_REPORT.md",
+        ]
+        for fname in expected:
+            self.assertTrue(
+                (self.tmp_dir / fname).exists(), f"Missing: {fname}"
+            )
 
 
 if __name__ == "__main__":

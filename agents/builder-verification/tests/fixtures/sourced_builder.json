@@ -1,0 +1,52 @@
+{
+  "record_id": "rec-006",
+  "owner_name": "Apex Construction LLC",
+  "parcel_id": "14-22-301-020",
+  "permit_count": 8,
+  "entity_type": "LLC",
+  "nearby_parcel_count": 5,
+  "prior_acquisitions": 7,
+  "purchase_cluster_days": 18,
+  "land_use": "vacant",
+  "parcel_address": "500 Commerce Dr, Springfield, IL 62701",
+  "mailing_address": "800 Industrial Pkwy Suite 300, Springfield, IL 62703",
+  "sale_price": 185000,
+  "sale_date": "2024-09-10",
+  "source_file": "county_records_q3_2024.csv",
+  "research": {
+    "secretary_of_state": {
+      "registered": true,
+      "state": "IL",
+      "legal_name": "APEX CONSTRUCTION LLC",
+      "status": "active",
+      "registered_agent": "John Doe",
+      "formation_date": "2018-03-15",
+      "source_url": "https://apps.ilsos.gov/corporatellc/llcsearch.html",
+      "source_name": "Illinois Secretary of State"
+    },
+    "website": {
+      "url": "https://apexconstruction-il.com",
+      "mentions_construction": true
+    },
+    "business_profiles": [
+      {
+        "platform": "BBB",
+        "categories": ["General Contractor", "Home Builder"],
+        "rating": "A+",
+        "url": "https://bbb.org/us/il/springfield/profile/general-contractor/apex-construction"
+      },
+      {
+        "platform": "Houzz",
+        "categories": ["General Contractor"],
+        "url": "https://houzz.com/pro/apexconstruction"
+      }
+    ],
+    "county_records": {
+      "deed_count": 14,
+      "permit_count": 8,
+      "assessor_parcels": 5,
+      "source_name": "Sangamon County Recorder",
+      "source_url": "https://sangamoncounty.net/recorder"
+    }
+  }
+}

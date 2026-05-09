@@ -8,7 +8,11 @@ no inferred intent beyond what the signals directly support.
 Input records describe individual parcel ownership/sale events.
 The agent scores each record on two independent axes (builder
 confidence, investor/cash-buyer confidence), routes to a buyer
-type, and emits four output documents.
+type, and emits five output documents.
+
+Optional `research` key per record unlocks source-backed scoring
+boosts and entity intelligence via SOS, website, business profiles,
+social profiles, and county records.
 """
 
 from __future__ import annotations
@@ -65,6 +69,23 @@ _WI_VACANT   = 0.20   # vacant-land ownership
 _WI_CLUSTER  = 0.15   # recent purchase clustering
 
 # ---------------------------------------------------------------------------
+# Research boost constants
+# ---------------------------------------------------------------------------
+_WR_SOS_ACTIVE           = 0.05   # active SOS registration confirms entity
+_WR_CONSTRUCTION_PROFILE = 0.12   # BBB/Houzz listing with contractor category
+_WR_WEBSITE_CONSTRUCTION = 0.06   # website explicitly mentions construction
+_WR_COUNTY_PERMIT_HEAVY  = 0.04   # county permit count >= 5
+_WR_CORROBORATION_3PLUS  = 0.03   # 3+ independent source types agree
+
+_MAX_BUILDER_BOOST  = 0.20        # additive cap on research builder boost
+_MAX_INVESTOR_BOOST = 0.15        # additive cap on research investor boost
+
+# County permit count that triggers heavy-permit boost
+_COUNTY_PERMIT_HEAVY_MIN = 5
+# County deed count that triggers investor activity boost
+_COUNTY_DEED_HEAVY_MIN = 5
+
+# ---------------------------------------------------------------------------
 # Keyword / entity patterns
 # ---------------------------------------------------------------------------
 
@@ -98,6 +119,41 @@ _INVESTOR_ENTITY_KEYWORDS = re.compile(
     re.IGNORECASE,
 )
 
+# Business profile categories that confirm construction activity
+_CONSTRUCTION_CATEGORIES: frozenset[str] = frozenset({
+    "general contractor",
+    "home builder",
+    "contractor",
+    "builder",
+    "construction",
+    "remodeling",
+    "renovation",
+    "custom home",
+})
+
+
+# ---------------------------------------------------------------------------
+# Source types and reliability
+# ---------------------------------------------------------------------------
+
+
+class SourceType(str, Enum):
+    SECRETARY_OF_STATE = "secretary_of_state"
+    WEBSITE            = "website"
+    BUSINESS_PROFILE   = "business_profile"
+    SOCIAL_PROFILE     = "social_profile"
+    COUNTY_RECORDS     = "county_records"
+
+
+# Reliability weight per source type (0.0–1.0)
+_SOURCE_RELIABILITY: dict[SourceType, float] = {
+    SourceType.SECRETARY_OF_STATE: 0.97,
+    SourceType.COUNTY_RECORDS:     0.95,
+    SourceType.BUSINESS_PROFILE:   0.82,
+    SourceType.WEBSITE:            0.72,
+    SourceType.SOCIAL_PROFILE:     0.55,
+}
+
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -110,6 +166,38 @@ class BuyerType(str, Enum):
     REPEAT_BUYER        = "repeat_buyer"
     QUARANTINED         = "quarantined"
     WEAK_RECORD         = "weak_record"
+
+
+@dataclass
+class SourceCitation:
+    source_type: SourceType
+    name: str
+    url: str | None = None
+    reliability: float = 0.0
+
+
+@dataclass
+class ResearchEvidence:
+    sources: list[SourceCitation] = field(default_factory=list)
+    # SOS signals
+    sos_registered: bool = False
+    sos_active: bool = False
+    sos_legal_name: str | None = None
+    sos_state: str | None = None
+    # Website signals
+    website_url: str | None = None
+    website_construction: bool = False
+    # Business profile signals
+    construction_profile_platforms: list[str] = field(default_factory=list)
+    # County record signals
+    county_deed_count: int = 0
+    county_permit_count: int = 0
+    county_source_name: str | None = None
+
+    @property
+    def source_count(self) -> int:
+        """Number of distinct SourceType values present in sources."""
+        return len({s.source_type for s in self.sources})
 
 
 @dataclass
@@ -128,6 +216,7 @@ class BuyerSignals:
     has_purchase_cluster: bool = False
     purchase_cluster_days: int | None = None
     source_evidence: list[str] = field(default_factory=list)
+    research_evidence: ResearchEvidence | None = None
 
 
 @dataclass
@@ -146,6 +235,8 @@ class BuyerProfile:
     sale_price: float | None = None
     sale_date: str | None = None
     source_file: str | None = None
+    entity_matches: list[str] = field(default_factory=list)
+    research_confidence: float = 0.0
     run_timestamp: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
@@ -200,6 +291,159 @@ def _addresses_mismatch(parcel_addr: str | None, mailing_addr: str | None) -> bo
     return _norm(parcel_addr) != _norm(mailing_addr)
 
 
+def _extract_research_evidence(record: dict[str, Any]) -> ResearchEvidence | None:
+    """
+    Parse the optional ``research`` dict from a raw record.
+
+    Supported keys: secretary_of_state, website, business_profiles,
+    social_profiles, county_records.
+
+    Returns None when the record has no research data or when no
+    parseable sources are found.
+    """
+    research = record.get("research")
+    if not research or not isinstance(research, dict):
+        return None
+
+    ev = ResearchEvidence()
+
+    # Secretary of State ------------------------------------------------
+    sos = research.get("secretary_of_state")
+    if sos and isinstance(sos, dict):
+        ev.sos_registered = bool(sos.get("registered", False))
+        status = str(sos.get("status", "") or "").lower()
+        ev.sos_active = ev.sos_registered and status == "active"
+        legal_name = sos.get("legal_name")
+        if legal_name:
+            ev.sos_legal_name = str(legal_name)
+        state = sos.get("state")
+        if state:
+            ev.sos_state = str(state)
+        url = sos.get("source_url")
+        name = sos.get("source_name", "Secretary of State")
+        ev.sources.append(SourceCitation(
+            source_type=SourceType.SECRETARY_OF_STATE,
+            name=str(name),
+            url=str(url) if url else None,
+            reliability=_SOURCE_RELIABILITY[SourceType.SECRETARY_OF_STATE],
+        ))
+
+    # Website -----------------------------------------------------------
+    website = research.get("website")
+    if website and isinstance(website, dict):
+        ev.website_url = website.get("url")
+        ev.website_construction = bool(website.get("mentions_construction", False))
+        ev.sources.append(SourceCitation(
+            source_type=SourceType.WEBSITE,
+            name=str(ev.website_url or "website"),
+            url=ev.website_url,
+            reliability=_SOURCE_RELIABILITY[SourceType.WEBSITE],
+        ))
+
+    # Business profiles -------------------------------------------------
+    profiles = research.get("business_profiles", [])
+    if profiles and isinstance(profiles, list):
+        for prof in profiles:
+            if not isinstance(prof, dict):
+                continue
+            platform = str(prof.get("platform", "unknown"))
+            categories: list[str] = prof.get("categories") or []
+            is_construction = any(
+                c.lower() in _CONSTRUCTION_CATEGORIES for c in categories
+            )
+            if is_construction:
+                ev.construction_profile_platforms.append(platform)
+            ev.sources.append(SourceCitation(
+                source_type=SourceType.BUSINESS_PROFILE,
+                name=platform,
+                url=prof.get("url"),
+                reliability=_SOURCE_RELIABILITY[SourceType.BUSINESS_PROFILE],
+            ))
+
+    # Social profiles ---------------------------------------------------
+    socials = research.get("social_profiles", [])
+    if socials and isinstance(socials, list):
+        for social in socials:
+            if not isinstance(social, dict):
+                continue
+            platform = str(social.get("platform", "unknown"))
+            ev.sources.append(SourceCitation(
+                source_type=SourceType.SOCIAL_PROFILE,
+                name=platform,
+                url=social.get("url"),
+                reliability=_SOURCE_RELIABILITY[SourceType.SOCIAL_PROFILE],
+            ))
+
+    # County records ----------------------------------------------------
+    county = research.get("county_records")
+    if county and isinstance(county, dict):
+        ev.county_deed_count = int(county.get("deed_count", 0) or 0)
+        ev.county_permit_count = int(county.get("permit_count", 0) or 0)
+        ev.county_source_name = county.get("source_name")
+        url = county.get("source_url")
+        ev.sources.append(SourceCitation(
+            source_type=SourceType.COUNTY_RECORDS,
+            name=str(ev.county_source_name or "County Records"),
+            url=str(url) if url else None,
+            reliability=_SOURCE_RELIABILITY[SourceType.COUNTY_RECORDS],
+        ))
+
+    return ev if ev.sources else None
+
+
+def _research_confidence(ev: ResearchEvidence) -> float:
+    """
+    Aggregate reliability score for a set of research sources (0.0–1.0).
+
+    Computed as the average reliability across distinct source types,
+    plus a small corroboration bonus for 2+ types agreeing.
+    """
+    if not ev.sources:
+        return 0.0
+    # One reliability value per distinct source type (highest wins ties)
+    type_reliability: dict[SourceType, float] = {}
+    for s in ev.sources:
+        if s.source_type not in type_reliability or s.reliability > type_reliability[s.source_type]:
+            type_reliability[s.source_type] = s.reliability
+    avg = sum(type_reliability.values()) / len(type_reliability)
+    corroboration = min(0.10, (len(type_reliability) - 1) * 0.05)
+    return min(1.0, round(avg + corroboration, 4))
+
+
+def _research_builder_boost(ev: ResearchEvidence) -> float:
+    """
+    Additive builder confidence boost derived from external research.
+    Capped at _MAX_BUILDER_BOOST (0.20).
+    """
+    boost = 0.0
+    if ev.sos_active:
+        boost += _WR_SOS_ACTIVE
+    if ev.construction_profile_platforms:
+        boost += _WR_CONSTRUCTION_PROFILE
+    if ev.website_construction:
+        boost += _WR_WEBSITE_CONSTRUCTION
+    if ev.county_permit_count >= _COUNTY_PERMIT_HEAVY_MIN:
+        boost += _WR_COUNTY_PERMIT_HEAVY
+    if ev.source_count >= 3:
+        boost += _WR_CORROBORATION_3PLUS
+    return min(_MAX_BUILDER_BOOST, round(boost, 4))
+
+
+def _research_investor_boost(ev: ResearchEvidence) -> float:
+    """
+    Additive investor confidence boost derived from external research.
+    Capped at _MAX_INVESTOR_BOOST (0.15).
+    """
+    boost = 0.0
+    if ev.sos_active:
+        boost += 0.05   # active entity confirms organised buyer
+    if ev.county_deed_count >= _COUNTY_DEED_HEAVY_MIN:
+        boost += 0.06   # high deed activity → active acquisitor
+    if ev.source_count >= 3:
+        boost += 0.04   # well-documented entity
+    return min(_MAX_INVESTOR_BOOST, round(boost, 4))
+
+
 def _extract_signals(
     record: dict[str, Any],
     batch_counts: dict[str, int],
@@ -218,6 +462,7 @@ def _extract_signals(
       prior_acquisitions    int   (pre-computed from upstream data pipeline)
       purchase_cluster_days int   (days between this and most recent prior purchase)
       source_file           str
+      research              dict  (optional — enables research-backed scoring)
     """
     sig = BuyerSignals()
     owner: str = str(record.get("owner_name", "") or "")
@@ -276,7 +521,6 @@ def _extract_signals(
 
     # Merge batch count into effective repeat signal
     effective_acquisitions = max(prior, batch_count)
-    # Store back for scoring convenience
     sig.prior_acquisitions = effective_acquisitions
 
     # --- Vacant land ---
@@ -311,6 +555,27 @@ def _extract_signals(
     src = record.get("source_file")
     if src:
         sig.source_evidence.append(f"source: {src}")
+
+    # --- Research evidence (optional) ---
+    sig.research_evidence = _extract_research_evidence(record)
+    if sig.research_evidence is not None:
+        rc = _research_confidence(sig.research_evidence)
+        ev = sig.research_evidence
+        parts: list[str] = []
+        if ev.sos_active:
+            parts.append(f"SOS active ({ev.sos_state or 'unknown state'})")
+        if ev.construction_profile_platforms:
+            parts.append(
+                f"construction profiles: {', '.join(ev.construction_profile_platforms)}"
+            )
+        if ev.website_construction:
+            parts.append("website mentions construction")
+        if ev.county_permit_count:
+            parts.append(f"county permits: {ev.county_permit_count}")
+        if parts:
+            sig.source_evidence.append(
+                f"research evidence ({rc:.2f} confidence): {'; '.join(parts)}"
+            )
 
     return sig
 
@@ -349,6 +614,10 @@ def _builder_score(sig: BuyerSignals) -> float:
     elif sig.nearby_parcel_count >= _NEARBY_PARTIAL:
         score += _WB_NEARBY * 0.45
 
+    # Research boost (additive, capped separately)
+    if sig.research_evidence is not None:
+        score += _research_builder_boost(sig.research_evidence)
+
     return max(0.0, min(1.0, round(score, 4)))
 
 
@@ -381,6 +650,10 @@ def _investor_score(sig: BuyerSignals) -> float:
     # Purchase clustering (0–0.15)
     if sig.has_purchase_cluster:
         score += _WI_CLUSTER
+
+    # Research boost (additive, capped separately)
+    if sig.research_evidence is not None:
+        score += _research_investor_boost(sig.research_evidence)
 
     return max(0.0, min(1.0, round(score, 4)))
 
@@ -454,7 +727,7 @@ def _route(
 
 class BuilderVerificationAgent:
     """
-    Processes a batch of raw owner/buyer records and produces four
+    Processes a batch of raw owner/buyer records and produces five
     output documents with evidence-backed confidence profiles.
 
     Usage:
@@ -488,9 +761,21 @@ class BuilderVerificationAgent:
             key = _normalize_owner(str(r.get("owner_name", "") or ""))
             batch_counts[key] = batch_counts.get(key, 0) + 1
 
+        # Build entity index from SOS legal names across the batch
+        entity_index: dict[str, str] = {}  # normalized → canonical legal name
+        for r in records:
+            research = r.get("research")
+            if not research or not isinstance(research, dict):
+                continue
+            sos = research.get("secretary_of_state")
+            if sos and isinstance(sos, dict) and sos.get("registered") and sos.get("legal_name"):
+                legal_name = str(sos["legal_name"])
+                norm = _normalize_owner(legal_name)
+                entity_index[norm] = legal_name
+
         profiles: list[BuyerProfile] = []
         for raw in records:
-            profiles.append(self._process_record(raw, batch_counts))
+            profiles.append(self._process_record(raw, batch_counts, entity_index))
 
         builders    = [p for p in profiles if p.buyer_type == BuyerType.VERIFIED_BUILDER]
         cash_buyers = [p for p in profiles if p.buyer_type == BuyerType.POSSIBLE_CASH_BUYER]
@@ -514,18 +799,22 @@ class BuilderVerificationAgent:
         )
 
     def write_outputs(self, report: VerificationReport) -> None:
-        """Write all four output documents to reports_dir."""
+        """Write all five output documents to reports_dir."""
         self._write_verified_builders(report)
         self._write_possible_cash_buyers(report)
         self._write_buyer_activity_report(report)
         self._write_buyer_confidence_scores(report)
+        self._write_entity_intelligence_report(report)
 
     # ------------------------------------------------------------------
     # Record processing
     # ------------------------------------------------------------------
 
     def _process_record(
-        self, raw: dict[str, Any], batch_counts: dict[str, int]
+        self,
+        raw: dict[str, Any],
+        batch_counts: dict[str, int],
+        entity_index: dict[str, str],
     ) -> BuyerProfile:
         record_id  = str(raw.get("record_id", "") or "")
         owner_name = str(raw.get("owner_name", "") or "")
@@ -544,6 +833,26 @@ class BuilderVerificationAgent:
             except (TypeError, ValueError):
                 pass
 
+        # Entity matching: check owner name and SOS legal name against entity index
+        entity_matches: list[str] = []
+        norm_owner = _normalize_owner(owner_name)
+        if norm_owner in entity_index:
+            legal = entity_index[norm_owner]
+            if legal not in entity_matches:
+                entity_matches.append(legal)
+        if sig.research_evidence and sig.research_evidence.sos_legal_name:
+            norm_legal = _normalize_owner(sig.research_evidence.sos_legal_name)
+            for idx_norm, idx_legal in entity_index.items():
+                if idx_norm in (norm_legal, norm_owner):
+                    if idx_legal not in entity_matches:
+                        entity_matches.append(idx_legal)
+
+        research_confidence = (
+            _research_confidence(sig.research_evidence)
+            if sig.research_evidence is not None
+            else 0.0
+        )
+
         return BuyerProfile(
             record_id=record_id,
             owner_name=owner_name,
@@ -559,6 +868,8 @@ class BuilderVerificationAgent:
             sale_price=sale_price,
             sale_date=raw.get("sale_date"),
             source_file=raw.get("source_file"),
+            entity_matches=entity_matches,
+            research_confidence=research_confidence,
         )
 
     # ------------------------------------------------------------------
@@ -692,6 +1003,8 @@ class BuilderVerificationAgent:
                     "buyer_type": p.buyer_type,
                     "builder_confidence": p.builder_confidence,
                     "investor_confidence": p.investor_confidence,
+                    "research_confidence": p.research_confidence,
+                    "entity_matches": p.entity_matches,
                     "signals": {
                         "is_company_owned": p.signals.is_company_owned,
                         "entity_type_detected": p.signals.entity_type_detected,
@@ -717,6 +1030,104 @@ class BuilderVerificationAgent:
             json.dumps(payload, indent=2),
         )
 
+    def _write_entity_intelligence_report(self, report: VerificationReport) -> None:
+        all_profiles = (
+            report.verified_builders
+            + report.possible_cash_buyers
+            + report.repeat_buyers
+            + report.quarantined
+            + report.weak_records
+        )
+
+        # Collect profiles that have research evidence
+        researched = [p for p in all_profiles if p.signals.research_evidence is not None]
+        ts = report.run_timestamp
+
+        lines = [
+            "# ENTITY INTELLIGENCE REPORT",
+            "",
+            f"_Generated: {ts}_",
+            "",
+        ]
+
+        if not researched:
+            lines += [
+                "_No research-backed entity records in this batch._",
+                "",
+            ]
+            self._write(
+                self.reports_dir / "ENTITY_INTELLIGENCE_REPORT.md",
+                "\n".join(lines),
+            )
+            return
+
+        lines += [
+            f"## Entities with Research Evidence ({len(researched)} record(s))",
+            "",
+        ]
+
+        for p in researched:
+            ev = p.signals.research_evidence
+            assert ev is not None
+            b_boost = _research_builder_boost(ev)
+            i_boost = _research_investor_boost(ev)
+            rc = p.research_confidence
+
+            lines += [f"### {p.owner_name}", ""]
+            lines.append(f"- **Record ID**: `{p.record_id}`")
+            lines.append(f"- **Parcel**: `{p.parcel_id}`")
+            lines.append(f"- **Buyer type**: {p.buyer_type}")
+            lines.append(
+                f"- **Builder confidence**: {p.builder_confidence:.3f} "
+                f"(research boost: +{b_boost:.3f})"
+            )
+            lines.append(
+                f"- **Investor confidence**: {p.investor_confidence:.3f} "
+                f"(research boost: +{i_boost:.3f})"
+            )
+            lines.append(f"- **Research confidence**: {rc:.3f}")
+            if p.entity_matches:
+                lines.append(
+                    f"- **Entity matches**: {', '.join(p.entity_matches)}"
+                )
+
+            if ev.sos_legal_name:
+                lines.append(
+                    f"- **SOS legal name**: {ev.sos_legal_name} "
+                    f"({ev.sos_state or 'unknown'}) — "
+                    f"{'active' if ev.sos_active else 'registered/inactive'}"
+                )
+
+            if ev.construction_profile_platforms:
+                lines.append(
+                    f"- **Construction profiles**: "
+                    f"{', '.join(ev.construction_profile_platforms)}"
+                )
+
+            if ev.website_construction and ev.website_url:
+                lines.append(f"- **Website (construction)**: {ev.website_url}")
+
+            if ev.county_deed_count or ev.county_permit_count:
+                lines.append(
+                    f"- **County records** ({ev.county_source_name or 'unknown'}): "
+                    f"deeds={ev.county_deed_count}, permits={ev.county_permit_count}"
+                )
+
+            lines += ["", "**Sources:**", ""]
+            for src in ev.sources:
+                url_str = f" — {src.url}" if src.url else ""
+                lines.append(
+                    f"  - [{src.source_type}] {src.name} "
+                    f"(reliability: {src.reliability:.2f}){url_str}"
+                )
+
+            lines.append("")
+
+        self._write(
+            self.reports_dir / "ENTITY_INTELLIGENCE_REPORT.md",
+            "\n".join(lines),
+        )
+
     # ------------------------------------------------------------------
     # Utility
     # ------------------------------------------------------------------
@@ -732,6 +1143,29 @@ class BuilderVerificationAgent:
 
 
 def _profile_to_dict(p: BuyerProfile) -> dict[str, Any]:
+    ev = p.signals.research_evidence
+    research_dict: dict[str, Any] | None = None
+    if ev is not None:
+        research_dict = {
+            "sos_active": ev.sos_active,
+            "sos_legal_name": ev.sos_legal_name,
+            "sos_state": ev.sos_state,
+            "website_construction": ev.website_construction,
+            "construction_profile_platforms": ev.construction_profile_platforms,
+            "county_deed_count": ev.county_deed_count,
+            "county_permit_count": ev.county_permit_count,
+            "source_count": ev.source_count,
+            "sources": [
+                {
+                    "source_type": s.source_type,
+                    "name": s.name,
+                    "url": s.url,
+                    "reliability": s.reliability,
+                }
+                for s in ev.sources
+            ],
+        }
+
     return {
         "record_id": p.record_id,
         "owner_name": p.owner_name,
@@ -739,6 +1173,8 @@ def _profile_to_dict(p: BuyerProfile) -> dict[str, Any]:
         "buyer_type": p.buyer_type,
         "builder_confidence": p.builder_confidence,
         "investor_confidence": p.investor_confidence,
+        "research_confidence": p.research_confidence,
+        "entity_matches": p.entity_matches,
         "parcel_address": p.parcel_address,
         "mailing_address": p.mailing_address,
         "sale_price": p.sale_price,
@@ -757,6 +1193,7 @@ def _profile_to_dict(p: BuyerProfile) -> dict[str, Any]:
             "has_purchase_cluster": p.signals.has_purchase_cluster,
             "purchase_cluster_days": p.signals.purchase_cluster_days,
         },
+        "research_evidence": research_dict,
         "evidence_flags": p.evidence_flags,
         "run_timestamp": p.run_timestamp,
     }
@@ -774,6 +1211,10 @@ def _profile_md_block(p: BuyerProfile, *, show_builder: bool) -> list[str]:
     ]
     if not show_builder:
         lines.append(f"- **Builder confidence**: {p.builder_confidence:.3f}")
+    if p.research_confidence > 0:
+        lines.append(f"- **Research confidence**: {p.research_confidence:.3f}")
+    if p.entity_matches:
+        lines.append(f"- **Entity matches**: {', '.join(p.entity_matches)}")
     if p.parcel_address:
         lines.append(f"- **Parcel address**: {p.parcel_address}")
     if p.sale_price is not None:

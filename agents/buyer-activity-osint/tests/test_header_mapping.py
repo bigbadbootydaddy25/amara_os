@@ -16,6 +16,7 @@ import csv
 import json
 import sys
 import tempfile
+from datetime import date
 from io import StringIO
 from pathlib import Path
 
@@ -460,3 +461,301 @@ class TestEndToEnd:
             "--dry-run",
         ])
         assert rc == 0
+
+    def test_new_report_files_written(self):
+        reports_dir = self.ws / "reports2"
+        agent.write_reports(self.txns, self.profiles, self.ignored, reports_dir, self.ws)
+        assert (reports_dir / "RECENT_BUYERS.json").exists()
+        assert (reports_dir / "MULTI_PURCHASE_BUYERS.json").exists()
+        assert (reports_dir / "BUYER_PURCHASE_HISTORY.md").exists()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Purchase history — _parse_date
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestParseDate:
+    @pytest.mark.parametrize("raw,expected", [
+        ("2025-01-15",     date(2025, 1, 15)),
+        ("01/15/2025",     date(2025, 1, 15)),
+        ("1/15/2025",      date(2025, 1, 15)),
+        ("01-15-2025",     date(2025, 1, 15)),
+        ("20250115",       date(2025, 1, 15)),
+        ("January 15, 2025", date(2025, 1, 15)),
+        ("Jan 15, 2025",   date(2025, 1, 15)),
+        ("",               None),
+        (None,             None),
+        ("not-a-date",     None),
+        ("2025-13-01",     None),   # invalid month
+    ])
+    def test_parse_date_formats(self, raw, expected):
+        assert agent._parse_date(raw) == expected
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Purchase history — profile fields
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Fixed reference date so all window calculations are deterministic
+_REF = date(2026, 5, 9)
+
+
+def _prof(txns, seeds=None) -> agent.BuyerActivityProfile:
+    """Build profiles with fixed reference date; return first profile."""
+    profiles = agent.build_profiles(txns, seeds or [], ref_date=_REF)
+    assert profiles, "expected at least one profile"
+    return profiles[0]
+
+
+class TestPurchaseHistoryFields:
+    def test_total_purchase_count(self):
+        txns = [
+            _txn(buyer_entity="Big LLC", sale_date="2025-01-01"),
+            _txn(buyer_entity="Big LLC", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert p.total_purchase_count == 2
+
+    def test_recent_counts_within_window(self):
+        # One purchase 60 days before ref, one 200 days before ref
+        d60  = (date(2026, 3, 10)).isoformat()   # 60d before 2026-05-09
+        d200 = (date(2025, 10, 21)).isoformat()  # ~200d before
+        txns = [
+            _txn(buyer_entity="Big LLC", sale_date=d60),
+            _txn(buyer_entity="Big LLC", sale_date=d200),
+        ]
+        p = _prof(txns)
+        assert p.recent_purchase_count_30d == 0
+        assert p.recent_purchase_count_90d == 1
+        assert p.recent_purchase_count_180d == 1
+        assert p.recent_purchase_count_365d == 2
+
+    def test_last_and_first_purchase_date(self):
+        txns = [
+            _txn(buyer_entity="Alpha LLC", sale_date="2024-03-01"),
+            _txn(buyer_entity="Alpha LLC", sale_date="2025-11-01"),
+        ]
+        p = _prof(txns)
+        assert p.first_purchase_date == "2024-03-01"
+        assert p.last_purchase_date == "2025-11-01"
+
+    def test_days_since_last_purchase(self):
+        # last purchase exactly 100 days before _REF (2026-05-09)
+        d = date(2026, 1, 29).isoformat()  # 100 days before 2026-05-09
+        txns = [_txn(buyer_entity="Beta LLC", sale_date=d)]
+        p = _prof(txns)
+        assert p.days_since_last_purchase == 100
+
+    def test_no_date_gives_none(self):
+        txns = [_txn(buyer_entity="Ghost LLC", sale_date=None)]
+        p = _prof(txns)
+        assert p.last_purchase_date is None
+        assert p.days_since_last_purchase is None
+        assert p.first_purchase_date is None
+
+    def test_multi_purchase_buyer_true(self):
+        txns = [
+            _txn(buyer_entity="Busy LLC", sale_date="2025-01-01"),
+            _txn(buyer_entity="Busy LLC", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert p.multi_purchase_buyer is True
+
+    def test_multi_purchase_buyer_false_for_single(self):
+        txns = [_txn(buyer_entity="Quiet LLC", sale_date="2025-01-01")]
+        p = _prof(txns)
+        assert p.multi_purchase_buyer is False
+
+    def test_repeat_market_buyer_multiple_zips(self):
+        txns = [
+            _txn(buyer_entity="Wide LLC", zip="77008", sale_date="2025-01-01"),
+            _txn(buyer_entity="Wide LLC", zip="77009", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert p.repeat_market_buyer is True
+
+    def test_repeat_market_buyer_false_single_zip(self):
+        txns = [
+            _txn(buyer_entity="Narrow LLC", zip="77008", sale_date="2025-01-01"),
+            _txn(buyer_entity="Narrow LLC", zip="77008", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert p.repeat_market_buyer is False
+
+    def test_purchase_markets_populated(self):
+        txns = [
+            _txn(buyer_entity="Wide LLC", city="Houston",  sale_date="2025-01-01"),
+            _txn(buyer_entity="Wide LLC", city="Dallas",   sale_date="2025-06-01"),
+            _txn(buyer_entity="Wide LLC", city="Houston",  sale_date="2025-09-01"),
+        ]
+        p = _prof(txns)
+        assert set(p.purchase_markets) == {"Houston", "Dallas"}
+
+    def test_purchase_zip_codes_populated(self):
+        txns = [
+            _txn(buyer_entity="ZipCo LLC", zip="77008", sale_date="2025-01-01"),
+            _txn(buyer_entity="ZipCo LLC", zip="75201", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert "77008" in p.purchase_zip_codes
+        assert "75201" in p.purchase_zip_codes
+
+    def test_purchase_property_types_populated(self):
+        txns = [
+            _txn(buyer_entity="Prop LLC", property_type="SFR", sale_date="2025-01-01"),
+            _txn(buyer_entity="Prop LLC", property_type="MFR", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert set(p.purchase_property_types) == {"MFR", "SFR"}
+
+
+class TestPurchaseTimingConfidence:
+    def test_high_when_all_dated(self):
+        txns = [
+            _txn(buyer_entity="Dated LLC", sale_date="2025-01-01"),
+            _txn(buyer_entity="Dated LLC", sale_date="2025-06-01"),
+        ]
+        p = _prof(txns)
+        assert p.purchase_timing_confidence == "high"
+
+    def test_low_when_no_dates(self):
+        txns = [
+            _txn(buyer_entity="Ghost LLC", sale_date=None),
+            _txn(buyer_entity="Ghost LLC", sale_date=None),
+        ]
+        p = _prof(txns)
+        assert p.purchase_timing_confidence == "low"
+
+    def test_medium_when_partial(self):
+        txns = [
+            _txn(buyer_entity="Mixed LLC", sale_date="2025-01-01"),
+            _txn(buyer_entity="Mixed LLC", sale_date=None),
+        ]
+        p = _prof(txns)
+        assert p.purchase_timing_confidence == "medium"
+
+
+class TestPurchaseVelocityScore:
+    def test_zero_for_no_transactions(self):
+        p = agent.build_profiles([], [], ref_date=_REF)
+        assert p == []
+
+    def test_single_purchase_is_10(self):
+        txns = [_txn(buyer_entity="Solo LLC", sale_date="2025-01-01")]
+        p = _prof(txns)
+        assert p.purchase_velocity_score == 10.0
+
+    def test_zero_velocity_when_no_dates(self):
+        txns = [_txn(buyer_entity="Ghost LLC", sale_date=None)]
+        p = _prof(txns)
+        assert p.purchase_velocity_score == 0.0
+
+    def test_higher_velocity_for_faster_buyer(self):
+        fast = [
+            _txn(buyer_entity="Fast LLC", sale_date="2025-01-01"),
+            _txn(buyer_entity="Fast LLC", sale_date="2025-01-15"),
+            _txn(buyer_entity="Fast LLC", sale_date="2025-02-01"),
+        ]
+        slow = [
+            _txn(buyer_entity="Slow LLC", sale_date="2023-01-01"),
+            _txn(buyer_entity="Slow LLC", sale_date="2025-01-01"),
+        ]
+        p_fast = agent.build_profiles(fast, [], ref_date=_REF)[0]
+        p_slow = agent.build_profiles(slow, [], ref_date=_REF)[0]
+        assert p_fast.purchase_velocity_score > p_slow.purchase_velocity_score
+
+    def test_velocity_capped_at_100(self):
+        txns = [
+            _txn(buyer_entity="Mega LLC", sale_date=f"2025-01-{d:02d}")
+            for d in range(1, 29)
+        ]
+        p = _prof(txns)
+        assert p.purchase_velocity_score <= 100.0
+
+
+class TestRecentPurchaseEvidence:
+    def test_evidence_only_within_180_days(self):
+        d_recent = date(2026, 2, 1).isoformat()   # ~97d before ref
+        d_old    = date(2024, 1, 1).isoformat()   # far in past
+        txns = [
+            _txn(buyer_entity="EvidCo LLC", sale_date=d_recent, property_address="100 New St"),
+            _txn(buyer_entity="EvidCo LLC", sale_date=d_old,    property_address="200 Old St"),
+        ]
+        p = _prof(txns)
+        assert len(p.recent_purchase_evidence) == 1
+        assert "100 New St" in (p.recent_purchase_evidence[0].get("address") or "")
+
+    def test_evidence_has_required_keys(self):
+        d = date(2026, 2, 1).isoformat()
+        txns = [_txn(buyer_entity="Keys LLC", sale_date=d)]
+        p = _prof(txns)
+        ev = p.recent_purchase_evidence[0]
+        assert "date" in ev
+        assert "address" in ev
+        assert "sale_price" in ev
+        assert "financing_type" in ev
+        assert "source_file" in ev
+
+    def test_evidence_source_file_is_basename(self):
+        d = date(2026, 2, 1).isoformat()
+        txns = [_txn(buyer_entity="NameCo LLC", sale_date=d, source_file="/long/path/mydata.csv")]
+        p = _prof(txns)
+        assert p.recent_purchase_evidence[0]["source_file"] == "mydata.csv"
+
+    def test_no_evidence_when_no_recent_purchases(self):
+        txns = [_txn(buyer_entity="Old LLC", sale_date="2020-01-01")]
+        p = _prof(txns)
+        assert p.recent_purchase_evidence == []
+
+
+class TestNewOutputFiles:
+    def setup_method(self):
+        self.ws = _make_workspace()
+        raw_dir = self.ws / "data" / "buyer-activity" / "raw"
+        txns, ignored = agent.load_raw_dir(raw_dir)
+        self.profiles = agent.build_profiles(txns, SEEDS, ref_date=_REF)
+        self.reports_dir = self.ws / "ph_reports"
+        agent.write_reports(txns, self.profiles, ignored, self.reports_dir, self.ws)
+
+    def test_recent_buyers_json_exists(self):
+        assert (self.reports_dir / "RECENT_BUYERS.json").exists()
+
+    def test_multi_purchase_buyers_json_exists(self):
+        assert (self.reports_dir / "MULTI_PURCHASE_BUYERS.json").exists()
+
+    def test_buyer_purchase_history_md_exists(self):
+        assert (self.reports_dir / "BUYER_PURCHASE_HISTORY.md").exists()
+
+    def test_recent_buyers_json_structure(self):
+        data = json.loads((self.reports_dir / "RECENT_BUYERS.json").read_text())
+        assert "total_recent_buyers" in data
+        assert "window_days" in data
+        assert "buyers" in data
+        assert data["window_days"] == 90
+
+    def test_multi_purchase_buyers_have_count_gte_2(self):
+        data = json.loads((self.reports_dir / "MULTI_PURCHASE_BUYERS.json").read_text())
+        for buyer in data["buyers"]:
+            assert buyer["total_purchase_count"] >= 2
+
+    def test_purchase_history_md_has_table(self):
+        md = (self.reports_dir / "BUYER_PURCHASE_HISTORY.md").read_text()
+        assert "## " in md
+        assert "Total purchases" in md
+        assert "Purchase velocity score" in md
+
+    def test_activity_summary_has_new_fields(self):
+        data = json.loads((self.reports_dir / "ACTIVITY_SUMMARY.json").read_text())
+        if data["buyer_profiles"]:
+            bp = data["buyer_profiles"][0]
+            assert "total_purchase_count" in bp
+            assert "recent_purchase_count_90d" in bp
+            assert "purchase_velocity_score" in bp
+            assert "multi_purchase_buyer" in bp
+            assert "recent_purchase_evidence" in bp
+
+    def test_profiles_sorted_by_recent_activity(self):
+        data = json.loads((self.reports_dir / "RECENT_BUYERS.json").read_text())
+        buyers = data["buyers"]
+        for i in range(len(buyers) - 1):
+            assert buyers[i]["recent_purchase_count_90d"] >= buyers[i + 1]["recent_purchase_count_90d"]

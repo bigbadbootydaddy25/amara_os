@@ -25,7 +25,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -256,6 +256,31 @@ _RAW_MAP: dict[str, str] = {
     "year_constructed":             "year_built",
 }
 
+# ─── date parsing ────────────────────────────────────────────────────────────
+
+_DATE_FORMATS: tuple[str, ...] = (
+    "%Y-%m-%d",
+    "%m/%d/%Y",
+    "%m/%d/%y",
+    "%m-%d-%Y",
+    "%Y%m%d",
+    "%B %d, %Y",
+    "%b %d, %Y",
+)
+
+
+def _parse_date(raw: Optional[str]) -> Optional[date]:
+    if not raw:
+        return None
+    raw = raw.strip()
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(raw, fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
 _ENTITY_RE = re.compile(
     r"\b(LLC|Inc|Corp|LP|LLP|Trust|REIT|Properties|Holdings|Investments|"
     r"Homes|Builders|Development|Capital|Ventures|Partners|Group|Realty|"
@@ -364,6 +389,23 @@ class BuyerActivityProfile:
     most_recent_sale: Optional[str]
     earliest_sale:    Optional[str]
     source_files:     list[str]
+    # ── purchase history (populated by _make_profile) ─────────────────────
+    total_purchase_count:          int   = 0
+    recent_purchase_count_30d:     int   = 0
+    recent_purchase_count_90d:     int   = 0
+    recent_purchase_count_180d:    int   = 0
+    recent_purchase_count_365d:    int   = 0
+    last_purchase_date:            Optional[str]  = None
+    days_since_last_purchase:      Optional[int]  = None
+    first_purchase_date:           Optional[str]  = None
+    purchase_velocity_score:       float = 0.0
+    multi_purchase_buyer:          bool  = False
+    repeat_market_buyer:           bool  = False
+    purchase_markets:              list[str] = field(default_factory=list)
+    purchase_zip_codes:            list[str] = field(default_factory=list)
+    purchase_property_types:       list[str] = field(default_factory=list)
+    purchase_timing_confidence:    str   = "low"   # high | medium | low
+    recent_purchase_evidence:      list[dict] = field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -554,6 +596,7 @@ def _most_common(items: list[str]) -> Optional[str]:
 def build_profiles(
     transactions: list[Transaction],
     seeds: list[BuyerSeed],
+    ref_date: Optional[date] = None,
 ) -> list[BuyerActivityProfile]:
     grouped: dict[str, list[Transaction]] = {}
     for txn in transactions:
@@ -561,8 +604,9 @@ def build_profiles(
         if key:
             grouped.setdefault(key, []).append(txn)
 
-    profiles = [_make_profile(k, txns, seeds) for k, txns in grouped.items()]
-    profiles.sort(key=lambda p: p.transaction_count, reverse=True)
+    today = ref_date or date.today()
+    profiles = [_make_profile(k, txns, seeds, today) for k, txns in grouped.items()]
+    profiles.sort(key=lambda p: (p.recent_purchase_count_90d, p.total_purchase_count), reverse=True)
     return profiles
 
 
@@ -570,6 +614,7 @@ def _make_profile(
     key: str,
     txns: list[Transaction],
     seeds: list[BuyerSeed],
+    ref_date: date,
 ) -> BuyerActivityProfile:
     entities    = [t.buyer_entity for t in txns if t.buyer_entity]
     individuals = [t.buyer_name   for t in txns if t.buyer_name]
@@ -580,7 +625,76 @@ def _make_profile(
 
     seed   = match_seed(entity_name, individual_name, seeds)
     prices = [t.sale_price for t in txns if t.sale_price is not None]
-    dates  = sorted(d for t in txns if (d := t.sale_date))
+    raw_dates = sorted(d for t in txns if (d := t.sale_date))
+
+    # ── parse dates ────────────────────────────────────────────────────────
+    parsed: list[tuple[date, Transaction]] = []
+    for txn in txns:
+        d = _parse_date(txn.sale_date)
+        if d:
+            parsed.append((d, txn))
+    parsed.sort(key=lambda x: x[0])
+
+    dated_count = len(parsed)
+    total       = len(txns)
+    if dated_count == 0:
+        timing_confidence = "low"
+    elif dated_count == total:
+        timing_confidence = "high"
+    else:
+        timing_confidence = "medium"
+
+    # ── windowed counts ────────────────────────────────────────────────────
+    def _count_within(days: int) -> int:
+        return sum(1 for d, _ in parsed if (ref_date - d).days <= days)
+
+    cnt_30  = _count_within(30)
+    cnt_90  = _count_within(90)
+    cnt_180 = _count_within(180)
+    cnt_365 = _count_within(365)
+
+    last_date  = parsed[-1][0] if parsed else None
+    first_date = parsed[0][0]  if parsed else None
+    days_since = (ref_date - last_date).days if last_date else None
+
+    # ── velocity score 0–100 ───────────────────────────────────────────────
+    # Rate = purchases per 30 days over active window; 5/month → 100
+    if dated_count == 0:
+        velocity = 0.0
+    elif dated_count == 1:
+        velocity = 10.0
+    else:
+        active_days = max(1, (last_date - first_date).days)
+        rate_per_30 = (dated_count / active_days) * 30
+        velocity = min(100.0, round(rate_per_30 * 20, 1))
+
+    # ── flags ──────────────────────────────────────────────────────────────
+    multi_purchase  = total >= 2
+    zip_set         = sorted({t.zip  for t in txns if t.zip})
+    market_set      = sorted({t.city for t in txns if t.city})
+    repeat_market   = len(zip_set) >= 2 or len(market_set) >= 2
+    prop_type_set   = sorted({t.property_type for t in txns if t.property_type})
+
+    # ── recent evidence (last 180 days, most recent first) ────────────────
+    recent_evidence = []
+    for d, txn in reversed(parsed):
+        if (ref_date - d).days > 180:
+            break
+        addr_parts = [p for p in [
+            txn.property_address,
+            txn.city,
+            txn.state,
+            txn.zip,
+        ] if p]
+        evidence = {
+            "date":          d.isoformat(),
+            "address":       ", ".join(addr_parts) if addr_parts else None,
+            "sale_price":    txn.sale_price,
+            "financing_type": txn.financing_type,
+            "property_type": txn.property_type,
+            "source_file":   Path(txn.source_file).name,
+        }
+        recent_evidence.append(evidence)
 
     return BuyerActivityProfile(
         buyer_key=key,
@@ -589,16 +703,33 @@ def _make_profile(
         individual_name=individual_name,
         seed_id=seed.buyer_id if seed else None,
         seed_status=seed.status if seed else None,
-        transaction_count=len(txns),
-        zip_codes=sorted({t.zip for t in txns if t.zip}),
-        property_types=sorted({t.property_type for t in txns if t.property_type}),
+        transaction_count=total,
+        zip_codes=zip_set,
+        property_types=prop_type_set,
         financing_types=sorted({t.financing_type for t in txns if t.financing_type}),
         price_min=min(prices) if prices else None,
         price_max=max(prices) if prices else None,
         price_avg=round(sum(prices) / len(prices), 2) if prices else None,
-        most_recent_sale=dates[-1] if dates else None,
-        earliest_sale=dates[0] if dates else None,
+        most_recent_sale=raw_dates[-1] if raw_dates else None,
+        earliest_sale=raw_dates[0] if raw_dates else None,
         source_files=sorted({t.source_file for t in txns}),
+        # purchase history
+        total_purchase_count=total,
+        recent_purchase_count_30d=cnt_30,
+        recent_purchase_count_90d=cnt_90,
+        recent_purchase_count_180d=cnt_180,
+        recent_purchase_count_365d=cnt_365,
+        last_purchase_date=last_date.isoformat() if last_date else None,
+        days_since_last_purchase=days_since,
+        first_purchase_date=first_date.isoformat() if first_date else None,
+        purchase_velocity_score=velocity,
+        multi_purchase_buyer=multi_purchase,
+        repeat_market_buyer=repeat_market,
+        purchase_markets=market_set,
+        purchase_zip_codes=zip_set,
+        purchase_property_types=prop_type_set,
+        purchase_timing_confidence=timing_confidence,
+        recent_purchase_evidence=recent_evidence,
     )
 
 
@@ -619,6 +750,9 @@ def write_reports(
     _write_buyer_profiles_md(profiles, reports_dir, ts)
     _write_ignored_files_md(ignored, reports_dir, ts, workspace_root)
     _write_activity_summary_json(transactions, profiles, ignored, reports_dir, ts)
+    _write_recent_buyers_json(profiles, reports_dir, ts)
+    _write_multi_purchase_buyers_json(profiles, reports_dir, ts)
+    _write_buyer_purchase_history_md(profiles, reports_dir, ts)
 
 
 def _write_buyer_profiles_md(
@@ -659,6 +793,31 @@ def _write_buyer_profiles_md(
                 lines.append(f"- **Most recent sale**: {p.most_recent_sale}")
             if p.earliest_sale and p.earliest_sale != p.most_recent_sale:
                 lines.append(f"- **Earliest sale**: {p.earliest_sale}")
+            # purchase history
+            lines.append(f"- **Total purchases**: {p.total_purchase_count}")
+            conf = p.purchase_timing_confidence
+            lines.append(f"- **Purchase timing confidence**: {conf}")
+            if p.days_since_last_purchase is not None:
+                lines.append(f"- **Days since last purchase**: {p.days_since_last_purchase}")
+            if p.purchase_velocity_score > 0:
+                lines.append(f"- **Purchase velocity score**: {p.purchase_velocity_score}")
+            lines.append(f"- **Multi-purchase buyer**: {p.multi_purchase_buyer}")
+            lines.append(f"- **Repeat market buyer**: {p.repeat_market_buyer}")
+            counts = (
+                f"30d={p.recent_purchase_count_30d}  "
+                f"90d={p.recent_purchase_count_90d}  "
+                f"180d={p.recent_purchase_count_180d}  "
+                f"365d={p.recent_purchase_count_365d}"
+            )
+            lines.append(f"- **Recent purchases**: {counts}")
+            if p.purchase_markets:
+                lines.append(f"- **Purchase markets**: {', '.join(p.purchase_markets)}")
+            if p.recent_purchase_evidence:
+                lines.append("- **Recent evidence**:")
+                for ev in p.recent_purchase_evidence[:5]:
+                    price_str = f"${ev['sale_price']:,.0f}" if ev.get("sale_price") else "n/a"
+                    addr_str  = ev.get("address") or "n/a"
+                    lines.append(f"  - {ev['date']}  {addr_str}  {price_str}  ({ev['source_file']})")
             lines.append("")
 
     (reports_dir / "BUYER_ACTIVITY_PROFILES.md").write_text(
@@ -699,6 +858,144 @@ def _write_ignored_files_md(
     )
 
 
+def _profile_to_dict(p: BuyerActivityProfile) -> dict:
+    return {
+        "buyer_key":                   p.buyer_key,
+        "display_name":                p.display_name,
+        "entity_name":                 p.entity_name,
+        "individual_name":             p.individual_name,
+        "seed_id":                     p.seed_id,
+        "seed_status":                 p.seed_status,
+        "transaction_count":           p.transaction_count,
+        "zip_codes":                   p.zip_codes,
+        "property_types":              p.property_types,
+        "financing_types":             p.financing_types,
+        "price_min":                   p.price_min,
+        "price_max":                   p.price_max,
+        "price_avg":                   p.price_avg,
+        "most_recent_sale":            p.most_recent_sale,
+        "earliest_sale":               p.earliest_sale,
+        "source_files":                [Path(f).name for f in p.source_files],
+        # purchase history
+        "total_purchase_count":        p.total_purchase_count,
+        "recent_purchase_count_30d":   p.recent_purchase_count_30d,
+        "recent_purchase_count_90d":   p.recent_purchase_count_90d,
+        "recent_purchase_count_180d":  p.recent_purchase_count_180d,
+        "recent_purchase_count_365d":  p.recent_purchase_count_365d,
+        "last_purchase_date":          p.last_purchase_date,
+        "days_since_last_purchase":    p.days_since_last_purchase,
+        "first_purchase_date":         p.first_purchase_date,
+        "purchase_velocity_score":     p.purchase_velocity_score,
+        "multi_purchase_buyer":        p.multi_purchase_buyer,
+        "repeat_market_buyer":         p.repeat_market_buyer,
+        "purchase_markets":            p.purchase_markets,
+        "purchase_zip_codes":          p.purchase_zip_codes,
+        "purchase_property_types":     p.purchase_property_types,
+        "purchase_timing_confidence":  p.purchase_timing_confidence,
+        "recent_purchase_evidence":    p.recent_purchase_evidence,
+    }
+
+
+def _write_recent_buyers_json(
+    profiles: list[BuyerActivityProfile],
+    reports_dir: Path,
+    ts: str,
+) -> None:
+    recent = [p for p in profiles if p.recent_purchase_count_90d >= 1]
+    recent.sort(key=lambda p: (p.recent_purchase_count_90d, p.purchase_velocity_score), reverse=True)
+    payload = {
+        "run_timestamp": ts,
+        "total_recent_buyers": len(recent),
+        "window_days": 90,
+        "buyers": [_profile_to_dict(p) for p in recent],
+    }
+    (reports_dir / "RECENT_BUYERS.json").write_text(
+        json.dumps(payload, indent=2, default=str), encoding="utf-8"
+    )
+
+
+def _write_multi_purchase_buyers_json(
+    profiles: list[BuyerActivityProfile],
+    reports_dir: Path,
+    ts: str,
+) -> None:
+    multi = [p for p in profiles if p.multi_purchase_buyer]
+    multi.sort(key=lambda p: (p.total_purchase_count, p.purchase_velocity_score), reverse=True)
+    payload = {
+        "run_timestamp": ts,
+        "total_multi_purchase_buyers": len(multi),
+        "buyers": [_profile_to_dict(p) for p in multi],
+    }
+    (reports_dir / "MULTI_PURCHASE_BUYERS.json").write_text(
+        json.dumps(payload, indent=2, default=str), encoding="utf-8"
+    )
+
+
+def _write_buyer_purchase_history_md(
+    profiles: list[BuyerActivityProfile],
+    reports_dir: Path,
+    ts: str,
+) -> None:
+    lines = [
+        "# BUYER_PURCHASE_HISTORY",
+        "",
+        f"_Generated: {ts}_",
+        f"_Profiles: {len(profiles)}_",
+        "",
+        "Ranked by recency (most 90-day purchases first).",
+        "",
+    ]
+    for p in profiles:
+        seed_tag = f"[{p.seed_id}·{p.seed_status}]" if p.seed_id else "[new]"
+        lines += [
+            f"## {p.display_name}  {seed_tag}",
+            "",
+            f"| Field | Value |",
+            f"|---|---|",
+            f"| Total purchases | {p.total_purchase_count} |",
+            f"| First purchase | {p.first_purchase_date or 'unknown'} |",
+            f"| Last purchase | {p.last_purchase_date or 'unknown'} |",
+            f"| Days since last purchase | {p.days_since_last_purchase if p.days_since_last_purchase is not None else 'unknown'} |",
+            f"| Purchases (30d / 90d / 180d / 365d) | {p.recent_purchase_count_30d} / {p.recent_purchase_count_90d} / {p.recent_purchase_count_180d} / {p.recent_purchase_count_365d} |",
+            f"| Purchase velocity score | {p.purchase_velocity_score} |",
+            f"| Multi-purchase buyer | {p.multi_purchase_buyer} |",
+            f"| Repeat market buyer | {p.repeat_market_buyer} |",
+            f"| Purchase timing confidence | {p.purchase_timing_confidence} |",
+        ]
+        if p.purchase_markets:
+            lines.append(f"| Markets | {', '.join(p.purchase_markets)} |")
+        if p.purchase_zip_codes:
+            lines.append(f"| ZIP codes | {', '.join(p.purchase_zip_codes)} |")
+        if p.purchase_property_types:
+            lines.append(f"| Property types | {', '.join(p.purchase_property_types)} |")
+        if p.price_avg is not None:
+            lines.append(
+                f"| Price range | ${p.price_min:,.0f} – ${p.price_max:,.0f}"
+                f" (avg ${p.price_avg:,.0f}) |"
+            )
+        lines.append("")
+        if p.recent_purchase_evidence:
+            lines.append("**Recent purchase evidence:**")
+            lines.append("")
+            lines.append("| Date | Address | Price | Financing | Source |")
+            lines.append("|---|---|---|---|---|")
+            for ev in p.recent_purchase_evidence:
+                price_str = f"${ev['sale_price']:,.0f}" if ev.get("sale_price") else "n/a"
+                lines.append(
+                    f"| {ev['date']} "
+                    f"| {ev.get('address') or 'n/a'} "
+                    f"| {price_str} "
+                    f"| {ev.get('financing_type') or 'n/a'} "
+                    f"| {ev['source_file']} |"
+                )
+            lines.append("")
+        lines.append("")
+
+    (reports_dir / "BUYER_PURCHASE_HISTORY.md").write_text(
+        "\n".join(lines), encoding="utf-8"
+    )
+
+
 def _write_activity_summary_json(
     transactions: list[Transaction],
     profiles: list[BuyerActivityProfile],
@@ -709,27 +1006,7 @@ def _write_activity_summary_json(
     payload = {
         "run_timestamp": ts,
         "eligible_transaction_count": len(transactions),
-        "buyer_profiles": [
-            {
-                "buyer_key":         p.buyer_key,
-                "display_name":      p.display_name,
-                "entity_name":       p.entity_name,
-                "individual_name":   p.individual_name,
-                "seed_id":           p.seed_id,
-                "seed_status":       p.seed_status,
-                "transaction_count": p.transaction_count,
-                "zip_codes":         p.zip_codes,
-                "property_types":    p.property_types,
-                "financing_types":   p.financing_types,
-                "price_min":         p.price_min,
-                "price_max":         p.price_max,
-                "price_avg":         p.price_avg,
-                "most_recent_sale":  p.most_recent_sale,
-                "earliest_sale":     p.earliest_sale,
-                "source_files":      [Path(f).name for f in p.source_files],
-            }
-            for p in profiles
-        ],
+        "buyer_profiles": [_profile_to_dict(p) for p in profiles],
         "ignored_files": [
             {"file": Path(i.path).name, "reason": i.reason}
             for i in ignored
@@ -852,8 +1129,23 @@ def main(argv: list[str] | None = None) -> int:
                 f"  avg ${p.price_avg:>9,.0f}"
                 f"  range ${p.price_min:,.0f}–${p.price_max:,.0f}"
             ) if p.price_avg else ""
+            flags = []
+            if p.multi_purchase_buyer:
+                flags.append("multi-purchase")
+            if p.repeat_market_buyer:
+                flags.append("repeat-market")
+            flag_str = f"  [{', '.join(flags)}]" if flags else ""
             zip_str = ", ".join(p.zip_codes[:4]) + ("…" if len(p.zip_codes) > 4 else "")
-            print(f"  {seed_tag:<22} {p.display_name:<38} {p.transaction_count:>3} txn(s){price_str}")
+            print(f"  {seed_tag:<22} {p.display_name:<38} {p.transaction_count:>3} txn(s){price_str}{flag_str}")
+            if p.days_since_last_purchase is not None:
+                vel = f"velocity={p.purchase_velocity_score}"
+                win = (
+                    f"30d={p.recent_purchase_count_30d}"
+                    f" 90d={p.recent_purchase_count_90d}"
+                    f" 180d={p.recent_purchase_count_180d}"
+                    f" 365d={p.recent_purchase_count_365d}"
+                )
+                print(f"    {'':22} Last purchase {p.days_since_last_purchase}d ago  {vel}  {win}")
             if zip_str:
                 print(f"    {'':22} ZIPs: {zip_str}")
             if p.property_types:
@@ -893,6 +1185,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  • BUYER_ACTIVITY_PROFILES.md")
         print(f"  • IGNORED_FILES.md")
         print(f"  • ACTIVITY_SUMMARY.json")
+        print(f"  • RECENT_BUYERS.json")
+        print(f"  • MULTI_PURCHASE_BUYERS.json")
+        print(f"  • BUYER_PURCHASE_HISTORY.md")
 
     return 0
 

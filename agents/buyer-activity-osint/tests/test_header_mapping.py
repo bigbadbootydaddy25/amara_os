@@ -758,4 +758,266 @@ class TestNewOutputFiles:
         data = json.loads((self.reports_dir / "RECENT_BUYERS.json").read_text())
         buyers = data["buyers"]
         for i in range(len(buyers) - 1):
-            assert buyers[i]["recent_purchase_count_90d"] >= buyers[i + 1]["recent_purchase_count_90d"]
+            assert buyers[i]["acquisition_heat_score"] >= buyers[i + 1]["acquisition_heat_score"]
+
+    def test_activity_summary_has_scoring_fields(self):
+        data = json.loads((self.reports_dir / "ACTIVITY_SUMMARY.json").read_text())
+        if data["buyer_profiles"]:
+            bp = data["buyer_profiles"][0]
+            assert "activity_recency_score" in bp
+            assert "weighted_buyer_score" in bp
+            assert "acquisition_heat_score" in bp
+            assert "buyer_state" in bp
+
+    def test_hot_buyers_json_exists(self):
+        assert (self.reports_dir / "HOT_BUYERS.json").exists()
+
+    def test_active_buyers_json_exists(self):
+        assert (self.reports_dir / "ACTIVE_BUYERS.json").exists()
+
+    def test_buyer_heat_rankings_md_exists(self):
+        assert (self.reports_dir / "BUYER_HEAT_RANKINGS.md").exists()
+
+    def test_buyer_heat_rankings_has_table(self):
+        md = (self.reports_dir / "BUYER_HEAT_RANKINGS.md").read_text()
+        assert "## Rankings" in md
+        assert "acquisition_heat_score" in md
+        assert "Rank" in md
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Scoring helpers — unit tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestActivityRecencyScore:
+    @pytest.mark.parametrize("days,expected", [
+        (0,    100.0),
+        (15,   100.0),
+        (30,   100.0),
+        (31,    80.0),
+        (90,    80.0),
+        (91,    55.0),
+        (180,   55.0),
+        (181,   30.0),
+        (365,   30.0),
+        (730,    0.0),   # exactly 2 years → fully decayed
+        (1000,   0.0),
+        (None,   0.0),
+    ])
+    def test_recency_score_thresholds(self, days, expected):
+        assert agent._activity_recency_score(days) == expected
+
+    def test_recency_decays_between_365_and_730(self):
+        s400 = agent._activity_recency_score(400)
+        s600 = agent._activity_recency_score(600)
+        assert 0.0 < s400 < 15.0
+        assert 0.0 < s600 < s400
+
+
+class TestWeightedBuyerScore:
+    def _score(self, **kw):
+        defaults = dict(
+            cnt_30=0, cnt_90=0, cnt_180=0, total=1,
+            multi=False, repeat=False, n_zips=1,
+            has_sfr=False, has_cash=False, has_hard_money=False,
+            has_land=False, has_distress=False,
+        )
+        defaults.update(kw)
+        return agent._weighted_buyer_score(**defaults)
+
+    def test_zero_for_minimal_buyer(self):
+        s = self._score()
+        assert 0.0 <= s <= 100.0
+
+    def test_30d_purchase_boosts_score(self):
+        base  = self._score()
+        with_ = self._score(cnt_30=1)
+        assert with_ > base
+
+    def test_multi_purchase_adds_points(self):
+        assert self._score(multi=True) > self._score(multi=False)
+
+    def test_hard_money_adds_more_than_cash(self):
+        hm   = self._score(has_hard_money=True)
+        cash = self._score(has_cash=True)
+        assert hm > cash
+
+    def test_distress_adds_points(self):
+        assert self._score(has_distress=True) > self._score(has_distress=False)
+
+    def test_score_capped_at_100(self):
+        s = self._score(
+            cnt_30=5, cnt_90=5, cnt_180=5, total=20,
+            multi=True, repeat=True, n_zips=1,
+            has_sfr=True, has_cash=True, has_hard_money=True,
+            has_land=True, has_distress=True,
+        )
+        assert s <= 100.0
+
+    def test_zip_concentration_bonus(self):
+        # 10 purchases in 1 ZIP scores higher than 10 in 10 ZIPs
+        concentrated = self._score(total=10, n_zips=1)
+        spread       = self._score(total=10, n_zips=10)
+        assert concentrated > spread
+
+
+class TestAcquisitionHeatScore:
+    def test_high_recency_dominates(self):
+        # Active buyer (recency=100) vs dormant (recency=0) same weighted
+        active  = agent._acquisition_heat_score(100.0, 50.0, 20.0, 20)
+        dormant = agent._acquisition_heat_score(0.0,   50.0, 20.0, 500)
+        assert active > dormant
+
+    def test_decay_applied_beyond_365(self):
+        no_decay  = agent._acquisition_heat_score(30.0, 30.0, 10.0, 300)
+        with_decay = agent._acquisition_heat_score(30.0, 30.0, 10.0, 730)
+        assert with_decay < no_decay
+
+    def test_score_capped_at_100(self):
+        assert agent._acquisition_heat_score(100.0, 100.0, 100.0, 5) <= 100.0
+
+    def test_score_is_zero_for_all_zero_inputs(self):
+        assert agent._acquisition_heat_score(0.0, 0.0, 0.0, None) == 0.0
+
+    def test_max_decay_is_50_percent(self):
+        # At 3 years (1095 days): decay = min(0.5, (730/365)*0.25) = min(0.5, 0.5) = 0.5
+        no_decay  = agent._acquisition_heat_score(30.0, 30.0, 10.0, 0)
+        max_decay = agent._acquisition_heat_score(30.0, 30.0, 10.0, 1095)
+        assert max_decay >= no_decay * 0.45   # at most ~50% reduction
+
+
+class TestBuyerState:
+    @pytest.mark.parametrize("cnt_30,cnt_90,cnt_365,total,expected", [
+        (1, 1, 1, 2, "HOT"),
+        (0, 1, 1, 2, "ACTIVE"),
+        (0, 0, 1, 1, "WARM"),
+        (0, 0, 0, 3, "COLD"),
+        (0, 0, 0, 1, "DORMANT"),
+        (0, 0, 0, 0, "DORMANT"),
+    ])
+    def test_buyer_state_logic(self, cnt_30, cnt_90, cnt_365, total, expected):
+        assert agent._buyer_state(cnt_30, cnt_90, cnt_365, total) == expected
+
+
+class TestRankingIntegration:
+    """Verify that recent active buyers outrank large dormant buyers."""
+
+    def _build(self, entity, sale_date, n=1, zip_="77008"):
+        return [_txn(buyer_entity=entity, sale_date=sale_date,
+                     financing_type="Cash", property_type="SFR", zip=zip_)
+                for _ in range(n)]
+
+    def test_30d_buyer_beats_dormant_whale(self):
+        """1 purchase in 30d should outrank 10 purchases all >2 years ago."""
+        d_recent = date(2026, 4, 20).isoformat()   # ~19 days before _REF
+        d_old    = "2023-01-01"
+        recent_txns = self._build("Fresh LLC",   d_recent)
+        whale_txns  = self._build("Whale Corp",  d_old, n=10)
+        profiles = agent.build_profiles(recent_txns + whale_txns, [], ref_date=_REF)
+        top = profiles[0]
+        assert top.display_name == "Fresh LLC"
+        assert top.buyer_state  == "HOT"
+
+    def test_hot_beats_active_beats_warm(self):
+        d_10d  = date(2026, 4, 29).isoformat()  # 10d before ref
+        d_60d  = date(2026, 3, 10).isoformat()  # 60d before ref
+        d_300d = date(2025, 7, 13).isoformat()  # ~300d before ref
+        hot    = self._build("Hot LLC",    d_10d)
+        active = self._build("Active LLC", d_60d)
+        warm   = self._build("Warm LLC",   d_300d)
+        profiles = agent.build_profiles(hot + active + warm, [], ref_date=_REF)
+        states = [p.buyer_state for p in profiles]
+        assert states[0] == "HOT"
+        assert states[1] == "ACTIVE"
+        assert states[2] == "WARM"
+
+    def test_acquisition_heat_score_present_and_positive(self):
+        txns = [_txn(buyer_entity="ScoreCo LLC", sale_date="2025-01-01")]
+        p = _prof(txns)
+        assert p.acquisition_heat_score >= 0.0
+        assert p.activity_recency_score >= 0.0
+        assert p.weighted_buyer_score   >= 0.0
+
+    def test_profiles_sorted_by_heat_score_descending(self):
+        d_recent = date(2026, 4, 20).isoformat()
+        d_old    = "2023-06-01"
+        txns = (
+            self._build("Old Buyer LLC", d_old,    n=5) +
+            self._build("New Buyer LLC", d_recent, n=1)
+        )
+        profiles = agent.build_profiles(txns, [], ref_date=_REF)
+        scores = [p.acquisition_heat_score for p in profiles]
+        assert scores == sorted(scores, reverse=True)
+
+    def test_buyer_state_on_profile(self):
+        d = date(2026, 4, 20).isoformat()
+        txns = [_txn(buyer_entity="Hot Co LLC", sale_date=d)]
+        p = agent.build_profiles(txns, [], ref_date=_REF)[0]
+        assert p.buyer_state == "HOT"
+
+    def test_signal_detection_sfr_cash(self):
+        txns = [_txn(buyer_entity="Signal LLC",
+                     property_type="SFR", financing_type="Cash",
+                     sale_date="2025-01-01")]
+        p = _prof(txns)
+        assert p.weighted_buyer_score > 0.0
+
+    def test_hard_money_buyer_scores_higher_than_conv(self):
+        hm   = [_txn(buyer_entity="HM LLC",   financing_type="Hard Money", sale_date="2025-01-01")]
+        conv = [_txn(buyer_entity="Conv LLC",  financing_type="Conventional", sale_date="2025-01-01")]
+        p_hm   = agent.build_profiles(hm,   [], ref_date=_REF)[0]
+        p_conv = agent.build_profiles(conv, [], ref_date=_REF)[0]
+        assert p_hm.weighted_buyer_score > p_conv.weighted_buyer_score
+
+
+class TestNewRankingOutputFiles:
+    def setup_method(self):
+        self.ws = _make_workspace()
+        raw_dir = self.ws / "data" / "buyer-activity" / "raw"
+        txns, ignored = agent.load_raw_dir(raw_dir)
+        self.profiles = agent.build_profiles(txns, SEEDS, ref_date=_REF)
+        self.reports_dir = self.ws / "rank_reports"
+        agent.write_reports(txns, self.profiles, ignored, self.reports_dir, self.ws)
+
+    def test_hot_buyers_json_created(self):
+        assert (self.reports_dir / "HOT_BUYERS.json").exists()
+
+    def test_active_buyers_json_created(self):
+        assert (self.reports_dir / "ACTIVE_BUYERS.json").exists()
+
+    def test_buyer_heat_rankings_md_created(self):
+        assert (self.reports_dir / "BUYER_HEAT_RANKINGS.md").exists()
+
+    def test_hot_buyers_definition_field(self):
+        data = json.loads((self.reports_dir / "HOT_BUYERS.json").read_text())
+        assert "definition" in data
+        assert "30" in data["definition"]
+
+    def test_active_buyers_superset_of_hot(self):
+        hot    = json.loads((self.reports_dir / "HOT_BUYERS.json").read_text())
+        active = json.loads((self.reports_dir / "ACTIVE_BUYERS.json").read_text())
+        assert active["total_active_buyers"] >= hot["total_hot_buyers"]
+
+    def test_heat_rankings_has_state_summary(self):
+        md = (self.reports_dir / "BUYER_HEAT_RANKINGS.md").read_text()
+        assert "## State Summary" in md
+        assert "HOT" in md
+        assert "DORMANT" in md
+
+    def test_heat_rankings_sorted_by_heat(self):
+        data = json.loads((self.reports_dir / "ACTIVE_BUYERS.json").read_text())
+        buyers = data["buyers"]
+        for i in range(len(buyers) - 1):
+            assert buyers[i]["acquisition_heat_score"] >= buyers[i + 1]["acquisition_heat_score"]
+
+    def test_all_profiles_have_buyer_state(self):
+        data = json.loads((self.reports_dir / "ACTIVITY_SUMMARY.json").read_text())
+        valid = {"HOT", "ACTIVE", "WARM", "COLD", "DORMANT"}
+        for bp in data["buyer_profiles"]:
+            assert bp["buyer_state"] in valid
+
+    def test_multi_purchase_sorted_by_heat(self):
+        data = json.loads((self.reports_dir / "MULTI_PURCHASE_BUYERS.json").read_text())
+        buyers = data["buyers"]
+        for i in range(len(buyers) - 1):
+            assert buyers[i]["acquisition_heat_score"] >= buyers[i + 1]["acquisition_heat_score"]

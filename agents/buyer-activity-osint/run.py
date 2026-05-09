@@ -281,6 +281,112 @@ def _parse_date(raw: Optional[str]) -> Optional[date]:
     return None
 
 
+# ─── activity-type signal detectors ─────────────────────────────────────────
+
+_SFR_RE        = re.compile(r"\b(sfr|single.?fam|residential)\b", re.I)
+_CASH_RE       = re.compile(r"\bcash\b", re.I)
+_HARD_MONEY_RE = re.compile(r"\bhard.?money\b", re.I)
+_LAND_RE       = re.compile(r"\b(land|lot|vacant|infill|mfr|multi.?fam)\b", re.I)
+_DISTRESS_RE   = re.compile(r"\b(foreclos|reo|hud|tax.?lien|short.?sale|auction)\b", re.I)
+
+
+# ─── scoring helpers ─────────────────────────────────────────────────────────
+
+def _activity_recency_score(days_since: Optional[int]) -> float:
+    """0–100; decays rapidly after 365 days."""
+    if days_since is None:
+        return 0.0
+    if days_since <= 30:
+        return 100.0
+    if days_since <= 90:
+        return 80.0
+    if days_since <= 180:
+        return 55.0
+    if days_since <= 365:
+        return 30.0
+    years_over = (days_since - 365) / 365
+    return max(0.0, round(15.0 - years_over * 15.0, 1))
+
+
+def _weighted_buyer_score(
+    cnt_30: int,
+    cnt_90: int,
+    cnt_180: int,
+    total: int,
+    multi: bool,
+    repeat: bool,
+    n_zips: int,
+    has_sfr: bool,
+    has_cash: bool,
+    has_hard_money: bool,
+    has_land: bool,
+    has_distress: bool,
+) -> float:
+    """
+    0–100 composite score from purchase signals.
+
+    Weights (approximate maxima):
+      recent activity   50 pts   — strongly favours recent buyers
+      buyer-type flags  15 pts
+      distress signals  17 pts
+      ZIP concentration 10 pts
+      historical volume  8 pts
+    """
+    score = 0.0
+
+    # Recent activity (max ~50)
+    score += min(30.0, cnt_30 * 30.0)
+    score += min(15.0, cnt_90 * 5.0)
+    score += min(5.0,  cnt_180 * 1.0)
+
+    # Buyer-type flags (max 15)
+    if multi:  score += 10.0
+    if repeat: score += 5.0
+
+    # Distress / specialisation signals (max 17)
+    if has_distress:   score += 7.0
+    if has_hard_money: score += 6.0
+    if has_cash:       score += 5.0
+    if has_sfr:        score += 4.0
+    if has_land:       score += 3.0
+
+    # ZIP concentration — high purchases-per-ZIP → market specialist (max 10)
+    if n_zips > 0 and total > 0:
+        score += min(10.0, (total / n_zips) * 2.0)
+
+    # Historical volume — capped low so dormant whales don't dominate (max 8)
+    score += min(8.0, total * 0.5)
+
+    return min(100.0, round(score, 1))
+
+
+def _acquisition_heat_score(
+    recency: float,
+    weighted: float,
+    velocity: float,
+    days_since: Optional[int],
+) -> float:
+    """
+    Final heat score 0–100.  Applies extra decay for buyers inactive
+    more than one year.
+    """
+    heat = 0.40 * recency + 0.40 * weighted + 0.20 * velocity
+    if days_since is not None and days_since > 365:
+        years_over = (days_since - 365) / 365
+        decay = min(0.50, years_over * 0.25)
+        heat *= 1.0 - decay
+    return min(100.0, round(heat, 1))
+
+
+def _buyer_state(cnt_30: int, cnt_90: int, cnt_365: int, total: int) -> str:
+    """HOT → ACTIVE → WARM → COLD → DORMANT."""
+    if cnt_30 >= 1:  return "HOT"
+    if cnt_90 >= 1:  return "ACTIVE"
+    if cnt_365 >= 1: return "WARM"
+    if total >= 2:   return "COLD"
+    return "DORMANT"
+
+
 _ENTITY_RE = re.compile(
     r"\b(LLC|Inc|Corp|LP|LLP|Trust|REIT|Properties|Holdings|Investments|"
     r"Homes|Builders|Development|Capital|Ventures|Partners|Group|Realty|"
@@ -406,6 +512,11 @@ class BuyerActivityProfile:
     purchase_property_types:       list[str] = field(default_factory=list)
     purchase_timing_confidence:    str   = "low"   # high | medium | low
     recent_purchase_evidence:      list[dict] = field(default_factory=list)
+    # ── buyer ranking scores ──────────────────────────────────────────────
+    activity_recency_score:        float = 0.0
+    weighted_buyer_score:          float = 0.0
+    acquisition_heat_score:        float = 0.0
+    buyer_state:                   str   = "DORMANT"  # HOT|ACTIVE|WARM|COLD|DORMANT
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -606,7 +717,7 @@ def build_profiles(
 
     today = ref_date or date.today()
     profiles = [_make_profile(k, txns, seeds, today) for k, txns in grouped.items()]
-    profiles.sort(key=lambda p: (p.recent_purchase_count_90d, p.total_purchase_count), reverse=True)
+    profiles.sort(key=lambda p: p.acquisition_heat_score, reverse=True)
     return profiles
 
 
@@ -668,12 +779,29 @@ def _make_profile(
         rate_per_30 = (dated_count / active_days) * 30
         velocity = min(100.0, round(rate_per_30 * 20, 1))
 
-    # ── flags ──────────────────────────────────────────────────────────────
+    # ── flags and activity signals ────────────────────────────────────────
     multi_purchase  = total >= 2
     zip_set         = sorted({t.zip  for t in txns if t.zip})
     market_set      = sorted({t.city for t in txns if t.city})
     repeat_market   = len(zip_set) >= 2 or len(market_set) >= 2
     prop_type_set   = sorted({t.property_type for t in txns if t.property_type})
+
+    all_ptypes = " ".join(t.property_type  or "" for t in txns)
+    all_ftypes = " ".join(t.financing_type or "" for t in txns)
+    has_sfr        = bool(_SFR_RE.search(all_ptypes))
+    has_cash       = bool(_CASH_RE.search(all_ftypes))
+    has_hard_money = bool(_HARD_MONEY_RE.search(all_ftypes))
+    has_land       = bool(_LAND_RE.search(all_ptypes))
+    has_distress   = bool(_DISTRESS_RE.search(all_ptypes + " " + all_ftypes))
+
+    # ── ranking scores ────────────────────────────────────────────────────
+    recency_score = _activity_recency_score(days_since)
+    w_score       = _weighted_buyer_score(
+        cnt_30, cnt_90, cnt_180, total, multi_purchase, repeat_market,
+        len(zip_set), has_sfr, has_cash, has_hard_money, has_land, has_distress,
+    )
+    heat_score    = _acquisition_heat_score(recency_score, w_score, velocity, days_since)
+    state         = _buyer_state(cnt_30, cnt_90, cnt_365, total)
 
     # ── recent evidence (last 180 days, most recent first) ────────────────
     recent_evidence = []
@@ -730,6 +858,10 @@ def _make_profile(
         purchase_property_types=prop_type_set,
         purchase_timing_confidence=timing_confidence,
         recent_purchase_evidence=recent_evidence,
+        activity_recency_score=recency_score,
+        weighted_buyer_score=w_score,
+        acquisition_heat_score=heat_score,
+        buyer_state=state,
     )
 
 
@@ -752,6 +884,9 @@ def write_reports(
     _write_activity_summary_json(transactions, profiles, ignored, reports_dir, ts)
     _write_recent_buyers_json(profiles, reports_dir, ts)
     _write_multi_purchase_buyers_json(profiles, reports_dir, ts)
+    _write_hot_buyers_json(profiles, reports_dir, ts)
+    _write_active_buyers_json(profiles, reports_dir, ts)
+    _write_buyer_heat_rankings_md(profiles, reports_dir, ts)
     _write_buyer_purchase_history_md(profiles, reports_dir, ts)
 
 
@@ -893,6 +1028,11 @@ def _profile_to_dict(p: BuyerActivityProfile) -> dict:
         "purchase_property_types":     p.purchase_property_types,
         "purchase_timing_confidence":  p.purchase_timing_confidence,
         "recent_purchase_evidence":    p.recent_purchase_evidence,
+        # ranking
+        "activity_recency_score":      p.activity_recency_score,
+        "weighted_buyer_score":        p.weighted_buyer_score,
+        "acquisition_heat_score":      p.acquisition_heat_score,
+        "buyer_state":                 p.buyer_state,
     }
 
 
@@ -902,7 +1042,7 @@ def _write_recent_buyers_json(
     ts: str,
 ) -> None:
     recent = [p for p in profiles if p.recent_purchase_count_90d >= 1]
-    recent.sort(key=lambda p: (p.recent_purchase_count_90d, p.purchase_velocity_score), reverse=True)
+    recent.sort(key=lambda p: p.acquisition_heat_score, reverse=True)
     payload = {
         "run_timestamp": ts,
         "total_recent_buyers": len(recent),
@@ -920,7 +1060,7 @@ def _write_multi_purchase_buyers_json(
     ts: str,
 ) -> None:
     multi = [p for p in profiles if p.multi_purchase_buyer]
-    multi.sort(key=lambda p: (p.total_purchase_count, p.purchase_velocity_score), reverse=True)
+    multi.sort(key=lambda p: p.acquisition_heat_score, reverse=True)
     payload = {
         "run_timestamp": ts,
         "total_multi_purchase_buyers": len(multi),
@@ -928,6 +1068,155 @@ def _write_multi_purchase_buyers_json(
     }
     (reports_dir / "MULTI_PURCHASE_BUYERS.json").write_text(
         json.dumps(payload, indent=2, default=str), encoding="utf-8"
+    )
+
+
+def _write_hot_buyers_json(
+    profiles: list[BuyerActivityProfile],
+    reports_dir: Path,
+    ts: str,
+) -> None:
+    hot = [p for p in profiles if p.buyer_state == "HOT"]
+    hot.sort(key=lambda p: p.acquisition_heat_score, reverse=True)
+    payload = {
+        "run_timestamp": ts,
+        "total_hot_buyers": len(hot),
+        "definition": "Buyers with at least one purchase recorded in the last 30 days",
+        "buyers": [_profile_to_dict(p) for p in hot],
+    }
+    (reports_dir / "HOT_BUYERS.json").write_text(
+        json.dumps(payload, indent=2, default=str), encoding="utf-8"
+    )
+
+
+def _write_active_buyers_json(
+    profiles: list[BuyerActivityProfile],
+    reports_dir: Path,
+    ts: str,
+) -> None:
+    active = [p for p in profiles if p.buyer_state in ("HOT", "ACTIVE")]
+    active.sort(key=lambda p: p.acquisition_heat_score, reverse=True)
+    payload = {
+        "run_timestamp": ts,
+        "total_active_buyers": len(active),
+        "definition": "Buyers with at least one purchase in the last 90 days (HOT or ACTIVE state)",
+        "buyers": [_profile_to_dict(p) for p in active],
+    }
+    (reports_dir / "ACTIVE_BUYERS.json").write_text(
+        json.dumps(payload, indent=2, default=str), encoding="utf-8"
+    )
+
+
+_STATE_BADGE = {
+    "HOT":     "🔥 HOT",
+    "ACTIVE":  "✅ ACTIVE",
+    "WARM":    "🟡 WARM",
+    "COLD":    "🔵 COLD",
+    "DORMANT": "⬜ DORMANT",
+}
+
+
+def _write_buyer_heat_rankings_md(
+    profiles: list[BuyerActivityProfile],
+    reports_dir: Path,
+    ts: str,
+) -> None:
+    ranked = sorted(profiles, key=lambda p: p.acquisition_heat_score, reverse=True)
+    state_counts: dict[str, int] = {}
+    for p in ranked:
+        state_counts[p.buyer_state] = state_counts.get(p.buyer_state, 0) + 1
+
+    lines = [
+        "# BUYER_HEAT_RANKINGS",
+        "",
+        f"_Generated: {ts}_",
+        f"_Total buyers ranked: {len(ranked)}_",
+        "",
+        "## State Summary",
+        "",
+    ]
+    for state in ("HOT", "ACTIVE", "WARM", "COLD", "DORMANT"):
+        n = state_counts.get(state, 0)
+        lines.append(f"- **{_STATE_BADGE[state]}**: {n}")
+    lines += [
+        "",
+        "## Scoring Model",
+        "",
+        "| Component | Weight | Notes |",
+        "|---|---|---|",
+        "| activity_recency_score | 40% | 100=last 30d, decays to 0 after ~2yr |",
+        "| weighted_buyer_score | 40% | Recency + distress + market signals |",
+        "| purchase_velocity_score | 20% | Purchases/month over active window |",
+        "| Inactivity decay | ×0–50% | Applied when last purchase >365d ago |",
+        "",
+        "## Buyer State Definitions",
+        "",
+        "| State | Criteria |",
+        "|---|---|",
+        "| 🔥 HOT | Purchase in last 30 days |",
+        "| ✅ ACTIVE | Purchase in last 90 days |",
+        "| 🟡 WARM | Purchase in last 365 days |",
+        "| 🔵 COLD | Multi-purchase buyer, last >365 days |",
+        "| ⬜ DORMANT | Single purchase or no date |",
+        "",
+        "## Rankings",
+        "",
+        "| Rank | State | Buyer | Heat | Recency | Weighted | Velocity | Last Purchase | Count |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for i, p in enumerate(ranked, 1):
+        badge = _STATE_BADGE.get(p.buyer_state, p.buyer_state)
+        last  = p.last_purchase_date or "unknown"
+        lines.append(
+            f"| {i} | {badge} | {p.display_name} "
+            f"| {p.acquisition_heat_score} "
+            f"| {p.activity_recency_score} "
+            f"| {p.weighted_buyer_score} "
+            f"| {p.purchase_velocity_score} "
+            f"| {last} "
+            f"| {p.total_purchase_count} |"
+        )
+    lines += ["", "## Buyer Detail", ""]
+    for p in ranked:
+        badge = _STATE_BADGE.get(p.buyer_state, p.buyer_state)
+        seed_tag = f"[{p.seed_id}·{p.seed_status}]" if p.seed_id else "[new]"
+        lines += [
+            f"### {badge}  {p.display_name}  {seed_tag}",
+            "",
+            f"| Score | Value |",
+            f"|---|---|",
+            f"| acquisition_heat_score | **{p.acquisition_heat_score}** |",
+            f"| activity_recency_score | {p.activity_recency_score} |",
+            f"| weighted_buyer_score | {p.weighted_buyer_score} |",
+            f"| purchase_velocity_score | {p.purchase_velocity_score} |",
+            f"| Total purchases | {p.total_purchase_count} |",
+            f"| Purchases 30d / 90d / 180d / 365d | {p.recent_purchase_count_30d} / {p.recent_purchase_count_90d} / {p.recent_purchase_count_180d} / {p.recent_purchase_count_365d} |",
+            f"| Last purchase | {p.last_purchase_date or 'unknown'} |",
+            f"| Days since last purchase | {p.days_since_last_purchase if p.days_since_last_purchase is not None else 'unknown'} |",
+            f"| Multi-purchase | {p.multi_purchase_buyer} |",
+            f"| Repeat market | {p.repeat_market_buyer} |",
+        ]
+        if p.purchase_markets:
+            lines.append(f"| Markets | {', '.join(p.purchase_markets)} |")
+        if p.purchase_zip_codes:
+            lines.append(f"| ZIP codes | {', '.join(p.purchase_zip_codes)} |")
+        if p.price_avg is not None:
+            lines.append(f"| Avg price | ${p.price_avg:,.0f} |")
+        if p.recent_purchase_evidence:
+            lines += ["", "**Recent evidence:**", ""]
+            lines.append("| Date | Address | Price | Financing | Source |")
+            lines.append("|---|---|---|---|---|")
+            for ev in p.recent_purchase_evidence:
+                price_str = f"${ev['sale_price']:,.0f}" if ev.get("sale_price") else "n/a"
+                lines.append(
+                    f"| {ev['date']} | {ev.get('address') or 'n/a'} "
+                    f"| {price_str} | {ev.get('financing_type') or 'n/a'} "
+                    f"| {ev['source_file']} |"
+                )
+        lines.append("")
+
+    (reports_dir / "BUYER_HEAT_RANKINGS.md").write_text(
+        "\n".join(lines), encoding="utf-8"
     )
 
 
@@ -1136,7 +1425,9 @@ def main(argv: list[str] | None = None) -> int:
                 flags.append("repeat-market")
             flag_str = f"  [{', '.join(flags)}]" if flags else ""
             zip_str = ", ".join(p.zip_codes[:4]) + ("…" if len(p.zip_codes) > 4 else "")
-            print(f"  {seed_tag:<22} {p.display_name:<38} {p.transaction_count:>3} txn(s){price_str}{flag_str}")
+            state_str = f"[{p.buyer_state}]"
+            heat_str  = f"heat={p.acquisition_heat_score}"
+            print(f"  {seed_tag:<22} {p.display_name:<38} {p.transaction_count:>3} txn(s)  {state_str:<10} {heat_str}{price_str}{flag_str}")
             if p.days_since_last_purchase is not None:
                 vel = f"velocity={p.purchase_velocity_score}"
                 win = (
@@ -1187,6 +1478,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  • ACTIVITY_SUMMARY.json")
         print(f"  • RECENT_BUYERS.json")
         print(f"  • MULTI_PURCHASE_BUYERS.json")
+        print(f"  • HOT_BUYERS.json")
+        print(f"  • ACTIVE_BUYERS.json")
+        print(f"  • BUYER_HEAT_RANKINGS.md")
         print(f"  • BUYER_PURCHASE_HISTORY.md")
 
     return 0

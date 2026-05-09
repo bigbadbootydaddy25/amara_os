@@ -1,0 +1,16 @@
+{
+  "agent_name": "Bad Agent Name!",
+  "display_name": "",
+  "description": "",
+  "workflow_id": "",
+  "validated": false,
+  "inputs": [],
+  "pipeline_steps": [
+    {"name": "only_one", "function": "fn", "description": "only one step"}
+  ],
+  "outputs": [],
+  "signals": [
+    {"name": "bad signal name", "weight": 200, "description": "invalid"}
+  ],
+  "risk_level": "EXTREME"
+}

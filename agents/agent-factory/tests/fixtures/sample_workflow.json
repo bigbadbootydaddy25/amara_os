@@ -1,0 +1,42 @@
+{
+  "agent_name": "deal-scorer",
+  "display_name": "Deal Scorer Agent",
+  "description": "Scores real estate deals against investment criteria and ranks by confidence.",
+  "workflow_id": "WF-TEST-001",
+  "validated": true,
+  "version": "0.1.0",
+  "author": "amara-os",
+  "inputs": [
+    {
+      "name": "deals",
+      "flag": "--deals",
+      "short_flag": "-d",
+      "description": "Path to deals JSON array",
+      "required": true,
+      "type": "file"
+    }
+  ],
+  "pipeline_steps": [
+    {"name": "load", "function": "load_records", "description": "Load and validate deal records"},
+    {"name": "detect_signals", "function": "detect_all_signals", "description": "Detect scoring signals"},
+    {"name": "score", "function": "score_all", "description": "Apply confidence scoring"},
+    {"name": "rank", "function": "rank_results", "description": "Rank by score descending"},
+    {"name": "report", "function": "generate_all_reports", "description": "Write output files"}
+  ],
+  "outputs": [
+    {"name": "SCORED_DEALS.json", "type": "json", "description": "All deals with confidence scores"},
+    {"name": "TOP_DEALS.json", "type": "json", "description": "Top-ranked deals above threshold"},
+    {"name": "DEAL_REPORT.md", "type": "markdown", "description": "Human-readable summary report"}
+  ],
+  "signals": [
+    {"name": "PRICE_SIGNAL", "weight": 20, "description": "Price relative to market comparables"},
+    {"name": "ARV_SPREAD", "weight": 30, "description": "After-repair value spread potential"},
+    {"name": "DAYS_ON_MARKET", "weight": 15, "description": "Days on market — motivation indicator"},
+    {"name": "ENTITY_BUYER", "weight": 20, "description": "LLC or entity buyer detected"},
+    {"name": "DISTRESSED_FLAG", "weight": 15, "description": "Property flagged as distressed"}
+  ],
+  "memory_sources": ["builder-verification", "parcel-match"],
+  "risk_level": "LOW",
+  "tags": ["scoring", "deals", "real-estate"],
+  "min_confidence_threshold": 30
+}

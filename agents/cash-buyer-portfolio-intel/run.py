@@ -66,6 +66,46 @@ def read_csv_rows(path: Path) -> FileResult:
     )
 
 
+def read_xlsx_rows(path: Path) -> FileResult:
+    """
+    Read an Excel (.xlsx/.xls) file using openpyxl.
+    Returns FileResult with encoding_used='xlsx' on success, or skipped=True
+    with a reason (missing openpyxl, parse error, etc.).
+    """
+    try:
+        import openpyxl  # optional dependency
+    except ImportError:
+        return FileResult(
+            path=str(path), skipped=True,
+            skip_reason="openpyxl not installed — run: pip install openpyxl",
+        )
+    try:
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            wb = openpyxl.load_workbook(path, data_only=True)
+        ws = wb.active
+        # Single-pass iteration: header row first, then data rows
+        row_iter = ws.iter_rows(values_only=True)
+        raw_headers = list(next(row_iter, []))
+        headers = [str(h).strip() if h is not None else "" for h in raw_headers]
+        rows: list[dict] = []
+        for row_cells in row_iter:
+            d: dict[str, str] = {
+                h: (str(v).strip() if v is not None else "")
+                for h, v in zip(headers, row_cells)
+            }
+            if any(d.values()):   # skip blank rows
+                rows.append(d)
+        wb.close()
+        return FileResult(path=str(path), encoding_used="xlsx", rows=rows)
+    except Exception as exc:
+        return FileResult(
+            path=str(path), skipped=True,
+            skip_reason=f"xlsx parse error ({type(exc).__name__}): {exc}",
+        )
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # HEADER MAP
 # Covers PropStream title-case, Propwire mixed-case, and manual snake_case.
@@ -92,6 +132,11 @@ _RAW_MAP: dict[str, str] = {
     "entity_name":                  "owner_name",
     "company name":                 "owner_name",
     "company_name":                 "owner_name",
+    # PropStream split-name columns (combined in _row_to_record)
+    "owner 1 last name":            "owner_name",      # LLC name lives here
+    "owner 1 first name":           "owner_1_first",   # prepended when non-empty
+    "owner 2 last name":            "owner_2_last",
+    "owner 2 first name":           "owner_2_first",
     # ── property address ──────────────────────────────────────────────────────
     "property address":             "property_address",
     "property_address":             "property_address",
@@ -137,6 +182,7 @@ _RAW_MAP: dict[str, str] = {
     "estimated_value":              "estimated_value",
     "estimated market value":       "estimated_value",
     "estimated_market_value":       "estimated_value",
+    "est. value":                   "avm_value",         # PropStream primary AVM (preferred)
     "avm":                          "estimated_value",
     "avm value":                    "estimated_value",
     "avm_value":                    "estimated_value",
@@ -144,6 +190,7 @@ _RAW_MAP: dict[str, str] = {
     "market_value":                 "estimated_value",
     "assessed value":               "estimated_value",
     "assessed_value":               "estimated_value",
+    "total assessed value":         "estimated_value",   # PropStream fallback
     "zillow estimate":              "estimated_value",
     "zestimate":                    "estimated_value",
     "current value":                "estimated_value",
@@ -164,8 +211,11 @@ _RAW_MAP: dict[str, str] = {
     "total_liens":                  "open_loan_balance",
     "outstanding balance":          "open_loan_balance",
     "outstanding_balance":          "open_loan_balance",
+    # PropStream: est. remaining balance of open loans
+    "est. remaining balance of open loans": "open_loan_balance",
     # ── equity ────────────────────────────────────────────────────────────────
     "equity":                       "equity",
+    "est. equity":                  "equity",            # PropStream
     "estimated equity":             "equity",
     "estimated_equity":             "equity",
     "equity amount":                "equity",
@@ -180,6 +230,7 @@ _RAW_MAP: dict[str, str] = {
     "ltv":                          "ltv",
     "loan to value":                "ltv",
     "loan_to_value":                "ltv",
+    "est. loan-to-value":           "ltv",               # PropStream (0–100+ range)
     # ── sale / transaction ────────────────────────────────────────────────────
     "last sale price":              "last_sale_price",
     "last_sale_price":              "last_sale_price",
@@ -191,6 +242,8 @@ _RAW_MAP: dict[str, str] = {
     "purchase_price":               "last_sale_price",
     "consideration amount":         "last_sale_price",
     "consideration_amount":         "last_sale_price",
+    "last sale recording date":     "last_sale_date",    # PropStream
+    "last_sale_recording_date":     "last_sale_date",
     "last sale date":               "last_sale_date",
     "last_sale_date":               "last_sale_date",
     "sale date":                    "last_sale_date",
@@ -395,11 +448,17 @@ def _buyer_key(name: str) -> str:
 
 
 def _to_float(raw: Optional[str]) -> Optional[float]:
-    if not raw:
+    if raw is None:
+        return None
+    # Strip currency symbols, commas, spaces; then extract leading numeric token.
+    # Handles PropStream " Est." suffix, percent suffixes, trailing text, etc.
+    cleaned = re.sub(r"[$,\s]", "", str(raw))
+    m = re.match(r"^(-?[\d.]+)", cleaned)
+    if not m:
         return None
     try:
-        return float(re.sub(r"[$,%\s,]", "", raw))
-    except (ValueError, TypeError):
+        return float(m.group(1))
+    except ValueError:
         return None
 
 
@@ -467,6 +526,15 @@ def _row_to_record(row: dict, col_map: dict[str, str],
             canon.setdefault(c, v)
 
     owner = canon.get("owner_name", "").strip()
+
+    # PropStream split-name synthesis: prepend first name when present
+    # "Owner 1 First Name" maps to owner_1_first; "Owner 1 Last Name" to owner_name
+    fn = canon.get("owner_1_first", "").strip()
+    if fn and owner:
+        owner = f"{fn} {owner}"
+    elif fn and not owner:
+        owner = fn
+
     if not owner:
         return None
 
@@ -484,7 +552,7 @@ def _row_to_record(row: dict, col_map: dict[str, str],
         zip=_clean_zip(canon.get("zip")),
         county=canon.get("county"),
         apn=canon.get("apn"),
-        estimated_value=_to_float(canon.get("estimated_value")),
+        estimated_value=_to_float(canon.get("avm_value") or canon.get("estimated_value")),
         open_loan_balance=_to_float(canon.get("open_loan_balance")),
         equity=_to_float(canon.get("equity")),
         equity_pct=epct,
@@ -512,14 +580,15 @@ def ingest_csv_dir(
     for entry in sorted(raw_dir.iterdir()):
         if entry.name.startswith(".") or entry.name.startswith("_"):
             continue
-        if entry.suffix.lower() != ".csv":
+        suffix = entry.suffix.lower()
+        if suffix not in (".csv", ".xlsx", ".xls"):
             skipped.append(FileResult(
                 path=str(entry), skipped=True,
-                skip_reason=f"not a CSV (suffix: {entry.suffix!r})",
+                skip_reason=f"unsupported file type (suffix: {entry.suffix!r})",
             ))
             continue
 
-        result = read_csv_rows(entry)
+        result = read_xlsx_rows(entry) if suffix in (".xlsx", ".xls") else read_csv_rows(entry)
         if result.skipped:
             skipped.append(result)
             continue

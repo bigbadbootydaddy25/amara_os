@@ -1,0 +1,197 @@
+{
+  "_meta": {
+    "description": "Owners carrying portfolios with active distress signals — high vacancy, delinquent debt, or foreclosure exposure",
+    "distress_score_range": "0–100 (higher = more distressed)",
+    "last_updated": "2026-05-09"
+  },
+  "portfolios": [
+    {
+      "id": "DP-001",
+      "owner": "Crestline Capital Holdings LLC",
+      "entity_type": "private_equity_fund",
+      "distress_score": 84,
+      "properties": [
+        {
+          "address": "4420 Meridian Blvd, Phoenix, AZ 85012",
+          "asset_class": "multifamily",
+          "units": 148,
+          "vacancy_rate": 0.31,
+          "status": "delinquent_loan"
+        },
+        {
+          "address": "890 Commerce Loop, Mesa, AZ 85210",
+          "asset_class": "industrial",
+          "sf": 62000,
+          "vacancy_rate": 0.44,
+          "status": "lender_watch"
+        },
+        {
+          "address": "2101 W Encanto Pkwy, Phoenix, AZ 85009",
+          "asset_class": "multifamily",
+          "units": 72,
+          "vacancy_rate": 0.27,
+          "status": "delinquent_loan"
+        }
+      ],
+      "distress_indicators": {
+        "loan_delinquency_days": 97,
+        "weighted_vacancy_rate": 0.34,
+        "debt_service_coverage_ratio": 0.71,
+        "maturity_wall_months": 4,
+        "foreclosure_notices": 2,
+        "negative_cash_flow_months": 8
+      },
+      "motivation_signals": [
+        "Missed 3 consecutive debt-service payments",
+        "Lender issued NOD on Meridian Blvd asset",
+        "Fund LP redemptions creating liquidity pressure",
+        "Listed Mesa industrial at below-market ask in Q1 2026"
+      ],
+      "source_evidence": {
+        "county_recorder_filings": ["AZ-2026-NOD-004821", "AZ-2026-NOD-004822"],
+        "lender_notices": ["Silvergate CRE — default notice 2026-02-14"],
+        "market_intel_date": "2026-04-22",
+        "data_sources": ["Maricopa County Recorder", "CoStar vacancy pull", "LP communication intercept"]
+      }
+    },
+    {
+      "id": "DP-002",
+      "owner": "Harmon & Weiss Property Partners",
+      "entity_type": "family_office",
+      "distress_score": 71,
+      "properties": [
+        {
+          "address": "5510 N Scottsdale Rd, Scottsdale, AZ 85250",
+          "asset_class": "retail_strip",
+          "sf": 18400,
+          "vacancy_rate": 0.52,
+          "status": "under_water"
+        },
+        {
+          "address": "1832 E Broadway Rd, Tempe, AZ 85282",
+          "asset_class": "office",
+          "sf": 24000,
+          "vacancy_rate": 0.61,
+          "status": "lender_watch"
+        }
+      ],
+      "distress_indicators": {
+        "loan_delinquency_days": 41,
+        "weighted_vacancy_rate": 0.57,
+        "debt_service_coverage_ratio": 0.88,
+        "maturity_wall_months": 9,
+        "foreclosure_notices": 0,
+        "negative_cash_flow_months": 5
+      },
+      "motivation_signals": [
+        "Scottsdale retail anchor tenant vacated Jan 2026",
+        "Tempe office re-listed twice with price reductions",
+        "Principals approaching retirement — succession unclear",
+        "CPA firm flagged in 2025 tax records as winding down"
+      ],
+      "source_evidence": {
+        "county_recorder_filings": [],
+        "lender_notices": ["Western Alliance — forbearance request 2026-01-30"],
+        "market_intel_date": "2026-04-18",
+        "data_sources": ["LoopNet listing history", "Maricopa Assessor", "Western Alliance lender data"]
+      }
+    },
+    {
+      "id": "DP-003",
+      "owner": "Sunridge Development & Rentals Inc",
+      "entity_type": "owner_operator",
+      "distress_score": 91,
+      "properties": [
+        {
+          "address": "700 W Baseline Rd, Tempe, AZ 85283",
+          "asset_class": "multifamily",
+          "units": 214,
+          "vacancy_rate": 0.38,
+          "status": "foreclosure_filed"
+        },
+        {
+          "address": "12330 N Cave Creek Rd, Phoenix, AZ 85022",
+          "asset_class": "multifamily",
+          "units": 88,
+          "vacancy_rate": 0.29,
+          "status": "delinquent_loan"
+        },
+        {
+          "address": "2445 E Thomas Rd, Phoenix, AZ 85016",
+          "asset_class": "mixed_use",
+          "units": 40,
+          "sf_retail": 6200,
+          "vacancy_rate": 0.41,
+          "status": "delinquent_loan"
+        }
+      ],
+      "distress_indicators": {
+        "loan_delinquency_days": 148,
+        "weighted_vacancy_rate": 0.37,
+        "debt_service_coverage_ratio": 0.58,
+        "maturity_wall_months": 1,
+        "foreclosure_notices": 3,
+        "negative_cash_flow_months": 13
+      },
+      "motivation_signals": [
+        "Foreclosure filed on flagship Tempe asset — auction scheduled Q3 2026",
+        "Owner attempted bridge loan refi — rejected by 2 lenders",
+        "Eviction filings spiking — collections team overwhelmed",
+        "Insider source: principals exploring bulk portfolio sale"
+      ],
+      "source_evidence": {
+        "county_recorder_filings": [
+          "AZ-2026-FC-001102",
+          "AZ-2026-NOD-005503",
+          "AZ-2026-NOD-005504"
+        ],
+        "lender_notices": [
+          "US Bank CRE — foreclosure counsel retained 2026-03-01",
+          "Flagstar — NOD issued 2026-03-15"
+        ],
+        "market_intel_date": "2026-05-01",
+        "data_sources": ["Maricopa County Recorder", "PACER bankruptcy watch", "Insider broker network"]
+      }
+    },
+    {
+      "id": "DP-004",
+      "owner": "Trevino Asset Management Group",
+      "entity_type": "private_operator",
+      "distress_score": 55,
+      "properties": [
+        {
+          "address": "8900 S Central Ave, Phoenix, AZ 85042",
+          "asset_class": "land",
+          "acres": 12.4,
+          "status": "carrying_cost_pressure"
+        },
+        {
+          "address": "630 E McDowell Rd, Phoenix, AZ 85006",
+          "asset_class": "office",
+          "sf": 31000,
+          "vacancy_rate": 0.48,
+          "status": "lender_watch"
+        }
+      ],
+      "distress_indicators": {
+        "loan_delinquency_days": 0,
+        "weighted_vacancy_rate": 0.48,
+        "debt_service_coverage_ratio": 1.04,
+        "maturity_wall_months": 14,
+        "foreclosure_notices": 0,
+        "negative_cash_flow_months": 2
+      },
+      "motivation_signals": [
+        "Land carry costs mounting — entitlement timeline extended 18 months",
+        "Office asset losing tenants to newer Class A product",
+        "Owner expressed willingness to consider offers below ask"
+      ],
+      "source_evidence": {
+        "county_recorder_filings": [],
+        "lender_notices": [],
+        "market_intel_date": "2026-04-10",
+        "data_sources": ["Broker conversation 2026-04-10", "Maricopa Assessor", "CoStar"]
+      }
+    }
+  ]
+}

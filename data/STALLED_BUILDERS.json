@@ -1,0 +1,172 @@
+{
+  "_meta": {
+    "description": "Builders with active projects that have materially stalled — permits pulled but construction lagging, missed milestones, or financing breakdown",
+    "stall_score_range": "0–100 (higher = more stalled / more motivated to exit)",
+    "role_reclassification": "Stalled builders should be treated as potential motivated sellers, not qualified buyers",
+    "last_updated": "2026-05-09"
+  },
+  "builders": [
+    {
+      "id": "SB-001",
+      "name": "Vanguard Southwest Constructors LLC",
+      "builder_type": "spec_residential",
+      "stall_score": 89,
+      "role_classification": "motivated_seller",
+      "buyer_disqualification_reason": "Active construction financing in default; no acquisition capacity",
+      "stalled_projects": [
+        {
+          "project_name": "Vanguard at Laveen Ranch",
+          "address": "SW corner of 51st Ave & Dobbins Rd, Phoenix, AZ 85339",
+          "asset_class": "single_family_subdivision",
+          "permitted_units": 84,
+          "units_complete": 11,
+          "units_under_active_construction": 4,
+          "permit_pull_date": "2024-08-15",
+          "last_inspection_passed": "2025-09-03",
+          "months_since_meaningful_progress": 7,
+          "estimated_completion_original": "2025-12-01",
+          "revised_completion_estimate": "unknown",
+          "stall_triggers": [
+            "Construction lender froze draw requests Nov 2025",
+            "GC walked off site citing unpaid invoices",
+            "Grading and utility rough-in incomplete on phases 3–7"
+          ]
+        },
+        {
+          "project_name": "Mesa Gateway Townhomes",
+          "address": "1940 S Greenfield Rd, Mesa, AZ 85206",
+          "asset_class": "for_sale_townhome",
+          "permitted_units": 32,
+          "units_complete": 0,
+          "units_under_active_construction": 0,
+          "permit_pull_date": "2025-01-10",
+          "last_inspection_passed": "2025-03-14",
+          "months_since_meaningful_progress": 13,
+          "estimated_completion_original": "2026-01-01",
+          "revised_completion_estimate": "unknown",
+          "stall_triggers": [
+            "Permits pulled but site never mobilized",
+            "Presale contract fallout rate 78% after rate increase",
+            "Entitlement dispute with City of Mesa unresolved"
+          ]
+        }
+      ],
+      "financial_distress": {
+        "construction_loan_status": "draw_freeze",
+        "personal_guarantees_outstanding": true,
+        "mechanic_liens_filed": 6,
+        "lien_claimants": ["Saguaro Electric LLC", "Desert Framing Co", "Atlas Concrete AZ", "3 others"],
+        "estimated_completion_cost_gap": 3800000
+      },
+      "motivation_signals": [
+        "Builder has approached 2 capital partners about buyout of Laveen project",
+        "Mesa site listed quietly with land broker at 31% below basis",
+        "Personal guarantees creating urgency — principals personally exposed"
+      ],
+      "source_evidence": {
+        "permit_records": ["Maricopa County permit #2024-PHX-084821", "Mesa permit #2025-MESA-001032"],
+        "lien_filings": [
+          "AZ Mechanics Lien 2025-ML-009821 — Saguaro Electric",
+          "AZ Mechanics Lien 2026-ML-000441 — Desert Framing Co"
+        ],
+        "broker_intel": "Land broker confirmed off-market listing at $2.1M vs $3.05M basis",
+        "data_sources": ["Maricopa County Building Dept", "AZ Secretary of State", "Broker network"],
+        "intel_date": "2026-05-02"
+      }
+    },
+    {
+      "id": "SB-002",
+      "name": "Castellan Urban Development Inc",
+      "builder_type": "mixed_use_infill",
+      "stall_score": 73,
+      "role_classification": "motivated_seller",
+      "buyer_disqualification_reason": "Equity depleted on current projects; LP disputes prevent new capital deployment",
+      "stalled_projects": [
+        {
+          "project_name": "Castellan Midtown",
+          "address": "4102 N 16th St, Phoenix, AZ 85016",
+          "asset_class": "mixed_use_multifamily",
+          "permitted_units": 60,
+          "permitted_sf_retail": 8400,
+          "units_complete": 0,
+          "units_under_active_construction": 0,
+          "permit_pull_date": "2024-11-01",
+          "last_inspection_passed": "2025-06-20",
+          "months_since_meaningful_progress": 10,
+          "estimated_completion_original": "2026-06-01",
+          "revised_completion_estimate": "2027-Q3 at earliest",
+          "stall_triggers": [
+            "Equity LP pulled commitment citing project delays",
+            "Construction costs rebid at 22% above original pro forma",
+            "Revised entitlements required after design change — 8-month delay"
+          ]
+        }
+      ],
+      "financial_distress": {
+        "construction_loan_status": "not_yet_closed",
+        "personal_guarantees_outstanding": false,
+        "mechanic_liens_filed": 1,
+        "lien_claimants": ["Phoenix Architecture Group PLLC"],
+        "estimated_completion_cost_gap": 5200000
+      },
+      "motivation_signals": [
+        "Principals actively seeking JV partner or outright site sale",
+        "Entitlement value intact — site is shovel-ready for capable buyer",
+        "Architect lien signals breakdown in development team relationship"
+      ],
+      "source_evidence": {
+        "permit_records": ["Maricopa County permit #2024-PHX-112940"],
+        "lien_filings": ["AZ Mechanics Lien 2026-ML-000882 — Phoenix Architecture Group"],
+        "broker_intel": "Castellan principal confirmed JV/sale interest to broker March 2026",
+        "data_sources": ["Maricopa County Building Dept", "Broker network", "LP disclosure memo"],
+        "intel_date": "2026-04-28"
+      }
+    },
+    {
+      "id": "SB-003",
+      "name": "Ridgeback Homes Arizona LLC",
+      "builder_type": "production_homebuilder",
+      "stall_score": 44,
+      "role_classification": "cautious_seller",
+      "buyer_disqualification_reason": "Reduced pipeline capacity limits new acquisition appetite; evaluate carefully",
+      "stalled_projects": [
+        {
+          "project_name": "Ridgeback at Queen Creek Preserve",
+          "address": "E Ocotillo Rd & S Ellsworth Rd, Queen Creek, AZ 85142",
+          "asset_class": "single_family_subdivision",
+          "permitted_units": 210,
+          "units_complete": 97,
+          "units_under_active_construction": 18,
+          "permit_pull_date": "2023-06-01",
+          "last_inspection_passed": "2026-04-15",
+          "months_since_meaningful_progress": 3,
+          "estimated_completion_original": "2027-06-01",
+          "revised_completion_estimate": "2027-09-01",
+          "stall_triggers": [
+            "Absorption rate dropped 40% in Q1 2026 vs Q1 2025",
+            "Speculative starts paused pending presale targets",
+            "Sales incentive spend increasing — margin compression"
+          ]
+        }
+      ],
+      "financial_distress": {
+        "construction_loan_status": "current_with_covenant_pressure",
+        "personal_guarantees_outstanding": false,
+        "mechanic_liens_filed": 0,
+        "lien_claimants": [],
+        "estimated_completion_cost_gap": 0
+      },
+      "motivation_signals": [
+        "Willing to bulk-sell remaining finished lots to reduce carrying costs",
+        "Open to takeout offers on completed spec units"
+      ],
+      "source_evidence": {
+        "permit_records": ["Pinal County permit #2023-PINAL-005510"],
+        "lien_filings": [],
+        "broker_intel": "Ridgeback sales manager confirmed bulk lot negotiation openness Mar 2026",
+        "data_sources": ["Pinal County Building Dept", "MLS absorption data", "Builder sales team"],
+        "intel_date": "2026-04-12"
+      }
+    }
+  ]
+}

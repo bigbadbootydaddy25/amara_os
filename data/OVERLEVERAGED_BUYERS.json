@@ -1,0 +1,147 @@
+{
+  "_meta": {
+    "description": "Buyers with leverage metrics that indicate diminished acquisition capacity or elevated default risk",
+    "leverage_score_range": "0–100 (higher = more overleveraged)",
+    "last_updated": "2026-05-09"
+  },
+  "buyers": [
+    {
+      "id": "OB-001",
+      "name": "Pinnacle Equity Acquisitions LLC",
+      "buyer_type": "private_equity",
+      "leverage_score": 87,
+      "dispo_priority": "downgraded",
+      "leverage_indicators": {
+        "portfolio_ltv": 0.84,
+        "debt_to_equity_ratio": 5.2,
+        "interest_coverage_ratio": 1.08,
+        "active_loans_count": 23,
+        "loans_in_extension": 7,
+        "credit_events_24mo": [
+          "Lender covenant breach — Jan 2026",
+          "Margin call on credit line — Oct 2025",
+          "Loan extension request denied — Aug 2025"
+        ],
+        "unused_credit_capacity_pct": 0.04
+      },
+      "acquisition_posture": {
+        "stated_appetite": "active",
+        "actual_capacity_assessment": "constrained — cannot close without additional equity raise",
+        "recent_loi_to_close_ratio": 0.12,
+        "deals_fallen_out_of_escrow_12mo": 4
+      },
+      "risk_flags": [
+        "LOI activity exceeds close capacity — pattern of tire-kicking",
+        "GP capital calls deferred twice in 2025",
+        "Underwriting assumptions rely on rate compression not supported by market"
+      ],
+      "source_evidence": {
+        "lender_reports": ["JPM CRE credit review Q1 2026", "Wells Fargo covenant breach notice 2026-01-12"],
+        "broker_intel": "Deal team confirmed 4 escrow failures in Q3–Q4 2025",
+        "data_sources": ["Pitchbook fund data", "CoStar deal history", "Broker network"],
+        "intel_date": "2026-04-30"
+      }
+    },
+    {
+      "id": "OB-002",
+      "name": "Desert Ridge Capital Partners",
+      "buyer_type": "syndicator",
+      "leverage_score": 79,
+      "dispo_priority": "downgraded",
+      "leverage_indicators": {
+        "portfolio_ltv": 0.79,
+        "debt_to_equity_ratio": 3.8,
+        "interest_coverage_ratio": 1.14,
+        "active_loans_count": 11,
+        "loans_in_extension": 5,
+        "credit_events_24mo": [
+          "SEC inquiry into investor disclosures — Q4 2025",
+          "Preferred return payments suspended — Q1 2026"
+        ],
+        "unused_credit_capacity_pct": 0.09
+      },
+      "acquisition_posture": {
+        "stated_appetite": "selective",
+        "actual_capacity_assessment": "impaired — investor capital frozen pending SEC resolution",
+        "recent_loi_to_close_ratio": 0.20,
+        "deals_fallen_out_of_escrow_12mo": 2
+      },
+      "risk_flags": [
+        "Investor distributions halted — new equity raise blocked",
+        "Pending SEC inquiry chilling LP commitments",
+        "Sponsor fee structure under restructure negotiation"
+      ],
+      "source_evidence": {
+        "lender_reports": ["Preferred Bank extension approval 2026-02-28"],
+        "regulatory_filings": ["SEC Form D amendment 2025-11-15", "AZ Corp Commission notice 2026-01-05"],
+        "data_sources": ["SEC EDGAR", "AZ Corporation Commission", "Insider LP source"],
+        "intel_date": "2026-04-25"
+      }
+    },
+    {
+      "id": "OB-003",
+      "name": "Marcus Edgeworth (individual investor)",
+      "buyer_type": "individual_hni",
+      "leverage_score": 61,
+      "dispo_priority": "downgraded",
+      "leverage_indicators": {
+        "portfolio_ltv": 0.76,
+        "debt_to_equity_ratio": 3.1,
+        "interest_coverage_ratio": 1.29,
+        "active_loans_count": 6,
+        "loans_in_extension": 2,
+        "credit_events_24mo": [
+          "Hard money extension on Glendale SFR — Sep 2025",
+          "Personal guarantee called on commercial LOC — Feb 2026"
+        ],
+        "unused_credit_capacity_pct": 0.14
+      },
+      "acquisition_posture": {
+        "stated_appetite": "active",
+        "actual_capacity_assessment": "limited — personal guarantee exposure constraining new commitments",
+        "recent_loi_to_close_ratio": 0.33,
+        "deals_fallen_out_of_escrow_12mo": 1
+      },
+      "risk_flags": [
+        "Personal guarantee called — liquidity under stress",
+        "Reliant on 1031 exchange proceeds that may be time-constrained",
+        "Stated equity ready not corroborated by financial disclosure"
+      ],
+      "source_evidence": {
+        "lender_reports": ["Private lender personal guarantee demand 2026-02-10"],
+        "broker_intel": "Agent reported escrow fall-out citing 'financing issues' Dec 2025",
+        "data_sources": ["Maricopa County Recorder", "Broker network", "Hard money lender database"],
+        "intel_date": "2026-04-20"
+      }
+    },
+    {
+      "id": "OB-004",
+      "name": "Ironwood Realty Fund III",
+      "buyer_type": "private_equity",
+      "leverage_score": 38,
+      "dispo_priority": "standard",
+      "leverage_indicators": {
+        "portfolio_ltv": 0.58,
+        "debt_to_equity_ratio": 1.4,
+        "interest_coverage_ratio": 2.31,
+        "active_loans_count": 8,
+        "loans_in_extension": 0,
+        "credit_events_24mo": [],
+        "unused_credit_capacity_pct": 0.41
+      },
+      "acquisition_posture": {
+        "stated_appetite": "active",
+        "actual_capacity_assessment": "healthy — dry powder confirmed, clean credit",
+        "recent_loi_to_close_ratio": 0.71,
+        "deals_fallen_out_of_escrow_12mo": 0
+      },
+      "risk_flags": [],
+      "source_evidence": {
+        "lender_reports": [],
+        "broker_intel": "Closed 3 deals in Q1 2026, clean escrow record",
+        "data_sources": ["Fund III PPM", "Broker network", "CoStar transaction history"],
+        "intel_date": "2026-05-01"
+      }
+    }
+  ]
+}

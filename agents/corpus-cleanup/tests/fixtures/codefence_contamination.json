@@ -1,0 +1,7 @@
+{
+  "artifact_id": "art-004",
+  "title": "Docker Compose Reference",
+  "body": "[placeholder] Raw markdown dump. Parser emitted embedded code blocks:\n\n```yaml\nversion: '3'\nservices:\n  web:\n    image: nginx\n```\n\n```bash\ndocker compose up -d\n```\n\n```python\nprint('done')\n```",
+  "notes": "",
+  "workflows": []
+}

@@ -1,0 +1,20 @@
+{
+  "artifact_id": "art-001",
+  "title": "Building a FastAPI Service with Async SQLAlchemy",
+  "body": "FastAPI combined with async SQLAlchemy allows you to build high-throughput APIs backed by a relational database. The key insight is that SQLAlchemy 2.0 ships native async support through AsyncSession, which pairs cleanly with FastAPI dependency injection via Depends. You define your session factory, yield it in a lifespan context, and inject it into path functions. Connection pool sizing and engine echo settings are the two most impactful configuration levers for production workloads.",
+  "notes": "Key patterns: AsyncSession factory, engine configuration, lifespan injection, dependency scoping per request.",
+  "workflows": [
+    {
+      "name": "Set up async SQLAlchemy",
+      "steps": [
+        "pip install sqlalchemy[asyncio] asyncpg",
+        "Create async engine: create_async_engine(DATABASE_URL, pool_size=10)",
+        "Define AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)",
+        "Yield session in FastAPI dependency: async def get_db() -> AsyncGenerator",
+        "Inject via: db: AsyncSession = Depends(get_db)"
+      ]
+    }
+  ],
+  "source_url": "https://example.com/fastapi-async-sqlalchemy",
+  "source_evidence": "universal-skill-learner/run-2024-01-20.log"
+}

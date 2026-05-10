@@ -1,0 +1,36 @@
+{
+  "run_ts": "2026-05-10T14:31:17Z",
+  "original_missing_field_slots": 156,
+  "remaining_unresolved": 126,
+  "gap_reduction": 30,
+  "gap_reduction_pct": 19,
+  "entity_field_statuses": {
+    "resolved": 87,
+    "low_confidence": 0,
+    "inferred": 18,
+    "stale": 0,
+    "unresolved": 48
+  },
+  "property_field_statuses": {
+    "resolved": 75,
+    "low_confidence": 0,
+    "inferred": 12,
+    "stale": 0,
+    "unresolved": 78
+  },
+  "adapters_with_sources": [],
+  "adapters_no_sources": [
+    "County Appraisal District (CAD) Export",
+    "County Clerk Recording Export",
+    "GIS / APN Parcel Export",
+    "Secretary of State Business Search Export",
+    "Trustee Sale / Foreclosure Notice Export",
+    "Building Permit Export",
+    "Code Enforcement Export",
+    "Tax Delinquency Export",
+    "PACER Federal Court Record (Manual Export)",
+    "PropStream / Propwire Export (Manual)"
+  ],
+  "inference_adapter": "active",
+  "allowed_use": "lawful_osint_only"
+}

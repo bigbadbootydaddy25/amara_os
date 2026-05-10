@@ -1,0 +1,336 @@
+[
+  {
+    "entity_id": "DP-001",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "DP-002",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "DP-003",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "DP-004",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses",
+      "loan_balance"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "OB-001",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses",
+      "portfolio_count",
+      "estimated_equity",
+      "distress_score"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "OB-002",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses",
+      "portfolio_count",
+      "estimated_equity",
+      "distress_score"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "OB-003",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses",
+      "portfolio_count",
+      "estimated_equity",
+      "distress_score"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "OB-004",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "associated_addresses",
+      "portfolio_count",
+      "estimated_equity",
+      "loan_balance",
+      "distress_score"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "SB-001",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "loan_balance"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "SB-002",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "loan_balance"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "SB-003",
+    "entity_type": "entity",
+    "missing_fields": [
+      "sos_status",
+      "registered_agent",
+      "estimated_equity",
+      "loan_balance"
+    ],
+    "requires": "SOS export, PropStream export, or county deed export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1234_jeff_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1236_jeff_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1240_jeff_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1244_jeff_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1250_jeff_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1256_jeff_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "516_n_bishop_ave_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "520_n_bishop_ave_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "420_w_12th_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "422_w_12th_st_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity",
+      "zoning_classification"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "2215_singleton_blvd_dallas_tx_75212",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "2219_singleton_blvd_dallas_tx_75212",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity",
+      "zoning_classification"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "1100_n_zang_blvd_dallas_tx_75208",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "802_canty_st_dallas_tx_75203",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  },
+  {
+    "entity_id": "806_canty_st_dallas_tx_75203",
+    "entity_type": "property",
+    "missing_fields": [
+      "owner_name",
+      "assessed_value",
+      "last_sale_date",
+      "liens_recorded",
+      "permit_activity",
+      "zoning_classification"
+    ],
+    "requires": "CAD export, county clerk export, or PropStream export",
+    "allowed_use": "lawful_osint_only"
+  }
+]

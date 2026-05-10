@@ -45,3 +45,6 @@ next-env.d.ts
 __pycache__/
 *.py[cod]
 *.pyo
+
+# OSINT external cache (ephemeral, TTL-managed)
+data/osint/external-cache/*.json

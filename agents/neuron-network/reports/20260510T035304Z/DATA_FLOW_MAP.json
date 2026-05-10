@@ -1,0 +1,182 @@
+{
+  "description": "AI_BRAIN agent data flow \u2014 intended wiring",
+  "nodes": [
+    {
+      "id": "hermes",
+      "type": "backend",
+      "label": "Hermes",
+      "live_status": "missing"
+    },
+    {
+      "id": "neo4j",
+      "type": "backend",
+      "label": "Neo4j Graph DB",
+      "live_status": "unknown"
+    },
+    {
+      "id": "supabase",
+      "type": "backend",
+      "label": "Supabase",
+      "live_status": "not_installed"
+    },
+    {
+      "id": "mem0",
+      "type": "backend",
+      "label": "Mem0 Memory Layer",
+      "live_status": "unknown"
+    },
+    {
+      "id": "langchain",
+      "type": "framework",
+      "label": "LangChain",
+      "live_status": "not_installed"
+    },
+    {
+      "id": "langfuse",
+      "type": "observability",
+      "label": "Langfuse",
+      "live_status": "not_installed"
+    },
+    {
+      "id": "obsidian",
+      "type": "vault",
+      "label": "Obsidian Vault",
+      "live_status": "missing"
+    },
+    {
+      "id": "mirofish",
+      "type": "integration",
+      "label": "MiroFish",
+      "live_status": "missing"
+    },
+    {
+      "id": "buyer_osint",
+      "type": "agent",
+      "label": "Buyer Activity OSINT",
+      "live_status": "missing"
+    },
+    {
+      "id": "entity_resolution",
+      "type": "agent",
+      "label": "Entity Resolution",
+      "live_status": "missing"
+    },
+    {
+      "id": "deal_scoring",
+      "type": "agent",
+      "label": "Deal Scoring Engine",
+      "live_status": "ok"
+    },
+    {
+      "id": "portfolio_distress",
+      "type": "agent",
+      "label": "Portfolio Distress Analysis",
+      "live_status": "missing"
+    },
+    {
+      "id": "ownership_graph",
+      "type": "agent",
+      "label": "Ownership Graph",
+      "live_status": "missing"
+    },
+    {
+      "id": "integration_auditor",
+      "type": "agent",
+      "label": "Integration Auditor",
+      "live_status": "missing"
+    },
+    {
+      "id": "neuron_network",
+      "type": "agent",
+      "label": "Neuron Network (this agent)",
+      "live_status": "unknown"
+    }
+  ],
+  "edges": [
+    {
+      "from": "mirofish",
+      "to": "buyer_osint",
+      "label": "property/buyer data feed"
+    },
+    {
+      "from": "buyer_osint",
+      "to": "deal_scoring",
+      "label": "BUILDER_MATCHES, CASH_BUYER_MATCHES"
+    },
+    {
+      "from": "portfolio_distress",
+      "to": "deal_scoring",
+      "label": "DISTRESSED_PORTFOLIOS, OVERLEVERAGED_BUYERS, STALLED_BUILDERS"
+    },
+    {
+      "from": "entity_resolution",
+      "to": "ownership_graph",
+      "label": "resolved entity records"
+    },
+    {
+      "from": "entity_resolution",
+      "to": "deal_scoring",
+      "label": "deduped counterparty IDs"
+    },
+    {
+      "from": "ownership_graph",
+      "to": "neo4j",
+      "label": "graph node/edge writes"
+    },
+    {
+      "from": "deal_scoring",
+      "to": "supabase",
+      "label": "deal scores + HOT_DEALS"
+    },
+    {
+      "from": "deal_scoring",
+      "to": "obsidian",
+      "label": "DEAL_SCORECARD.md reports"
+    },
+    {
+      "from": "langchain",
+      "to": "buyer_osint",
+      "label": "LLM classification calls"
+    },
+    {
+      "from": "langchain",
+      "to": "entity_resolution",
+      "label": "LLM entity matching"
+    },
+    {
+      "from": "mem0",
+      "to": "hermes",
+      "label": "session memory context"
+    },
+    {
+      "from": "langfuse",
+      "to": "deal_scoring",
+      "label": "LLM observability traces"
+    },
+    {
+      "from": "langfuse",
+      "to": "buyer_osint",
+      "label": "LLM observability traces"
+    },
+    {
+      "from": "hermes",
+      "to": "obsidian",
+      "label": "vault note writes"
+    },
+    {
+      "from": "neo4j",
+      "to": "entity_resolution",
+      "label": "existing entity lookups"
+    },
+    {
+      "from": "neuron_network",
+      "to": "obsidian",
+      "label": "NEURON_NETWORK_STATUS.md"
+    },
+    {
+      "from": "integration_auditor",
+      "to": "neuron_network",
+      "label": "integration gap reports"
+    }
+  ]
+}

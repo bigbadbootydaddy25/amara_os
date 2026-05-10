@@ -1,0 +1,179 @@
+{
+  "run_at": "2026-05-10T03:53:04.694642+00:00",
+  "root": "/home/user/amara_os",
+  "summary": {
+    "total": 15,
+    "ok": 1,
+    "failed": 0,
+    "missing": 9,
+    "not_installed": 5,
+    "no_credentials": 0
+  },
+  "checks": [
+    {
+      "name": "Hermes",
+      "category": "backend",
+      "command": "hermes --version",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "/bin/sh: 1: hermes: not found",
+      "duration_ms": 2
+    },
+    {
+      "name": "Neo4j Docker",
+      "category": "backend",
+      "command": "docker ps --filter name=neo4j --format '{{.Names}}\t{{.Status}}'",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory",
+      "duration_ms": 153
+    },
+    {
+      "name": "Obsidian Vault",
+      "category": "vault",
+      "command": "test -d /home/user/amara_os/obsidian-vault",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "Mem0",
+      "category": "python_lib",
+      "command": "python3 -c \"import mem0; print('mem0 ok')\"",
+      "status": "not_installed",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'mem0'",
+      "duration_ms": 18
+    },
+    {
+      "name": "LangChain",
+      "category": "python_lib",
+      "command": "python3 -c \"import langchain; print('langchain ok')\"",
+      "status": "not_installed",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'langchain'",
+      "duration_ms": 13
+    },
+    {
+      "name": "Langfuse",
+      "category": "python_lib",
+      "command": "python3 -c \"import langfuse; print('langfuse ok')\"",
+      "status": "not_installed",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'langfuse'",
+      "duration_ms": 12
+    },
+    {
+      "name": "Supabase",
+      "category": "python_lib",
+      "command": "python3 -c \"import supabase; print('supabase ok')\"",
+      "status": "not_installed",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'supabase'",
+      "duration_ms": 11
+    },
+    {
+      "name": "Neo4j Python Driver",
+      "category": "python_lib",
+      "command": "python3 -c \"import neo4j; print('neo4j driver ok')\"",
+      "status": "not_installed",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'neo4j'",
+      "duration_ms": 13
+    },
+    {
+      "name": "Buyer Activity OSINT",
+      "category": "ai_agent",
+      "command": "test -f agents/buyer-activity-osint/run.py",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "Entity Resolution",
+      "category": "ai_agent",
+      "command": "test -f agents/entity-resolution/run.py",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "Deal Scoring Engine",
+      "category": "ai_agent",
+      "command": "test -f agents/deal-scoring-engine/run.py",
+      "status": "ok",
+      "installed": true,
+      "connected": true,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "Portfolio Distress Analysis",
+      "category": "ai_agent",
+      "command": "test -f agents/portfolio-distress-analysis/run.py",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "Ownership Graph",
+      "category": "ai_agent",
+      "command": "test -f agents/ownership-graph/run.py",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "Integration Auditor",
+      "category": "ai_agent",
+      "command": "test -f agents/integration-auditor/run.py",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    },
+    {
+      "name": "MiroFish",
+      "category": "integration",
+      "command": "test -d integrations/MiroFish",
+      "status": "missing",
+      "installed": false,
+      "connected": false,
+      "output": "",
+      "error": "",
+      "duration_ms": 1
+    }
+  ]
+}

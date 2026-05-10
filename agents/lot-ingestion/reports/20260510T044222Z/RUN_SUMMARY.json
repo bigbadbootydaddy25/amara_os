@@ -1,0 +1,10 @@
+{
+  "run_at": "2026-05-10T04:42:22.873786+00:00",
+  "lots_ingested": 15,
+  "clusters": 6,
+  "corridors": 1,
+  "high_confidence_corridors": 1,
+  "sources": [
+    "infill_lots_dallas.csv"
+  ]
+}

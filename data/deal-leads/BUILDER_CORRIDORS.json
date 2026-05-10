@@ -1,0 +1,48 @@
+{
+  "_meta": {
+    "description": "Builder corridors \u2014 streets with 3+ clustered lots",
+    "generated": "2026-05-10T04:42:22.878353+00:00",
+    "total_corridors": 1
+  },
+  "corridors": [
+    {
+      "corridor_id": "CORR-JEFF-ST-000",
+      "street_name": "jeff st",
+      "street_full": "Jeff St",
+      "cluster_ids": [
+        "CLU-JEFF-ST-000"
+      ],
+      "total_lots": 6,
+      "total_acres": 0.91,
+      "confidence": "high",
+      "confidence_score": 100,
+      "dominant_broker": "John Smith",
+      "broker_dispo_confidence": "high",
+      "signals": [
+        "adjacent_lots",
+        "bishop_arts",
+        "cleared_lot",
+        "corner_lot",
+        "fenced",
+        "probate",
+        "utilities_available"
+      ],
+      "strategies": [
+        "assemblage_candidate",
+        "builder_assignment",
+        "corner_premium",
+        "infill_build",
+        "land_flip"
+      ],
+      "district": "Bishop Arts",
+      "assemblage_potential": "high",
+      "price_range": [
+        39000,
+        52000
+      ],
+      "evidence_files": [
+        "infill_lots_dallas.csv"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,583 @@
+{
+  "_meta": {
+    "description": "Geo-clustered infill lot leads",
+    "generated": "2026-05-10T04:42:22.876781+00:00",
+    "total_clusters": 6,
+    "total_lots": 15
+  },
+  "clusters": [
+    {
+      "cluster_id": "CLU-JEFF-ST-000",
+      "street_name": "jeff st",
+      "street_full": "Jeff St",
+      "block_range": [
+        1200,
+        1200
+      ],
+      "lot_ids": [
+        "LOT-INFILL_L-0002",
+        "LOT-INFILL_L-0003",
+        "LOT-INFILL_L-0004",
+        "LOT-INFILL_L-0005",
+        "LOT-INFILL_L-0006",
+        "LOT-INFILL_L-0007"
+      ],
+      "lot_count": 6,
+      "total_acres": 0.91,
+      "price_range": [
+        39000,
+        52000
+      ],
+      "all_signals": [
+        "adjacent_lots",
+        "bishop_arts",
+        "cleared_lot",
+        "corner_lot",
+        "fenced",
+        "probate",
+        "utilities_available"
+      ],
+      "all_strategies": [
+        "assemblage_candidate",
+        "builder_assignment",
+        "corner_premium",
+        "infill_build",
+        "land_flip"
+      ],
+      "cluster_score": 100,
+      "assemblage_potential": "high",
+      "brokers": [
+        "Carlos Reyes",
+        "John Smith",
+        "Maria Torres"
+      ],
+      "buyer_matches": [],
+      "evidence": [
+        {
+          "lot_id": "LOT-INFILL_L-0002",
+          "address": "1234 Jeff St, Dallas, TX 75208",
+          "price": "$45000",
+          "size": 0.15,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "adjacent_lots",
+            "corner_lot",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "corner_premium",
+            "assemblage_candidate"
+          ],
+          "broker": "John Smith",
+          "phone": "(214) 555-0101",
+          "email": "jsmith@dallasbrokerage.com",
+          "source": "infill_lots_dallas.csv:row2",
+          "details": "Cleared corner lot. All utilities available at street. Adjacent to recently sold infill build. Bishop Arts corridor. Builder-ready."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0003",
+          "address": "1236 Jeff St, Dallas, TX 75208",
+          "price": "$42000",
+          "size": 0.14,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "fenced"
+          ],
+          "strategies": [
+            "infill_build"
+          ],
+          "broker": "John Smith",
+          "phone": "(214) 555-0101",
+          "email": "jsmith@dallasbrokerage.com",
+          "source": "infill_lots_dallas.csv:row3",
+          "details": "Adjacent cleared lot next to 1234. Utilities on site. Fenced. Motivated seller. Great infill build opportunity."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0004",
+          "address": "1240 Jeff St, Dallas, TX 75208",
+          "price": "$48000",
+          "size": 0.16,
+          "signals": [
+            "utilities_available",
+            "adjacent_lots",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "assemblage_candidate"
+          ],
+          "broker": "Maria Torres",
+          "phone": "(214) 555-0202",
+          "email": "mtorres@txrealty.com",
+          "source": "infill_lots_dallas.csv:row4",
+          "details": "Cleared infill lot. Adjacent lots available on Jeff St. Bishop Arts district. Utilities at street. Builder assignment preferred."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0005",
+          "address": "1244 Jeff St, Dallas, TX 75208",
+          "price": "$39000",
+          "size": 0.13,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "corner_lot",
+            "probate",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "land_flip",
+            "corner_premium"
+          ],
+          "broker": "Maria Torres",
+          "phone": "(214) 555-0202",
+          "email": "mtorres@txrealty.com",
+          "source": "infill_lots_dallas.csv:row5",
+          "details": "Probate sale. Cleared lot with utilities available. Corner lot at Jeff and alley. Bishop Arts."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0006",
+          "address": "1250 Jeff St, Dallas, TX 75208",
+          "price": "$52000",
+          "size": 0.18,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "adjacent_lots",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "assemblage_candidate"
+          ],
+          "broker": "Carlos Reyes",
+          "phone": "(214) 555-0303",
+          "email": "creyes@oakcliffrealty.com",
+          "source": "infill_lots_dallas.csv:row6",
+          "details": "Large cleared lot. Utilities at street. Ideal for builder assignment or infill build. Bishop Arts corridor. Adjacent lots on Jeff St available."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0007",
+          "address": "1256 Jeff St, Dallas, TX 75208",
+          "price": "$44000",
+          "size": 0.15,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "adjacent_lots",
+            "corner_lot",
+            "fenced"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "corner_premium",
+            "assemblage_candidate"
+          ],
+          "broker": "Carlos Reyes",
+          "phone": "(214) 555-0303",
+          "email": "creyes@oakcliffrealty.com",
+          "source": "infill_lots_dallas.csv:row7",
+          "details": "Cleared lot. Fenced. Corner of Jeff and cross street. Utilities available. 4 adjacent lots on same block."
+        }
+      ]
+    },
+    {
+      "cluster_id": "CLU-N-BISHOP-AVE-001",
+      "street_name": "n bishop ave",
+      "street_full": "N Bishop Ave",
+      "block_range": [
+        500,
+        500
+      ],
+      "lot_ids": [
+        "LOT-INFILL_L-0008",
+        "LOT-INFILL_L-0009"
+      ],
+      "lot_count": 2,
+      "total_acres": 0.42,
+      "price_range": [
+        61000,
+        65000
+      ],
+      "all_signals": [
+        "adjacent_lots",
+        "bishop_arts",
+        "cleared_lot",
+        "corner_lot",
+        "utilities_available"
+      ],
+      "all_strategies": [
+        "assemblage_candidate",
+        "builder_assignment",
+        "corner_premium",
+        "infill_build"
+      ],
+      "cluster_score": 100,
+      "assemblage_potential": "medium",
+      "brokers": [
+        "John Smith"
+      ],
+      "buyer_matches": [],
+      "evidence": [
+        {
+          "lot_id": "LOT-INFILL_L-0008",
+          "address": "516 N Bishop Ave, Dallas, TX 75208",
+          "price": "$65000",
+          "size": 0.22,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "adjacent_lots",
+            "corner_lot",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "corner_premium",
+            "assemblage_candidate"
+          ],
+          "broker": "John Smith",
+          "phone": "(214) 555-0101",
+          "email": "jsmith@dallasbrokerage.com",
+          "source": "infill_lots_dallas.csv:row8",
+          "details": "Bishop Arts District corner lot. Adjacent parcels available for assemblage. Cleared with all utilities."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0009",
+          "address": "520 N Bishop Ave, Dallas, TX 75208",
+          "price": "$61000",
+          "size": 0.2,
+          "signals": [
+            "utilities_available",
+            "adjacent_lots",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "assemblage_candidate"
+          ],
+          "broker": "John Smith",
+          "phone": "(214) 555-0101",
+          "email": "jsmith@dallasbrokerage.com",
+          "source": "infill_lots_dallas.csv:row9",
+          "details": "Adjacent to 516 N Bishop. Cleared. Utilities available. Builder corridor in Bishop Arts. Land flip or assign."
+        }
+      ]
+    },
+    {
+      "cluster_id": "CLU-W-12TH-ST-002",
+      "street_name": "w 12th st",
+      "street_full": "W 12th St",
+      "block_range": [
+        400,
+        400
+      ],
+      "lot_ids": [
+        "LOT-INFILL_L-0010",
+        "LOT-INFILL_L-0011"
+      ],
+      "lot_count": 2,
+      "total_acres": 0.23,
+      "price_range": [
+        36000,
+        38000
+      ],
+      "all_signals": [
+        "adjacent_lots",
+        "cleared_lot",
+        "corner_lot",
+        "fenced",
+        "probate",
+        "trinity_groves",
+        "utilities_available"
+      ],
+      "all_strategies": [
+        "assemblage_candidate",
+        "builder_assignment",
+        "corner_premium",
+        "infill_build",
+        "land_flip"
+      ],
+      "cluster_score": 100,
+      "assemblage_potential": "medium",
+      "brokers": [
+        "Sarah Kim"
+      ],
+      "buyer_matches": [],
+      "evidence": [
+        {
+          "lot_id": "LOT-INFILL_L-0010",
+          "address": "420 W 12th St, Dallas, TX 75208",
+          "price": "$38000",
+          "size": 0.12,
+          "signals": [
+            "cleared_lot",
+            "fenced",
+            "probate",
+            "trinity_groves"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "land_flip"
+          ],
+          "broker": "Sarah Kim",
+          "phone": "(214) 555-0404",
+          "email": "skim@dallaslandco.com",
+          "source": "infill_lots_dallas.csv:row10",
+          "details": "Trinity Groves adjacent. Cleared lot. Fenced. Probate sale. Motivated estate seller."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0011",
+          "address": "422 W 12th St, Dallas, TX 75208",
+          "price": "$36000",
+          "size": 0.11,
+          "signals": [
+            "utilities_available",
+            "adjacent_lots",
+            "corner_lot"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "corner_premium",
+            "assemblage_candidate"
+          ],
+          "broker": "Sarah Kim",
+          "phone": "(214) 555-0404",
+          "email": "skim@dallaslandco.com",
+          "source": "infill_lots_dallas.csv:row11",
+          "details": "Adjacent to 420 W 12th. Cleared. Utilities available. Corner of alley. Land flip candidate."
+        }
+      ]
+    },
+    {
+      "cluster_id": "CLU-SINGLETON-BLVD-003",
+      "street_name": "singleton blvd",
+      "street_full": "Singleton Blvd",
+      "block_range": [
+        2200,
+        2200
+      ],
+      "lot_ids": [
+        "LOT-INFILL_L-0012",
+        "LOT-INFILL_L-0013"
+      ],
+      "lot_count": 2,
+      "total_acres": 0.54,
+      "price_range": [
+        72000,
+        78000
+      ],
+      "all_signals": [
+        "adjacent_lots",
+        "cleared_lot",
+        "fenced",
+        "trinity_groves",
+        "utilities_available"
+      ],
+      "all_strategies": [
+        "assemblage_candidate",
+        "builder_assignment",
+        "infill_build"
+      ],
+      "cluster_score": 97,
+      "assemblage_potential": "medium",
+      "brokers": [
+        "Carlos Reyes"
+      ],
+      "buyer_matches": [],
+      "evidence": [
+        {
+          "lot_id": "LOT-INFILL_L-0012",
+          "address": "2215 Singleton Blvd, Dallas, TX 75212",
+          "price": "$78000",
+          "size": 0.28,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "adjacent_lots",
+            "trinity_groves"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "assemblage_candidate"
+          ],
+          "broker": "Carlos Reyes",
+          "phone": "(214) 555-0303",
+          "email": "creyes@oakcliffrealty.com",
+          "source": "infill_lots_dallas.csv:row12",
+          "details": "Trinity Groves corridor. Large cleared lot. Adjacent lots potentially available. All utilities. Builder-ready."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0013",
+          "address": "2219 Singleton Blvd, Dallas, TX 75212",
+          "price": "$72000",
+          "size": 0.26,
+          "signals": [
+            "adjacent_lots",
+            "fenced"
+          ],
+          "strategies": [
+            "builder_assignment",
+            "assemblage_candidate"
+          ],
+          "broker": "Carlos Reyes",
+          "phone": "(214) 555-0303",
+          "email": "creyes@oakcliffrealty.com",
+          "source": "infill_lots_dallas.csv:row13",
+          "details": "Adjacent to 2215 Singleton Blvd. Cleared. Utilities. Fenced. Builder corridor. Land flip or assign."
+        }
+      ]
+    },
+    {
+      "cluster_id": "CLU-N-ZANG-BLVD-004",
+      "street_name": "n zang blvd",
+      "street_full": "N Zang Blvd",
+      "block_range": [
+        1100,
+        1100
+      ],
+      "lot_ids": [
+        "LOT-INFILL_L-0014"
+      ],
+      "lot_count": 1,
+      "total_acres": 0.19,
+      "price_range": [
+        55000,
+        55000
+      ],
+      "all_signals": [
+        "bishop_arts",
+        "cleared_lot",
+        "utilities_available"
+      ],
+      "all_strategies": [
+        "builder_assignment",
+        "infill_build"
+      ],
+      "cluster_score": 85,
+      "assemblage_potential": "low",
+      "brokers": [
+        "Maria Torres"
+      ],
+      "buyer_matches": [],
+      "evidence": [
+        {
+          "lot_id": "LOT-INFILL_L-0014",
+          "address": "1100 N Zang Blvd, Dallas, TX 75208",
+          "price": "$55000",
+          "size": 0.19,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "bishop_arts"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment"
+          ],
+          "broker": "Maria Torres",
+          "phone": "(214) 555-0202",
+          "email": "mtorres@txrealty.com",
+          "source": "infill_lots_dallas.csv:row14",
+          "details": "Bishop Arts adjacent. Cleared lot. Corner. Utilities at street. Infill build or builder assignment."
+        }
+      ]
+    },
+    {
+      "cluster_id": "CLU-CANTY-ST-005",
+      "street_name": "canty st",
+      "street_full": "Canty St",
+      "block_range": [
+        800,
+        800
+      ],
+      "lot_ids": [
+        "LOT-INFILL_L-0015",
+        "LOT-INFILL_L-0016"
+      ],
+      "lot_count": 2,
+      "total_acres": 0.19,
+      "price_range": [
+        27000,
+        29000
+      ],
+      "all_signals": [
+        "adjacent_lots",
+        "cleared_lot",
+        "fenced",
+        "probate",
+        "utilities_available"
+      ],
+      "all_strategies": [
+        "assemblage_candidate",
+        "builder_assignment",
+        "infill_build",
+        "land_flip"
+      ],
+      "cluster_score": 100,
+      "assemblage_potential": "medium",
+      "brokers": [
+        "David Park"
+      ],
+      "buyer_matches": [],
+      "evidence": [
+        {
+          "lot_id": "LOT-INFILL_L-0015",
+          "address": "802 Canty St, Dallas, TX 75203",
+          "price": "$29000",
+          "size": 0.1,
+          "signals": [
+            "cleared_lot",
+            "utilities_available",
+            "fenced",
+            "probate"
+          ],
+          "strategies": [
+            "infill_build",
+            "land_flip"
+          ],
+          "broker": "David Park",
+          "phone": "(214) 555-0505",
+          "email": "dpark@southdallasrealty.com",
+          "source": "infill_lots_dallas.csv:row15",
+          "details": "Cleared lot. Utilities available. Estate/probate. Fenced. Good infill candidate."
+        },
+        {
+          "lot_id": "LOT-INFILL_L-0016",
+          "address": "806 Canty St, Dallas, TX 75203",
+          "price": "$27000",
+          "size": 0.09,
+          "signals": [
+            "utilities_available",
+            "adjacent_lots",
+            "probate"
+          ],
+          "strategies": [
+            "infill_build",
+            "builder_assignment",
+            "land_flip",
+            "assemblage_candidate"
+          ],
+          "broker": "David Park",
+          "phone": "(214) 555-0505",
+          "email": "dpark@southdallasrealty.com",
+          "source": "infill_lots_dallas.csv:row16",
+          "details": "Adjacent to 802 Canty. Cleared. Utilities on site. Same estate seller."
+        }
+      ]
+    }
+  ]
+}

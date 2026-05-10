@@ -1,53 +1,44 @@
 # Deal Scorecard
 
-Reference guide for how deal scores are computed and adjusted by the `deal-scoring-engine`.
+Reference guide for how the AI_BRAIN deal-scoring engine computes and adjusts deal scores.
+
+**Agent:** `agents/deal-scoring-engine/run.py`
+**Run:** `python3 agents/deal-scoring-engine/run.py [--verbose] [--json]`
 
 ---
 
 ## Scoring Overview
 
-All deals are scored 0–100. A base score of 50 is assumed unless overridden by the caller. Distress signals, leverage data, and builder stall status adjust the score up or down from that base.
+All deals are scored 0–100. A base score of 50 is assumed unless overridden. Distress signals, leverage data, and builder stall status adjust the score up or down from that base.
 
-| Score Band | Interpretation |
-|---|---|
-| 80–100 | High priority — act quickly |
-| 65–79 | Elevated — engage with urgency |
-| 50–64 | Standard — normal underwriting cadence |
-| 35–49 | Cautious — additional diligence required |
-| 0–34 | Deprioritise or disqualify |
+| Score Band | Label | Interpretation |
+|---|---|---|
+| 80–100 | HIGH PRIORITY | Act immediately |
+| 65–79 | ELEVATED | Engage with urgency |
+| 50–64 | STANDARD | Normal underwriting cadence |
+| 35–49 | CAUTIOUS | Additional diligence required |
+| 0–34 | DEPRIORITISE | Do not advance without resolution |
 
 ---
 
 ## Scoring Modules
 
-### 1. Seller-Side Opportunity (`scoreSellerOpportunity`)
+### 1. `score_seller_opportunity(owner_id, base_score=50)`
 
 Applied when `deal_side` is `acquisition` or `land`.
 
-Checks the counterparty against `DISTRESSED_PORTFOLIOS.json`. If a match is found, a distress boost is added to the base score:
+Matches owner against `DISTRESSED_PORTFOLIOS.json`. Distress boost is proportional to `distress_score`:
 
 ```
 distress_boost = round((distress_score / 100) × 40)
 final_score    = min(100, base_score + distress_boost)
 ```
 
-A portfolio `distress_score` of 91 produces a +36 boost on a base of 50 → final score 86.
-
-**Key distress indicators used:**
-- Loan delinquency days
-- Weighted portfolio vacancy rate
-- Debt service coverage ratio (DSCR)
-- Maturity wall (months to loan maturity)
-- Foreclosure notices filed
-- Consecutive months of negative cash flow
-
----
-
-### 2. Buyer Priority (`scoreBuyerPriority`)
+### 2. `score_buyer_priority(buyer_id, base_score=50)`
 
 Applied when `deal_side` is `disposition`.
 
-Checks the counterparty against `OVERLEVERAGED_BUYERS.json`. If matched, a leverage penalty is subtracted:
+Matches buyer against `OVERLEVERAGED_BUYERS.json`. Leverage penalty is proportional to `leverage_score`:
 
 ```
 leverage_penalty = round((leverage_score / 100) × 45)
@@ -63,57 +54,38 @@ final_score      = max(0, base_score - leverage_penalty)
 | 60–79 | `downgraded` |
 | 80–100 | `disqualified` |
 
-**Key leverage indicators used:**
-- Portfolio LTV
-- Debt-to-equity ratio
-- Interest coverage ratio
-- Loans currently in extension
-- Escrow failures in past 12 months
-- Active credit events
+### 3. `classify_builder_role(builder_id)`
 
----
+Applied to any counterparty matched in `STALLED_BUILDERS.json`.
 
-### 3. Builder Role Classification (`classifyBuilderRole`)
-
-Applied to any counterparty matched in `STALLED_BUILDERS.json`, regardless of deal side.
-
-Stalled builders are **reclassified as sellers**, not buyers. A builder's `role_classification` field drives this:
+Stalled builders are **reclassified as sellers** — composite score is forced to 0 when they appear on the buyer side:
 
 | Classification | Qualified as Buyer | Score Treatment |
 |---|---|---|
-| `motivated_seller` | No | Composite score forced to 0; seller outreach recommended |
-| `cautious_seller` | No | Composite score forced to 0; evaluate carefully as seller lead |
+| `motivated_seller` | No | Score → 0; seller outreach recommended |
+| `cautious_seller` | No | Score → 0; evaluate as seller lead |
 | `qualified_buyer` | Yes | Normal buyer scoring applies |
-
-**Key stall indicators used:**
-- Stall score (0–100)
-- Months since meaningful construction progress
-- Construction loan status (draw freeze, default, not yet closed)
-- Mechanic liens filed and claimants
-- Estimated completion cost gap
 
 ---
 
 ## Portfolio Distress Signals
 
-Portfolio distress is the primary upward pressure on seller-side opportunity scores. This section documents the signals, their sources, and how they translate into score adjustments.
+Portfolio distress is the primary upward driver of seller-side opportunity scores. This section documents the signals, their sources, and how they map to score adjustments.
 
 ### Signal Hierarchy
 
-Signals are ranked by urgency. Higher-ranked signals carry more weight in the `distress_score` (computed externally and stored in `DISTRESSED_PORTFOLIOS.json`).
-
-| Rank | Signal | Threshold for High Distress |
+| Rank | Signal | High Distress Threshold |
 |---|---|---|
 | 1 | Foreclosure notices filed | ≥ 1 |
 | 2 | Loan delinquency | > 90 days |
 | 3 | Maturity wall | ≤ 6 months |
 | 4 | DSCR | < 0.80 |
-| 5 | Weighted vacancy rate | > 30% |
+| 5 | Weighted portfolio vacancy | > 30% |
 | 6 | Negative cash flow streak | ≥ 6 consecutive months |
 
-### Score Boost Table
+### Boost Table
 
-| Distress Score | Boost Added | Effective Final Score (base 50) |
+| Distress Score | Boost | Final Score (base 50) |
 |---|---|---|
 | 90–100 | +36 to +40 | 86–90 |
 | 70–89 | +28 to +36 | 78–86 |
@@ -123,103 +95,147 @@ Signals are ranked by urgency. Higher-ranked signals carry more weight in the `d
 
 ### Current Distressed Portfolio Register
 
-| ID | Owner | Distress Score | Foreclosures | Delinquency (days) | DSCR | Maturity (mo) |
-|---|---|---|---|---|---|---|
-| DP-001 | Crestline Capital Holdings LLC | 84 | 2 | 97 | 0.71 | 4 |
-| DP-002 | Harmon & Weiss Property Partners | 71 | 0 | 41 | 0.88 | 9 |
-| DP-003 | Sunridge Development & Rentals Inc | 91 | 3 | 148 | 0.58 | 1 |
-| DP-004 | Trevino Asset Management Group | 55 | 0 | 0 | 1.04 | 14 |
+| ID | Owner | Score | Foreclosures | Delinquency | DSCR | Maturity | Final Score |
+|---|---|---|---|---|---|---|---|
+| DP-001 | Crestline Capital Holdings LLC | 84 | 2 | 97 days | 0.71 | 4 mo | **84** |
+| DP-002 | Harmon & Weiss Property Partners | 71 | 0 | 41 days | 0.88 | 9 mo | **78** |
+| DP-003 | Sunridge Development & Rentals Inc | 91 | 3 | 148 days | 0.58 | 1 mo | **86** |
+| DP-004 | Trevino Asset Management Group | 55 | 0 | 0 days | 1.04 | 14 mo | **72** |
 
-**Source:** `data/DISTRESSED_PORTFOLIOS.json` — Maricopa County Recorder, CoStar, lender notices, insider broker network.
+**Source file:** `data/portfolio-distress/DISTRESSED_PORTFOLIOS.json`
 
-### Score Examples
+### Live Engine Output (2026-05-10)
 
-**DP-003 — Sunridge Development & Rentals Inc (score 91)**
-- Foreclosure filed on flagship Tempe asset (214 units); auction scheduled Q3 2026
-- 3 NODs across portfolio
-- DSCR of 0.58 — deeply negative cash flow for 13 consecutive months
-- Loan maturity in 1 month; bridge refi rejected by 2 lenders
-- Score boost: +36 → final score 86 on base 50
-- Recommendation: HIGH OPPORTUNITY — prioritise outreach, structure for speed and certainty of close
+```
+AUTO-DP-003  |  Sunridge Development & Rentals Inc
+Side: acquisition     Score:  86/100  [HIGH PRIORITY]
+HIGH OPPORTUNITY — seller portfolio distress is severe (score 91/100).
+Prioritise outreach and structure for speed.
+Foreclosure filed on flagship Tempe asset — auction scheduled Q3 2026
 
-**DP-001 — Crestline Capital Holdings LLC (score 84)**
-- 2 foreclosure notices; NOD on Meridian Blvd asset
-- 97-day delinquency; DSCR 0.71
-- LP redemptions creating liquidity pressure alongside lender action
-- Score boost: +34 → final score 84 on base 50
-- Recommendation: HIGH OPPORTUNITY — motivated by LP and lender pressure simultaneously
+  [Evidence — DISTRESSED_PORTFOLIOS / DP-003]
+    · distress_score: 91
+    · weighted_vacancy: 37%
+    · DSCR: 0.58
+    · delinquency_days: 148
+    · foreclosure_notices: 3
+    · maturity_wall_months: 1
+    · intel_date: 2026-05-01
 
-**DP-002 — Harmon & Weiss Property Partners (score 71)**
-- Anchor tenant vacated Scottsdale retail Jan 2026; 57% weighted vacancy
-- Principals approaching retirement — succession gap adds urgency
-- Western Alliance forbearance request in play
-- Score boost: +28 → final score 78 on base 50
-- Recommendation: ELEVATED OPPORTUNITY — engage with relationship-first approach
+AUTO-DP-001  |  Crestline Capital Holdings LLC
+Side: acquisition     Score:  84/100  [HIGH PRIORITY]
+  · distress_score: 84  · DSCR: 0.71  · delinquency_days: 97
+  · foreclosure_notices: 2  · maturity_wall_months: 4
 
-**DP-004 — Trevino Asset Management Group (score 55)**
-- No foreclosures, current on debt — but land carry costs mounting
-- Entitlement timeline extended 18 months; office losing tenants
-- Score boost: +22 → final score 72 on base 50
-- Recommendation: MODERATE OPPORTUNITY — monitor and maintain contact; not yet urgency-driven
+AUTO-DP-002  |  Harmon & Weiss Property Partners
+Side: acquisition     Score:  78/100  [ELEVATED]
+  · distress_score: 71  · weighted_vacancy: 57%  · maturity_wall_months: 9
+
+AUTO-DP-004  |  Trevino Asset Management Group
+Side: acquisition     Score:  72/100  [ELEVATED]
+  · distress_score: 55  · DSCR: 1.04  · maturity_wall_months: 14
+```
 
 ### Evidence Preservation
 
-Every score output includes a `source_evidence` block tracing the signal back to its origin:
+Every scored output includes a `SourceEvidence` block tracing each signal to its origin:
 
-```ts
-{
-  dataset: 'DISTRESSED_PORTFOLIOS',
-  record_id: 'DP-003',
-  signals: [
-    'distress_score: 91',
-    'weighted_vacancy: 37%',
-    'DSCR: 0.58',
-    'delinquency_days: 148',
-    'foreclosure_notices: 3',
-    'maturity_wall_months: 1'
-  ],
-  raw_score: 91,
-  intel_date: '2026-05-01'
-}
+```python
+SourceEvidence(
+    dataset="DISTRESSED_PORTFOLIOS",
+    record_id="DP-003",
+    signals=[
+        "distress_score: 91",
+        "weighted_vacancy: 37%",
+        "DSCR: 0.58",
+        "delinquency_days: 148",
+        "foreclosure_notices: 3",
+        "maturity_wall_months: 1",
+    ],
+    raw_score=91,
+    intel_date="2026-05-01",
+)
 ```
 
-Source chains for each portfolio are maintained in `DISTRESSED_PORTFOLIOS.json` under `source_evidence`, including:
+Source chains for each record are maintained in the JSON files under `source_evidence`, including:
 - County recorder filing numbers
 - Lender notice dates and parties
 - Data source attribution
-- Intel date (date intelligence was confirmed)
+- Intel date (date intelligence was confirmed or last verified)
+
+---
+
+## Overleveraged Buyers — Live Output
+
+```
+AUTO-OB-001  |  Pinnacle Equity Acquisitions LLC
+Score:  11/100  [DEPRIORITISE]  — leverage_score 87, LTV 84%, 4 escrow failures
+
+AUTO-OB-002  |  Desert Ridge Capital Partners
+Score:  14/100  [DEPRIORITISE]  — leverage_score 79, LTV 79%, SEC inquiry active
+
+AUTO-OB-003  |  Marcus Edgeworth (individual investor)
+Score:  23/100  [DEPRIORITISE]  — leverage_score 61, personal guarantee called
+
+AUTO-OB-004  |  Ironwood Realty Fund III
+Score:  33/100  [STANDARD]      — leverage_score 38, 0 escrow failures, clean credit
+```
+
+**Source file:** `data/portfolio-distress/OVERLEVERAGED_BUYERS.json`
+
+---
+
+## Stalled Builders — Live Output
+
+```
+AUTO-SB-001  |  Vanguard Southwest Constructors LLC
+Score:   0/100  — RECLASSIFY AS SELLER (stall score 89, draw freeze, 6 mechanic liens)
+
+AUTO-SB-002  |  Castellan Urban Development Inc
+Score:   0/100  — RECLASSIFY AS SELLER (stall score 73, equity LP pulled, $5.2M cost gap)
+
+AUTO-SB-003  |  Ridgeback Homes Arizona LLC
+Score:   0/100  — RECLASSIFY AS SELLER (stall score 44, cautious_seller, bulk-lot sale open)
+```
+
+**Source file:** `data/portfolio-distress/STALLED_BUILDERS.json`
 
 ---
 
 ## Data Files
 
-| File | Purpose | Located |
-|---|---|---|
-| `data/DISTRESSED_PORTFOLIOS.json` | Portfolio owners with active distress signals | `/data/` |
-| `data/OVERLEVERAGED_BUYERS.json` | Buyers with leverage metrics exceeding safe thresholds | `/data/` |
-| `data/STALLED_BUILDERS.json` | Builders with materially stalled projects | `/data/` |
-| `src/lib/deal-scoring-engine.ts` | Scoring engine integrating all three datasets | `/src/lib/` |
+| File | Purpose |
+|---|---|
+| `data/portfolio-distress/DISTRESSED_PORTFOLIOS.json` | Portfolio owners with active distress signals |
+| `data/portfolio-distress/OVERLEVERAGED_BUYERS.json` | Buyers with leverage metrics exceeding safe thresholds |
+| `data/portfolio-distress/STALLED_BUILDERS.json` | Builders with materially stalled projects |
+| `agents/deal-scoring-engine/run.py` | Python scoring agent — single entry point |
 
 ---
 
 ## Usage
 
-```ts
-import { scoreDeal, scoreAllDistressedPortfolios } from '@/lib/deal-scoring-engine';
+```bash
+# Standard run
+python3 agents/deal-scoring-engine/run.py
 
-// Score a specific acquisition target
-const result = scoreDeal({
-  deal_id: 'ACQ-2026-041',
-  deal_side: 'acquisition',
-  counterparty_id: 'DP-003',
-  counterparty_name: 'Sunridge Development & Rentals Inc',
-  base_score: 50,
-});
+# With evidence detail
+python3 agents/deal-scoring-engine/run.py --verbose
 
-// result.composite_score → 86
-// result.recommendation  → 'HIGH OPPORTUNITY — ...'
-// result.seller_opportunity.evidence → { dataset: 'DISTRESSED_PORTFOLIOS', ... }
+# JSON output (pipe to jq, file, etc.)
+python3 agents/deal-scoring-engine/run.py --json
+```
 
-// Batch-score all distressed portfolio owners
-const allScores = scoreAllDistressedPortfolios();
+```python
+from agents.deal_scoring_engine.run import score_deal, score_all_distressed_portfolios
+
+result = score_deal(
+    deal_id="ACQ-2026-041",
+    deal_side="acquisition",
+    counterparty_id="DP-003",
+    counterparty_name="Sunridge Development & Rentals Inc",
+)
+# result.composite_score  → 86
+# result.recommendation   → "HIGH OPPORTUNITY — ..."
+# result.seller_opportunity.evidence.signals  → ["distress_score: 91", ...]
 ```

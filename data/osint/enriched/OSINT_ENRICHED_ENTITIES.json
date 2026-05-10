@@ -1,0 +1,1783 @@
+[
+  {
+    "entity_id": "DP-001",
+    "name": {
+      "value": "Crestline Capital Holdings LLC",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "private_equity_fund",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": 3,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 84,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_indicators": {
+      "value": {
+        "loan_delinquency_days": 97,
+        "weighted_vacancy_rate": 0.34,
+        "debt_service_coverage_ratio": 0.71,
+        "maturity_wall_months": 4,
+        "foreclosure_notices": 2,
+        "negative_cash_flow_months": 8
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Missed 3 consecutive debt-service payments",
+        "Lender issued NOD on Meridian Blvd asset",
+        "Fund LP redemptions creating liquidity pressure",
+        "Listed Mesa industrial at below-market ask in Q1 2026"
+      ],
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "county_recorder_filings": [
+          "AZ-2026-NOD-004821",
+          "AZ-2026-NOD-004822"
+        ],
+        "lender_notices": [
+          "Silvergate CRE \u2014 default notice 2026-02-14"
+        ],
+        "market_intel_date": "2026-04-22",
+        "data_sources": [
+          "Maricopa County Recorder",
+          "CoStar vacancy pull",
+          "LP communication intercept"
+        ]
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "DP-002",
+    "name": {
+      "value": "Harmon & Weiss Property Partners",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "family_office",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": 2,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 71,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_indicators": {
+      "value": {
+        "loan_delinquency_days": 41,
+        "weighted_vacancy_rate": 0.57,
+        "debt_service_coverage_ratio": 0.88,
+        "maturity_wall_months": 9,
+        "foreclosure_notices": 0,
+        "negative_cash_flow_months": 5
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Scottsdale retail anchor tenant vacated Jan 2026",
+        "Tempe office re-listed twice with price reductions",
+        "Principals approaching retirement \u2014 succession unclear",
+        "CPA firm flagged in 2025 tax records as winding down"
+      ],
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "county_recorder_filings": [],
+        "lender_notices": [
+          "Western Alliance \u2014 forbearance request 2026-01-30"
+        ],
+        "market_intel_date": "2026-04-18",
+        "data_sources": [
+          "LoopNet listing history",
+          "Maricopa Assessor",
+          "Western Alliance lender data"
+        ]
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "DP-003",
+    "name": {
+      "value": "Sunridge Development & Rentals Inc",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "owner_operator",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": 3,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 91,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_indicators": {
+      "value": {
+        "loan_delinquency_days": 148,
+        "weighted_vacancy_rate": 0.37,
+        "debt_service_coverage_ratio": 0.58,
+        "maturity_wall_months": 1,
+        "foreclosure_notices": 3,
+        "negative_cash_flow_months": 13
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Foreclosure filed on flagship Tempe asset \u2014 auction scheduled Q3 2026",
+        "Owner attempted bridge loan refi \u2014 rejected by 2 lenders",
+        "Eviction filings spiking \u2014 collections team overwhelmed",
+        "Insider source: principals exploring bulk portfolio sale"
+      ],
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "county_recorder_filings": [
+          "AZ-2026-FC-001102",
+          "AZ-2026-NOD-005503",
+          "AZ-2026-NOD-005504"
+        ],
+        "lender_notices": [
+          "US Bank CRE \u2014 foreclosure counsel retained 2026-03-01",
+          "Flagstar \u2014 NOD issued 2026-03-15"
+        ],
+        "market_intel_date": "2026-05-01",
+        "data_sources": [
+          "Maricopa County Recorder",
+          "PACER bankruptcy watch",
+          "Insider broker network"
+        ]
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "DP-004",
+    "name": {
+      "value": "Trevino Asset Management Group",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "private_operator",
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": 2,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 55,
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_indicators": {
+      "value": {
+        "loan_delinquency_days": 0,
+        "weighted_vacancy_rate": 0.48,
+        "debt_service_coverage_ratio": 1.04,
+        "maturity_wall_months": 14,
+        "foreclosure_notices": 0,
+        "negative_cash_flow_months": 2
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Land carry costs mounting \u2014 entitlement timeline extended 18 months",
+        "Office asset losing tenants to newer Class A product",
+        "Owner expressed willingness to consider offers below ask"
+      ],
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "county_recorder_filings": [],
+        "lender_notices": [],
+        "market_intel_date": "2026-04-10",
+        "data_sources": [
+          "Broker conversation 2026-04-10",
+          "Maricopa Assessor",
+          "CoStar"
+        ]
+      },
+      "source_type": "internal_record",
+      "source_name": "DISTRESSED_PORTFOLIOS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/DISTRESSED_PORTFOLIOS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "OB-001",
+    "name": {
+      "value": "Pinnacle Equity Acquisitions LLC",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "private_equity",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_score": {
+      "value": 87,
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "dispo_priority": {
+      "value": "downgraded",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_indicators": {
+      "value": {
+        "portfolio_ltv": 0.84,
+        "debt_to_equity_ratio": 5.2,
+        "interest_coverage_ratio": 1.08,
+        "active_loans_count": 23,
+        "loans_in_extension": 7,
+        "credit_events_24mo": [
+          "Lender covenant breach \u2014 Jan 2026",
+          "Margin call on credit line \u2014 Oct 2025",
+          "Loan extension request denied \u2014 Aug 2025"
+        ],
+        "unused_credit_capacity_pct": 0.04
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "acquisition_posture": {
+      "value": {
+        "stated_appetite": "active",
+        "actual_capacity_assessment": "constrained \u2014 cannot close without additional equity raise",
+        "recent_loi_to_close_ratio": 0.12,
+        "deals_fallen_out_of_escrow_12mo": 4
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "risk_flags": {
+      "value": [
+        "LOI activity exceeds close capacity \u2014 pattern of tire-kicking",
+        "GP capital calls deferred twice in 2025",
+        "Underwriting assumptions rely on rate compression not supported by market"
+      ],
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "lender_reports": [
+          "JPM CRE credit review Q1 2026",
+          "Wells Fargo covenant breach notice 2026-01-12"
+        ],
+        "broker_intel": "Deal team confirmed 4 escrow failures in Q3\u2013Q4 2025",
+        "data_sources": [
+          "Pitchbook fund data",
+          "CoStar deal history",
+          "Broker network"
+        ],
+        "intel_date": "2026-04-30"
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "OB-002",
+    "name": {
+      "value": "Desert Ridge Capital Partners",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "syndicator",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_score": {
+      "value": 79,
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "dispo_priority": {
+      "value": "downgraded",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_indicators": {
+      "value": {
+        "portfolio_ltv": 0.79,
+        "debt_to_equity_ratio": 3.8,
+        "interest_coverage_ratio": 1.14,
+        "active_loans_count": 11,
+        "loans_in_extension": 5,
+        "credit_events_24mo": [
+          "SEC inquiry into investor disclosures \u2014 Q4 2025",
+          "Preferred return payments suspended \u2014 Q1 2026"
+        ],
+        "unused_credit_capacity_pct": 0.09
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "acquisition_posture": {
+      "value": {
+        "stated_appetite": "selective",
+        "actual_capacity_assessment": "impaired \u2014 investor capital frozen pending SEC resolution",
+        "recent_loi_to_close_ratio": 0.2,
+        "deals_fallen_out_of_escrow_12mo": 2
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "risk_flags": {
+      "value": [
+        "Investor distributions halted \u2014 new equity raise blocked",
+        "Pending SEC inquiry chilling LP commitments",
+        "Sponsor fee structure under restructure negotiation"
+      ],
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "lender_reports": [
+          "Preferred Bank extension approval 2026-02-28"
+        ],
+        "regulatory_filings": [
+          "SEC Form D amendment 2025-11-15",
+          "AZ Corp Commission notice 2026-01-05"
+        ],
+        "data_sources": [
+          "SEC EDGAR",
+          "AZ Corporation Commission",
+          "Insider LP source"
+        ],
+        "intel_date": "2026-04-25"
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "OB-003",
+    "name": {
+      "value": "Marcus Edgeworth (individual investor)",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "individual_hni",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_score": {
+      "value": 61,
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "dispo_priority": {
+      "value": "downgraded",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_indicators": {
+      "value": {
+        "portfolio_ltv": 0.76,
+        "debt_to_equity_ratio": 3.1,
+        "interest_coverage_ratio": 1.29,
+        "active_loans_count": 6,
+        "loans_in_extension": 2,
+        "credit_events_24mo": [
+          "Hard money extension on Glendale SFR \u2014 Sep 2025",
+          "Personal guarantee called on commercial LOC \u2014 Feb 2026"
+        ],
+        "unused_credit_capacity_pct": 0.14
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "acquisition_posture": {
+      "value": {
+        "stated_appetite": "active",
+        "actual_capacity_assessment": "limited \u2014 personal guarantee exposure constraining new commitments",
+        "recent_loi_to_close_ratio": 0.33,
+        "deals_fallen_out_of_escrow_12mo": 1
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "risk_flags": {
+      "value": [
+        "Personal guarantee called \u2014 liquidity under stress",
+        "Reliant on 1031 exchange proceeds that may be time-constrained",
+        "Stated equity ready not corroborated by financial disclosure"
+      ],
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "lender_reports": [
+          "Private lender personal guarantee demand 2026-02-10"
+        ],
+        "broker_intel": "Agent reported escrow fall-out citing 'financing issues' Dec 2025",
+        "data_sources": [
+          "Maricopa County Recorder",
+          "Broker network",
+          "Hard money lender database"
+        ],
+        "intel_date": "2026-04-20"
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "OB-004",
+    "name": {
+      "value": "Ironwood Realty Fund III",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "private_equity",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_score": {
+      "value": 38,
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "dispo_priority": {
+      "value": "standard",
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "leverage_indicators": {
+      "value": {
+        "portfolio_ltv": 0.58,
+        "debt_to_equity_ratio": 1.4,
+        "interest_coverage_ratio": 2.31,
+        "active_loans_count": 8,
+        "loans_in_extension": 0,
+        "credit_events_24mo": [],
+        "unused_credit_capacity_pct": 0.41
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "acquisition_posture": {
+      "value": {
+        "stated_appetite": "active",
+        "actual_capacity_assessment": "healthy \u2014 dry powder confirmed, clean credit",
+        "recent_loi_to_close_ratio": 0.71,
+        "deals_fallen_out_of_escrow_12mo": 0
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "risk_flags": {
+      "value": [],
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "lender_reports": [],
+        "broker_intel": "Closed 3 deals in Q1 2026, clean escrow record",
+        "data_sources": [
+          "Fund III PPM",
+          "Broker network",
+          "CoStar transaction history"
+        ],
+        "intel_date": "2026-05-01"
+      },
+      "source_type": "internal_record",
+      "source_name": "OVERLEVERAGED_BUYERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/OVERLEVERAGED_BUYERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "SB-001",
+    "name": {
+      "value": "Vanguard Southwest Constructors LLC",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "spec_residential",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 89,
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "role_classification": {
+      "value": "motivated_seller",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "buyer_disqualification_reason": {
+      "value": "Active construction financing in default; no acquisition capacity",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "financial_distress": {
+      "value": {
+        "construction_loan_status": "draw_freeze",
+        "personal_guarantees_outstanding": true,
+        "mechanic_liens_filed": 6,
+        "lien_claimants": [
+          "Saguaro Electric LLC",
+          "Desert Framing Co",
+          "Atlas Concrete AZ",
+          "3 others"
+        ],
+        "estimated_completion_cost_gap": 3800000
+      },
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "stalled_projects": {
+      "value": [
+        {
+          "project_name": "Vanguard at Laveen Ranch",
+          "address": "SW corner of 51st Ave & Dobbins Rd, Phoenix, AZ 85339",
+          "asset_class": "single_family_subdivision",
+          "permitted_units": 84,
+          "units_complete": 11,
+          "units_under_active_construction": 4,
+          "permit_pull_date": "2024-08-15",
+          "last_inspection_passed": "2025-09-03",
+          "months_since_meaningful_progress": 7,
+          "estimated_completion_original": "2025-12-01",
+          "revised_completion_estimate": "unknown",
+          "stall_triggers": [
+            "Construction lender froze draw requests Nov 2025",
+            "GC walked off site citing unpaid invoices",
+            "Grading and utility rough-in incomplete on phases 3\u20137"
+          ]
+        },
+        {
+          "project_name": "Mesa Gateway Townhomes",
+          "address": "1940 S Greenfield Rd, Mesa, AZ 85206",
+          "asset_class": "for_sale_townhome",
+          "permitted_units": 32,
+          "units_complete": 0,
+          "units_under_active_construction": 0,
+          "permit_pull_date": "2025-01-10",
+          "last_inspection_passed": "2025-03-14",
+          "months_since_meaningful_progress": 13,
+          "estimated_completion_original": "2026-01-01",
+          "revised_completion_estimate": "unknown",
+          "stall_triggers": [
+            "Permits pulled but site never mobilized",
+            "Presale contract fallout rate 78% after rate increase",
+            "Entitlement dispute with City of Mesa unresolved"
+          ]
+        }
+      ],
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Builder has approached 2 capital partners about buyout of Laveen project",
+        "Mesa site listed quietly with land broker at 31% below basis",
+        "Personal guarantees creating urgency \u2014 principals personally exposed"
+      ],
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "permit_records": [
+          "Maricopa County permit #2024-PHX-084821",
+          "Mesa permit #2025-MESA-001032"
+        ],
+        "lien_filings": [
+          "AZ Mechanics Lien 2025-ML-009821 \u2014 Saguaro Electric",
+          "AZ Mechanics Lien 2026-ML-000441 \u2014 Desert Framing Co"
+        ],
+        "broker_intel": "Land broker confirmed off-market listing at $2.1M vs $3.05M basis",
+        "data_sources": [
+          "Maricopa County Building Dept",
+          "AZ Secretary of State",
+          "Broker network"
+        ],
+        "intel_date": "2026-05-02"
+      },
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "SB-002",
+    "name": {
+      "value": "Castellan Urban Development Inc",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "mixed_use_infill",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 73,
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "role_classification": {
+      "value": "motivated_seller",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "buyer_disqualification_reason": {
+      "value": "Equity depleted on current projects; LP disputes prevent new capital deployment",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "financial_distress": {
+      "value": {
+        "construction_loan_status": "not_yet_closed",
+        "personal_guarantees_outstanding": false,
+        "mechanic_liens_filed": 1,
+        "lien_claimants": [
+          "Phoenix Architecture Group PLLC"
+        ],
+        "estimated_completion_cost_gap": 5200000
+      },
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "stalled_projects": {
+      "value": [
+        {
+          "project_name": "Castellan Midtown",
+          "address": "4102 N 16th St, Phoenix, AZ 85016",
+          "asset_class": "mixed_use_multifamily",
+          "permitted_units": 60,
+          "permitted_sf_retail": 8400,
+          "units_complete": 0,
+          "units_under_active_construction": 0,
+          "permit_pull_date": "2024-11-01",
+          "last_inspection_passed": "2025-06-20",
+          "months_since_meaningful_progress": 10,
+          "estimated_completion_original": "2026-06-01",
+          "revised_completion_estimate": "2027-Q3 at earliest",
+          "stall_triggers": [
+            "Equity LP pulled commitment citing project delays",
+            "Construction costs rebid at 22% above original pro forma",
+            "Revised entitlements required after design change \u2014 8-month delay"
+          ]
+        }
+      ],
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Principals actively seeking JV partner or outright site sale",
+        "Entitlement value intact \u2014 site is shovel-ready for capable buyer",
+        "Architect lien signals breakdown in development team relationship"
+      ],
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "permit_records": [
+          "Maricopa County permit #2024-PHX-112940"
+        ],
+        "lien_filings": [
+          "AZ Mechanics Lien 2026-ML-000882 \u2014 Phoenix Architecture Group"
+        ],
+        "broker_intel": "Castellan principal confirmed JV/sale interest to broker March 2026",
+        "data_sources": [
+          "Maricopa County Building Dept",
+          "Broker network",
+          "LP disclosure memo"
+        ],
+        "intel_date": "2026-04-28"
+      },
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "entity_id": "SB-003",
+    "name": {
+      "value": "Ridgeback Homes Arizona LLC",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "entity_type": {
+      "value": "production_homebuilder",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "sos_status": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "registered_agent": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "associated_addresses": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "portfolio_count": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "estimated_equity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "loan_balance": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "distress_score": {
+      "value": 44,
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "role_classification": {
+      "value": "cautious_seller",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "buyer_disqualification_reason": {
+      "value": "Reduced pipeline capacity limits new acquisition appetite; evaluate carefully",
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "financial_distress": {
+      "value": {
+        "construction_loan_status": "current_with_covenant_pressure",
+        "personal_guarantees_outstanding": false,
+        "mechanic_liens_filed": 0,
+        "lien_claimants": [],
+        "estimated_completion_cost_gap": 0
+      },
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "stalled_projects": {
+      "value": [
+        {
+          "project_name": "Ridgeback at Queen Creek Preserve",
+          "address": "E Ocotillo Rd & S Ellsworth Rd, Queen Creek, AZ 85142",
+          "asset_class": "single_family_subdivision",
+          "permitted_units": 210,
+          "units_complete": 97,
+          "units_under_active_construction": 18,
+          "permit_pull_date": "2023-06-01",
+          "last_inspection_passed": "2026-04-15",
+          "months_since_meaningful_progress": 3,
+          "estimated_completion_original": "2027-06-01",
+          "revised_completion_estimate": "2027-09-01",
+          "stall_triggers": [
+            "Absorption rate dropped 40% in Q1 2026 vs Q1 2025",
+            "Speculative starts paused pending presale targets",
+            "Sales incentive spend increasing \u2014 margin compression"
+          ]
+        }
+      ],
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "motivation_signals": {
+      "value": [
+        "Willing to bulk-sell remaining finished lots to reduce carrying costs",
+        "Open to takeout offers on completed spec units"
+      ],
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "source_evidence": {
+      "value": {
+        "permit_records": [
+          "Pinal County permit #2023-PINAL-005510"
+        ],
+        "lien_filings": [],
+        "broker_intel": "Ridgeback sales manager confirmed bulk lot negotiation openness Mar 2026",
+        "data_sources": [
+          "Pinal County Building Dept",
+          "MLS absorption data",
+          "Builder sales team"
+        ],
+        "intel_date": "2026-04-12"
+      },
+      "source_type": "internal_record",
+      "source_name": "STALLED_BUILDERS.json",
+      "source_path_or_url": "/home/user/amara_os/data/portfolio-distress/STALLED_BUILDERS.json",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    }
+  }
+]

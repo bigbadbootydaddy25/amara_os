@@ -1,0 +1,1532 @@
+[
+  {
+    "property_id": "1234_jeff_st_dallas_tx_75208",
+    "address": {
+      "value": "1234 Jeff St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$45000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.15",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Cleared corner lot. All utilities available at street. Adjacent to recently sold infill build. Bishop Arts corridor. Builder-ready.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "John Smith, Broker | (214) 555-0101 | jsmith@dallasbrokerage.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "1236_jeff_st_dallas_tx_75208",
+    "address": {
+      "value": "1236 Jeff St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$42000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.14",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Adjacent cleared lot next to 1234. Utilities on site. Fenced. Motivated seller. Great infill build opportunity.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "John Smith, Broker | (214) 555-0101 | jsmith@dallasbrokerage.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "1240_jeff_st_dallas_tx_75208",
+    "address": {
+      "value": "1240 Jeff St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$48000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.16",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Cleared infill lot. Adjacent lots available on Jeff St. Bishop Arts district. Utilities at street. Builder assignment preferred.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Maria Torres, Realtor | (214) 555-0202 | mtorres@txrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "1244_jeff_st_dallas_tx_75208",
+    "address": {
+      "value": "1244 Jeff St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$39000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.13",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Probate sale. Cleared lot with utilities available. Corner lot at Jeff and alley. Bishop Arts.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Maria Torres, Realtor | (214) 555-0202 | mtorres@txrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "1250_jeff_st_dallas_tx_75208",
+    "address": {
+      "value": "1250 Jeff St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$52000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.18",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Large cleared lot. Utilities at street. Ideal for builder assignment or infill build. Bishop Arts corridor. Adjacent lots on Jeff St available.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Carlos Reyes, Agent | (214) 555-0303 | creyes@oakcliffrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "1256_jeff_st_dallas_tx_75208",
+    "address": {
+      "value": "1256 Jeff St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$44000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.15",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Cleared lot. Fenced. Corner of Jeff and cross street. Utilities available. 4 adjacent lots on same block.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Carlos Reyes, Agent | (214) 555-0303 | creyes@oakcliffrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "516_n_bishop_ave_dallas_tx_75208",
+    "address": {
+      "value": "516 N Bishop Ave, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$65000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.22",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Bishop Arts District corner lot. Adjacent parcels available for assemblage. Cleared with all utilities.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "John Smith, Broker | (214) 555-0101 | jsmith@dallasbrokerage.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "520_n_bishop_ave_dallas_tx_75208",
+    "address": {
+      "value": "520 N Bishop Ave, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$61000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.20",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Adjacent to 516 N Bishop. Cleared. Utilities available. Builder corridor in Bishop Arts. Land flip or assign.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "John Smith, Broker | (214) 555-0101 | jsmith@dallasbrokerage.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "420_w_12th_st_dallas_tx_75208",
+    "address": {
+      "value": "420 W 12th St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$38000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.12",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Trinity Groves adjacent. Cleared lot. Fenced. Probate sale. Motivated estate seller.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Sarah Kim, Broker | (214) 555-0404 | skim@dallaslandco.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "422_w_12th_st_dallas_tx_75208",
+    "address": {
+      "value": "422 W 12th St, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$36000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.11",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Adjacent to 420 W 12th. Cleared. Utilities available. Corner of alley. Land flip candidate.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Sarah Kim, Broker | (214) 555-0404 | skim@dallaslandco.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "2215_singleton_blvd_dallas_tx_75212",
+    "address": {
+      "value": "2215 Singleton Blvd, Dallas, TX 75212",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$78000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.28",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Trinity Groves corridor. Large cleared lot. Adjacent lots potentially available. All utilities. Builder-ready.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Carlos Reyes, Agent | (214) 555-0303 | creyes@oakcliffrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "2219_singleton_blvd_dallas_tx_75212",
+    "address": {
+      "value": "2219 Singleton Blvd, Dallas, TX 75212",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$72000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.26",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Adjacent to 2215 Singleton Blvd. Cleared. Utilities. Fenced. Builder corridor. Land flip or assign.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Carlos Reyes, Agent | (214) 555-0303 | creyes@oakcliffrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "1100_n_zang_blvd_dallas_tx_75208",
+    "address": {
+      "value": "1100 N Zang Blvd, Dallas, TX 75208",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$55000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.19",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Bishop Arts adjacent. Cleared lot. Corner. Utilities at street. Infill build or builder assignment.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "Maria Torres, Realtor | (214) 555-0202 | mtorres@txrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "802_canty_st_dallas_tx_75203",
+    "address": {
+      "value": "802 Canty St, Dallas, TX 75203",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$29000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.10",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Cleared lot. Utilities available. Estate/probate. Fenced. Good infill candidate.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "David Park, Agent | (214) 555-0505 | dpark@southdallasrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  },
+  {
+    "property_id": "806_canty_st_dallas_tx_75203",
+    "address": {
+      "value": "806 Canty St, Dallas, TX 75203",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "owner_name": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "assessed_value": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_price": {
+      "value": "$27000",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    },
+    "last_sale_date": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "liens_recorded": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "permit_activity": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "zoning_classification": {
+      "value": null,
+      "source_type": "missing",
+      "source_name": "",
+      "source_path_or_url": "",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "none",
+      "allowed_use": "lawful_osint_only"
+    },
+    "lot_size_acres": {
+      "value": "0.09",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "broker_details": {
+      "value": "Adjacent to 802 Canty. Cleared. Utilities on site. Same estate seller.",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "high",
+      "allowed_use": "lawful_osint_only"
+    },
+    "contact_info": {
+      "value": "David Park, Agent | (214) 555-0505 | dpark@southdallasrealty.com",
+      "source_type": "broker_lead",
+      "source_name": "infill_lots_dallas.csv",
+      "source_path_or_url": "/home/user/amara_os/data/deal-leads/raw/infill_lots_dallas.csv",
+      "collected_at": "2026-05-10T13:46:21Z",
+      "confidence": "medium",
+      "allowed_use": "lawful_osint_only"
+    }
+  }
+]

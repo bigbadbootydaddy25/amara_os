@@ -32,8 +32,7 @@ DISTRESSED_PORTFOLIOS_PATH = DATA_DIR / "DISTRESSED_PORTFOLIOS.json"
 OVERLEVERAGED_BUYERS_PATH = DATA_DIR / "OVERLEVERAGED_BUYERS.json"
 STALLED_BUILDERS_PATH = DATA_DIR / "STALLED_BUILDERS.json"
 
-DEALS_PATH = ROOT / "data" / "deals.json"
-LATEST_DIR = ROOT / "latest"
+REPORTS_DIR = ROOT / "agents" / "deal-scoring-engine" / "reports"
 
 # ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -104,7 +103,6 @@ def _load(path: Path) -> dict[str, Any]:
 _portfolios: list[dict] | None = None
 _buyers: list[dict] | None = None
 _builders: list[dict] | None = None
-_deals: list[dict] | None = None
 
 
 def portfolios() -> list[dict]:
@@ -128,18 +126,8 @@ def builders() -> list[dict]:
     return _builders
 
 
-def pipeline_deals() -> list[dict]:
-    global _deals
-    if _deals is None:
-        if DEALS_PATH.exists():
-            _deals = _load(DEALS_PATH)["deals"]
-        else:
-            _deals = []
-    return _deals
-
-
 # ── Entity-name matching against distress datasets ────────────────────────────
-# Pipeline deals carry entity names (owner_name, buyer_name, builder_name).
+# Deal records carry entity names (owner_name, buyer_name, builder_name).
 # These lookups resolve names to distress records without requiring pre-keyed IDs.
 
 def _portfolio_by_name(name: str | None) -> dict | None:
@@ -447,112 +435,6 @@ def score_deal(
 
 # ── Batch helpers ─────────────────────────────────────────────────────────────
 
-def score_pipeline_deal(deal: dict) -> DealScore:
-    """Score a raw pipeline deal record, applying distress overlays by entity name."""
-    deal_id: str = deal["deal_id"]
-    deal_side: DealSide = deal["deal_side"]
-    base_score: int = deal.get("base_score", 50)
-    now = datetime.now(timezone.utc).isoformat()
-
-    owner_name: str | None = deal.get("owner_name")
-    buyer_name: str | None = deal.get("buyer_name")
-    builder_name: str | None = deal.get("builder_name")
-
-    # Resolve entity names to distress records
-    portfolio_rec = _portfolio_by_name(owner_name)
-    buyer_rec = _buyer_by_name(buyer_name)
-    builder_rec = _builder_by_name(builder_name)
-
-    # Use the pre-keyed ID-based functions when a match exists, else pass a sentinel
-    seller_id = portfolio_rec["id"] if portfolio_rec else "__no_match__"
-    buyer_id = buyer_rec["id"] if buyer_rec else "__no_match__"
-    builder_id = builder_rec["id"] if builder_rec else "__no_match__"
-
-    counterparty_name = owner_name or buyer_name or builder_name or "Unknown"
-
-    if deal_side in ("acquisition", "land"):
-        seller = score_seller_opportunity(seller_id, base_score)
-        return DealScore(
-            deal_id=deal_id,
-            deal_side=deal_side,
-            counterparty_id=seller_id,
-            counterparty_name=counterparty_name,
-            composite_score=seller.final_score,
-            recommendation=_seller_recommendation(seller),
-            scored_at=now,
-            seller_opportunity=seller,
-        )
-
-    if deal_side == "disposition":
-        buyer = score_buyer_priority(buyer_id, base_score)
-        builder = classify_builder_role(builder_id)
-        is_builder = builder.evidence is not None
-
-        if is_builder and not builder.qualified_as_buyer:
-            return DealScore(
-                deal_id=deal_id,
-                deal_side=deal_side,
-                counterparty_id=builder_id,
-                counterparty_name=counterparty_name,
-                composite_score=0,
-                recommendation=_builder_recommendation(builder),
-                scored_at=now,
-                buyer_priority=buyer,
-                builder_role=builder,
-            )
-
-        return DealScore(
-            deal_id=deal_id,
-            deal_side=deal_side,
-            counterparty_id=buyer_id,
-            counterparty_name=counterparty_name,
-            composite_score=buyer.final_score,
-            recommendation=_buyer_recommendation(buyer),
-            scored_at=now,
-            buyer_priority=buyer,
-            builder_role=builder if is_builder else None,
-        )
-
-    # JV
-    seller = score_seller_opportunity(seller_id, base_score)
-    buyer = score_buyer_priority(buyer_id, base_score)
-    builder = classify_builder_role(builder_id)
-
-    if builder.evidence and not builder.qualified_as_buyer:
-        recommendation = _builder_recommendation(builder)
-        composite = 0
-        cp_id = builder_id
-    elif seller.distress_match:
-        recommendation = _seller_recommendation(seller)
-        composite = seller.final_score
-        cp_id = seller_id
-    elif buyer.evidence:
-        recommendation = _buyer_recommendation(buyer)
-        composite = buyer.final_score
-        cp_id = buyer_id
-    else:
-        recommendation = "No distress signals — score based on standard underwriting."
-        composite = base_score
-        cp_id = "__no_match__"
-
-    return DealScore(
-        deal_id=deal_id,
-        deal_side=deal_side,
-        counterparty_id=cp_id,
-        counterparty_name=counterparty_name,
-        composite_score=composite,
-        recommendation=recommendation,
-        scored_at=now,
-        seller_opportunity=seller if seller.distress_match else None,
-        buyer_priority=buyer if buyer.evidence else None,
-        builder_role=builder if builder.evidence else None,
-    )
-
-
-def score_pipeline() -> list[DealScore]:
-    return [score_pipeline_deal(d) for d in pipeline_deals()]
-
-
 def score_all_distressed_portfolios(base_score: int = 50) -> list[DealScore]:
     return [
         score_deal(
@@ -669,34 +551,43 @@ def _stalled_builder_summary_table(scores: list[DealScore]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def write_latest_scorecard(pipeline_scores: list[DealScore]) -> Path:
-    """Write latest/DEAL_SCORECARD.md with a Portfolio Distress Signals section."""
-    LATEST_DIR.mkdir(exist_ok=True)
-    out = LATEST_DIR / "DEAL_SCORECARD.md"
-    run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    total = len(pipeline_scores)
+def write_timestamped_report(scores: list[DealScore], run_ts: datetime | None = None) -> Path:
+    """Write agents/deal-scoring-engine/reports/<timestamp>/DEAL_SCORECARD.md."""
+    ts = run_ts or datetime.now(timezone.utc)
+    stamp = ts.strftime("%Y%m%dT%H%M%SZ")
+    report_dir = REPORTS_DIR / stamp
+    report_dir.mkdir(parents=True, exist_ok=True)
+    out = report_dir / "DEAL_SCORECARD.md"
+
+    run_date = ts.strftime("%Y-%m-%d %H:%M UTC")
+    total = len(scores)
     distress_hits = sum(
-        1 for ds in pipeline_scores
+        1 for ds in scores
         if ds.seller_opportunity and ds.seller_opportunity.distress_match
     )
     leverage_hits = sum(
-        1 for ds in pipeline_scores
+        1 for ds in scores
         if ds.buyer_priority and ds.buyer_priority.dispo_priority in ("downgraded", "disqualified")
     )
     builder_hits = sum(
-        1 for ds in pipeline_scores
+        1 for ds in scores
         if ds.builder_role and not ds.builder_role.qualified_as_buyer
     )
+    high = [ds for ds in scores if ds.composite_score >= 80]
+    elevated = [ds for ds in scores if 65 <= ds.composite_score < 80]
+    deprioritised = [ds for ds in scores if ds.composite_score < 35]
 
-    high = [ds for ds in pipeline_scores if ds.composite_score >= 80]
-    elevated = [ds for ds in pipeline_scores if 65 <= ds.composite_score < 80]
-    deprioritised = [ds for ds in pipeline_scores if ds.composite_score < 35]
+    high_rows = "".join(
+        f"| {ds.deal_id} | {ds.counterparty_name} | {ds.deal_side} "
+        f"| **{ds.composite_score}** | {ds.recommendation[:90]} |\n"
+        for ds in sorted(high, key=lambda x: -x.composite_score)
+    ) or "_None this run._\n"
 
     content = f"""# Deal Scorecard
 
 **Agent:** `agents/deal-scoring-engine/run.py`
-**Run date:** {run_date}
-**Pipeline deals scored:** {total}
+**Run:** {run_date}
+**Report:** `agents/deal-scoring-engine/reports/{stamp}/DEAL_SCORECARD.md`
 
 ---
 
@@ -704,19 +595,19 @@ def write_latest_scorecard(pipeline_scores: list[DealScore]) -> Path:
 
 | Metric | Count |
 |---|---|
-| Total deals scored | {total} |
-| Distress-boosted (seller) | {distress_hits} |
-| Leverage-penalised (buyer) | {leverage_hits} |
+| Scored deals | {total} |
+| Hot deals (≥ 80) | {len(high)} |
+| Elevated (65–79) | {len(elevated)} |
+| Deprioritised (< 35) | {len(deprioritised)} |
+| Distress-boosted sellers | {distress_hits} |
+| Leverage-penalised buyers | {leverage_hits} |
 | Builders reclassified as sellers | {builder_hits} |
-| HIGH PRIORITY (≥80) | {len(high)} |
-| ELEVATED (65–79) | {len(elevated)} |
-| DEPRIORITISE (<35) | {len(deprioritised)} |
 
 ---
 
 ## Portfolio Distress Signals
 
-Portfolio distress is the primary upward driver of seller-side opportunity scores. Owner names are matched against `data/portfolio-distress/DISTRESSED_PORTFOLIOS.json` at score time.
+Portfolio distress boosts seller-side opportunity scores. Owner, buyer, and builder names are matched at score time against the three distress datasets in `data/portfolio-distress/`.
 
 ### Signal Hierarchy
 
@@ -729,57 +620,46 @@ Portfolio distress is the primary upward driver of seller-side opportunity score
 | 5 | Weighted portfolio vacancy | > 30% |
 | 6 | Negative cash flow streak | ≥ 6 consecutive months |
 
-### Boost Formula
+### Scoring Adjustments
 
 ```
+# Seller boost (DISTRESSED_PORTFOLIOS)
 distress_boost = round((distress_score / 100) × 40)
 final_score    = min(100, base_score + distress_boost)
-```
 
-### Distressed Owners Matched This Run
-
-{_distress_summary_table(pipeline_scores)}
-
----
-
-## Overleveraged Buyers — Dispo Downgrades
-
-Buyer names are matched against `data/portfolio-distress/OVERLEVERAGED_BUYERS.json`. Leverage penalty applied:
-
-```
+# Buyer penalty (OVERLEVERAGED_BUYERS)
 leverage_penalty = round((leverage_score / 100) × 45)
 final_score      = max(0, base_score - leverage_penalty)
+
+# Builder reclassification (STALLED_BUILDERS)
+# → composite_score forced to 0 when role != qualified_buyer
 ```
+
+### Distressed Portfolio Owners Matched This Run
+
+{_distress_summary_table(scores)}
 
 ### Overleveraged Buyers Matched This Run
 
-{_overleveraged_summary_table(pipeline_scores)}
+{_overleveraged_summary_table(scores)}
+
+### Stalled Builders Reclassified This Run
+
+{_stalled_builder_summary_table(scores)}
 
 ---
 
-## Stalled Builders — Role Reclassification
-
-Builder names are matched against `data/portfolio-distress/STALLED_BUILDERS.json`. Stalled builders are treated as motivated sellers; composite score is forced to 0 on the buyer side.
-
-### Builders Reclassified This Run
-
-{_stalled_builder_summary_table(pipeline_scores)}
-
----
-
-## HIGH PRIORITY Deals (score ≥ 80)
+## Hot Deals — score ≥ 80
 
 | Deal | Counterparty | Side | Score | Recommendation |
 |---|---|---|---|---|
-{"".join(f"| {ds.deal_id} | {ds.counterparty_name} | {ds.deal_side} | **{ds.composite_score}** | {ds.recommendation[:90]} |" + chr(10) for ds in sorted(high, key=lambda x: -x.composite_score)) or "_None this run._" + chr(10)}
-
+{high_rows}
 ---
 
 ## Source Files
 
 | File | Purpose |
 |---|---|
-| `data/deals.json` | Active deal pipeline |
 | `data/portfolio-distress/DISTRESSED_PORTFOLIOS.json` | Distressed portfolio owners |
 | `data/portfolio-distress/OVERLEVERAGED_BUYERS.json` | Overleveraged buyers |
 | `data/portfolio-distress/STALLED_BUILDERS.json` | Stalled builders |
@@ -836,6 +716,103 @@ def _print_score(ds: DealScore, verbose: bool = False) -> None:
             print(f"    · {sig}")
 
 
+def run(deals: list[dict], run_ts: datetime | None = None) -> list[DealScore]:
+    """
+    Score a list of deal dicts and write the timestamped report.
+
+    Each deal dict must contain:
+        deal_id   : str
+        deal_side : 'acquisition' | 'disposition' | 'land' | 'jv'
+        base_score: int  (optional, default 50)
+        owner_name   : str | None
+        buyer_name   : str | None
+        builder_name : str | None
+
+    Returns all DealScore objects so callers can do further processing.
+    """
+    ts = run_ts or datetime.now(timezone.utc)
+    scores: list[DealScore] = []
+    now_iso = ts.isoformat()
+
+    for deal in deals:
+        deal_id: str = deal["deal_id"]
+        deal_side: DealSide = deal["deal_side"]
+        base_score: int = deal.get("base_score", 50)
+
+        owner_name: str | None = deal.get("owner_name")
+        buyer_name: str | None = deal.get("buyer_name")
+        builder_name: str | None = deal.get("builder_name")
+
+        portfolio_rec = _portfolio_by_name(owner_name)
+        buyer_rec = _buyer_by_name(buyer_name)
+        builder_rec = _builder_by_name(builder_name)
+
+        seller_id = portfolio_rec["id"] if portfolio_rec else "__no_match__"
+        buyer_id = buyer_rec["id"] if buyer_rec else "__no_match__"
+        builder_id = builder_rec["id"] if builder_rec else "__no_match__"
+
+        counterparty_name = owner_name or buyer_name or builder_name or "Unknown"
+
+        if deal_side in ("acquisition", "land"):
+            seller = score_seller_opportunity(seller_id, base_score)
+            scores.append(DealScore(
+                deal_id=deal_id, deal_side=deal_side,
+                counterparty_id=seller_id, counterparty_name=counterparty_name,
+                composite_score=seller.final_score,
+                recommendation=_seller_recommendation(seller),
+                scored_at=now_iso, seller_opportunity=seller,
+            ))
+
+        elif deal_side == "disposition":
+            buyer = score_buyer_priority(buyer_id, base_score)
+            builder = classify_builder_role(builder_id)
+            is_builder = builder.evidence is not None
+
+            if is_builder and not builder.qualified_as_buyer:
+                scores.append(DealScore(
+                    deal_id=deal_id, deal_side=deal_side,
+                    counterparty_id=builder_id, counterparty_name=counterparty_name,
+                    composite_score=0, recommendation=_builder_recommendation(builder),
+                    scored_at=now_iso, buyer_priority=buyer, builder_role=builder,
+                ))
+            else:
+                scores.append(DealScore(
+                    deal_id=deal_id, deal_side=deal_side,
+                    counterparty_id=buyer_id, counterparty_name=counterparty_name,
+                    composite_score=buyer.final_score,
+                    recommendation=_buyer_recommendation(buyer),
+                    scored_at=now_iso, buyer_priority=buyer,
+                    builder_role=builder if is_builder else None,
+                ))
+
+        else:  # jv
+            seller = score_seller_opportunity(seller_id, base_score)
+            buyer = score_buyer_priority(buyer_id, base_score)
+            builder = classify_builder_role(builder_id)
+
+            if builder.evidence and not builder.qualified_as_buyer:
+                rec, composite, cp_id = _builder_recommendation(builder), 0, builder_id
+            elif seller.distress_match:
+                rec, composite, cp_id = _seller_recommendation(seller), seller.final_score, seller_id
+            elif buyer.evidence:
+                rec, composite, cp_id = _buyer_recommendation(buyer), buyer.final_score, buyer_id
+            else:
+                rec = "No distress signals — score based on standard underwriting."
+                composite, cp_id = base_score, "__no_match__"
+
+            scores.append(DealScore(
+                deal_id=deal_id, deal_side=deal_side,
+                counterparty_id=cp_id, counterparty_name=counterparty_name,
+                composite_score=composite, recommendation=rec, scored_at=now_iso,
+                seller_opportunity=seller if seller.distress_match else None,
+                buyer_priority=buyer if buyer.evidence else None,
+                builder_role=builder if builder.evidence else None,
+            ))
+
+    report_path = write_timestamped_report(scores, ts)
+    return scores
+
+
 def main() -> None:
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
     as_json = "--json" in sys.argv
@@ -845,31 +822,17 @@ def main() -> None:
     print("  Portfolio Distress Integration")
     print("=" * 64)
 
-    # ── Score the deal pipeline ───────────────────────────────────────────────
-    pipe_scores = score_pipeline()
-    total_pipeline = len(pipe_scores)
+    # ── Live pipeline scoring (caller supplies deals; distress overlays applied) ─
+    # This stub exercises the distress datasets directly.
+    # Replace with the real deal loader to process the full pipeline.
+    ts = datetime.now(timezone.utc)
+    all_scores: list[DealScore] = []
 
-    if total_pipeline:
-        print(f"\n{'━' * 64}")
-        print(f"  DEAL PIPELINE  ({total_pipeline} deals)")
-        print(f"{'━' * 64}")
-        for ds in pipe_scores:
-            _print_score(ds, verbose=verbose)
-    else:
-        print("\n  [PIPELINE] No deals found in data/deals.json — skipping pipeline run.")
-
-    # ── Write latest/DEAL_SCORECARD.md ────────────────────────────────────────
-    scorecard_path = write_latest_scorecard(pipe_scores)
-    print(f"\n  Scorecard written → {scorecard_path.relative_to(ROOT)}")
-
-    # ── Distress dataset batch runs (for audit/debug) ─────────────────────────
     sections = [
         ("DISTRESSED PORTFOLIO OWNERS — Seller Opportunity", score_all_distressed_portfolios()),
         ("OVERLEVERAGED BUYERS — Dispo Priority", score_all_buyers()),
         ("STALLED BUILDERS — Role Classification", score_all_builders()),
     ]
-
-    all_scores: list[DealScore] = list(pipe_scores)
 
     for header, scores in sections:
         print(f"\n{'━' * 64}")
@@ -877,11 +840,17 @@ def main() -> None:
         print(f"{'━' * 64}")
         for ds in scores:
             _print_score(ds, verbose=verbose)
-            all_scores.append(ds)
+        all_scores.extend(scores)
+
+    # ── Write timestamped report ──────────────────────────────────────────────
+    report_path = write_timestamped_report(all_scores, ts)
+
+    hot = [ds for ds in all_scores if ds.composite_score >= 80]
 
     print(f"\n{'═' * 64}")
-    print(f"  Pipeline: {total_pipeline} deals  |  Distress datasets: {len(all_scores) - total_pipeline} records")
-    print(f"  Total scored: {len(all_scores)}  |  {datetime.now(timezone.utc).date()}")
+    print(f"  Scored deals:  {len(all_scores)}")
+    print(f"  Hot deals:     {len(hot)}")
+    print(f"  Report:        {report_path.relative_to(ROOT)}")
     print(f"{'═' * 64}\n")
 
     if as_json:

@@ -39,12 +39,40 @@
     "lookbackYears": 10
   },
 
+  "distress": {
+    "minScore": 0,
+    "maxRetries": 2,
+    "courtListenerRateMs": 2000
+  },
+
+  "scoring": {
+    "minCompositeScore": 70,
+    "minSpreadNet": 300000,
+    "qualifyingSpeeds": ["FAST", "MEDIUM"]
+  },
+
+  "openclaw": {
+    "url": "http://127.0.0.1:18789",
+    "channel": "telegram",
+    "retryIntervalMs": 60000
+  },
+
+  "airtable": {
+    "baseId": "app0jn857ZwVzQs8i",
+    "table": "Land Pipeline"
+  },
+
+  "ollama": {
+    "url": "http://127.0.0.1:11434",
+    "model": "llama3"
+  },
+
   "agents": {
-    "01": { "id": "plat-expiration-scanner",    "enabled": true  },
-    "02": { "id": "parcel-ownership-resolver",   "enabled": false },
-    "03": { "id": "lien-encumbrance-scanner",    "enabled": false },
-    "04": { "id": "zoning-entitlement-analyzer", "enabled": false },
-    "05": { "id": "market-comp-aggregator",      "enabled": false },
-    "06": { "id": "intelligence-report-generator","enabled": false }
+    "01": { "id": "plat-expiration-scanner",    "enabled": true,  "module": "./agents/01-plat-expiration-scanner"    },
+    "02": { "id": "distress-scanner",            "enabled": true,  "module": "./agents/02-distress-scanner"           },
+    "03": { "id": "builder-demand-scanner",      "enabled": true,  "module": "./agents/03-builder-demand-scanner"     },
+    "04": { "id": "opportunity-scorer",          "enabled": true,  "module": "./agents/04-opportunity-scorer"         },
+    "05": { "id": "quick-flip-filter",           "enabled": true,  "module": "./agents/05-quick-flip-filter"          },
+    "06": { "id": "builder-buybox-profiler",     "enabled": true,  "module": "./agents/06-builder-buybox-profiler"    }
   }
 }

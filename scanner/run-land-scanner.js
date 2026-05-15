@@ -8,12 +8,12 @@
  *
  * Orchestrates the 6-agent pipeline:
  *
+ *   06  builder-buybox-profiler      ← seeds/refreshes builder buy-box data (runs first)
  *   01  plat-expiration-scanner      ← scans for expired / dormant plats
- *   02  parcel-ownership-resolver    ← resolves ownership & entity structure
- *   03  lien-encumbrance-scanner     ← checks for liens, lis pendens, CoE
- *   04  zoning-entitlement-analyzer  ← zoning + FLU + entitlement history
- *   05  market-comp-aggregator       ← comparable sales & land values
- *   06  intelligence-report-generator← final scored, ranked report
+ *   02  distress-scanner             ← scores financial & legal distress per plat
+ *   03  builder-demand-scanner       ← permit activity + EDGAR + demand scoring
+ *   04  opportunity-scorer           ← composite score, hot-match alerts, buy-box match
+ *   05  quick-flip-filter            ← Kill Shot Briefs, OpenClaw, Airtable
  *
  * Usage:
  *   node run-land-scanner.js [--agents 01,02] [--log-level debug]
@@ -53,19 +53,23 @@ function parseArgs(argv) {
 
 const AGENT_MODULES = {
   '01': './agents/01-plat-expiration-scanner',
-  '02': './agents/02-parcel-ownership-resolver',
-  '03': './agents/03-lien-encumbrance-scanner',
-  '04': './agents/04-zoning-entitlement-analyzer',
-  '05': './agents/05-market-comp-aggregator',
-  '06': './agents/06-intelligence-report-generator',
+  '02': './agents/02-distress-scanner',
+  '03': './agents/03-builder-demand-scanner',
+  '04': './agents/04-opportunity-scorer',
+  '05': './agents/05-quick-flip-filter',
+  '06': './agents/06-builder-buybox-profiler',
 };
 
 function resolveAgentList(requested) {
-  const enabled = Object.entries(config.agents)
-    .filter(([, v]) => v.enabled)
-    .map(([k]) => k.padStart(2, '0'));
-
-  if (!requested) return enabled;
+  if (!requested) {
+    // Default execution order: Agent 06 seeds buy-box data first, then 01-05
+    const enabled = Object.entries(config.agents)
+      .filter(([, v]) => v.enabled)
+      .map(([k]) => k.padStart(2, '0'));
+    const has06 = enabled.includes('06');
+    const rest  = enabled.filter((id) => id !== '06').sort();
+    return has06 ? ['06', ...rest] : rest;
+  }
 
   const unknown = requested.filter((id) => !AGENT_MODULES[id]);
   if (unknown.length) {

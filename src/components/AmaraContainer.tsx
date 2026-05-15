@@ -8,6 +8,7 @@ import { useVoiceOutput } from '@/hooks/useVoiceOutput';
 import { useAmaraStore } from '@/stores/amara-store';
 import type { AmaraState } from '@/types';
 import { StatusIndicator } from '@/components/StatusIndicator';
+import { OsintScanner } from '@/components/OsintScanner';
 
 const DEMO_SEQUENCE: Array<{ state: AmaraState; duration: number }> = [
   { state: 'idle', duration: 4000 },
@@ -273,6 +274,7 @@ export function AmaraContainer() {
         </button>
       ) : null}
       <StatusIndicator />
+      <OsintScanner />
     </main>
   );
 }

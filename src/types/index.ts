@@ -64,3 +64,60 @@ export interface AvatarAnimState {
   breathScale: number;
   thinkingPulse: number;
 }
+
+// OSINT Land Scanner
+
+export type OsintQueryType = 'ip' | 'coordinates' | 'address';
+
+export interface OsintLocation {
+  lat?: number;
+  lon?: number;
+  displayName?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  countryCode?: string;
+  zip?: string;
+  timezone?: string;
+  continent?: string;
+}
+
+export interface OsintNetwork {
+  isp?: string;
+  org?: string;
+  as?: string;
+  asName?: string;
+  isProxy?: boolean;
+  isHosting?: boolean;
+}
+
+export interface OsintPlace {
+  type?: string;
+  category?: string;
+  osmType?: string;
+  osmId?: number;
+  importance?: number;
+  boundingBox?: [string, string, string, string];
+}
+
+export interface OsintScanResult {
+  query: string;
+  queryType: OsintQueryType;
+  timestamp: string;
+  location?: OsintLocation;
+  network?: OsintNetwork;
+  place?: OsintPlace;
+}
+
+export interface OsintStore {
+  isOpen: boolean;
+  isScanning: boolean;
+  result: OsintScanResult | null;
+  error: string | null;
+  history: OsintScanResult[];
+  setOpen: (open: boolean) => void;
+  setScanning: (scanning: boolean) => void;
+  setResult: (result: OsintScanResult | null) => void;
+  setError: (error: string | null) => void;
+  pushHistory: (result: OsintScanResult) => void;
+}

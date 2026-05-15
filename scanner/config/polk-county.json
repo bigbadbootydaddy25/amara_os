@@ -1,0 +1,50 @@
+{
+  "county": "Polk",
+  "state": "FL",
+  "fips": "12105",
+
+  "gis": {
+    "baseUrl": "https://maps.polk-county.net/arcgis/rest/services",
+    "subdivisionLayer": "Property/PolkSubdivisions/MapServer/0",
+    "parcelLayer": "Property/PolkParcels/MapServer/0",
+    "zoningLayer": "Planning/ZoningMapService/MapServer/0",
+    "permitLayer": "Development/BuildingPermits/MapServer/0"
+  },
+
+  "propertyAppraiser": {
+    "baseUrl": "https://www.polkpa.org",
+    "searchEndpoint": "/CamaDisplay/Requests/GetAppraisalRecord",
+    "platSearchEndpoint": "/CamaDisplay/Requests/GetSubdivisionList"
+  },
+
+  "clerk": {
+    "baseUrl": "https://www.polkclerk.com",
+    "officialRecordsSearch": "/official-records/search"
+  },
+
+  "pipeline": {
+    "rateLimitMs": 1200,
+    "maxRetries": 3,
+    "retryBackoffMs": 2000,
+    "timeoutMs": 30000,
+    "batchSize": 50,
+    "outputDir": "./output",
+    "logLevel": "info"
+  },
+
+  "platExpiration": {
+    "preliminaryPlatMaxAgeMonths": 24,
+    "warningWindowMonths": 3,
+    "dormancyThresholdYears": 5,
+    "lookbackYears": 10
+  },
+
+  "agents": {
+    "01": { "id": "plat-expiration-scanner",    "enabled": true  },
+    "02": { "id": "parcel-ownership-resolver",   "enabled": false },
+    "03": { "id": "lien-encumbrance-scanner",    "enabled": false },
+    "04": { "id": "zoning-entitlement-analyzer", "enabled": false },
+    "05": { "id": "market-comp-aggregator",      "enabled": false },
+    "06": { "id": "intelligence-report-generator","enabled": false }
+  }
+}

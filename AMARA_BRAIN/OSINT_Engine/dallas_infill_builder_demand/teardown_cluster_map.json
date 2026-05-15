@@ -1,0 +1,133 @@
+{
+  "metadata": {
+    "generated": "2026-05-15T18:50:27Z",
+    "primary_market": "Dallas, Texas",
+    "data_type": "VERIFIED PUBLIC RECORD — REAL DATA ONLY",
+    "swarm_agent": "Teardown Cluster Agent",
+    "methodology": "OSINT — public news sources, city plan documents, Dallas Free Press, D Magazine, Oak Cliff Advocate, Dallas Observer, City of Dallas Legistar, CandysDirt"
+  },
+  "teardown_clusters": [
+    {
+      "cluster_id": "TC-001",
+      "cluster_name": "South Dallas / Fair Park Systemic Teardown-Replace Corridor",
+      "neighborhoods": ["South Dallas", "Fair Park", "Exposition Park"],
+      "primary_zips": ["75215", "75210"],
+      "cluster_intensity": "HIGH",
+      "confidence": "HIGH",
+      "evidence_type": "City-adopted area plan explicitly documenting teardown-replace pattern as primary redevelopment mechanism",
+      "evidence_summary": "The South Dallas/Fair Park Area Plan (SDFP), adopted by Dallas City Council June 25, 2025, was triggered by four years of documented 'grossly incompatible' infill construction. Residents describe three-story flat-roof homes with large driveways being built on teardown sites. The plan explicitly cites this as the dominant redevelopment pattern in existing single-family blocks and proposes design standards to govern future infill teardown-rebuilds.",
+      "key_addresses": [
+        {
+          "address": "3500 Ash Lane",
+          "zip": "75215",
+          "project": "The Dahl — 292-unit mixed-income multifamily (Larkspur Capital)",
+          "type": "Cleared multi-parcel site redevelopment"
+        }
+      ],
+      "regulatory_response": "SDFP Area Plan adopted June 25, 2025. Provisions: Neighborhood Mixed-Use rezoning on 2nd Avenue corridor; ADU overlay district rights; duplex subdivision rights; Neighborhood Revitalization Strategy Area designation (federal HUD funds).",
+      "amara_os_targeting_priority": "TIER 1 — Highest priority. City regulatory response confirms systemic teardown wave. Active lot shortage forming.",
+      "source_urls": [
+        "https://dallascityhall.com/departments/pnv/Pages/SDFP-AreaPlanning.aspx",
+        "https://content.govdelivery.com/accounts/TXDALLAS/bulletins/3e76444",
+        "https://dallasfreepress.com/south-dallas/south-dallas-fair-park-area-plan/",
+        "https://dallasfreepress.com/south-dallas/city-council-approves-south-dallas-fair-park-area-plan-after-years-of-community-work/",
+        "https://candysdirt.com/2025/02/04/south-dallas-fair-park-the-little-area-plan-that-could/",
+        "https://labreportdallas.com/neighborhoods/how-2025-set-the-course-for-south-dallas-future/"
+      ]
+    },
+    {
+      "cluster_id": "TC-002",
+      "cluster_name": "Tenth Street Historic District Systematic Teardown Cluster",
+      "neighborhoods": ["Tenth Street Historic District", "East Oak Cliff"],
+      "primary_zips": ["75203"],
+      "adjacent_zips": ["75216"],
+      "cluster_intensity": "HIGH",
+      "confidence": "HIGH",
+      "evidence_type": "Litigated demolition record; documented percentage teardown rate within landmark district",
+      "evidence_summary": "Between 2010 and 2023, the city documented 35 demolished historic homes in the Tenth Street Landmark District. A 2019 lawsuit alleged the real figure was closer to 72 demolitions out of 260 total homes — a 28% teardown rate in the district. Mechanism: Dallas's '3,000-square-foot rule' (passed 2010) permits demolition of homes smaller than 3,000 sq ft within a Landmark District without full Landmark Commission review, enabling fast-tracked teardown-infill cycles.",
+      "teardown_rate": "28%+ (72 of 260 homes per lawsuit allegation; 35 per city records)",
+      "enabling_mechanism": "Dallas 3,000-sq-ft demolition rule (2010) — allows demo of sub-3,000 sq ft homes in landmark districts without full Commission review",
+      "amara_os_targeting_priority": "TIER 1 — High priority. Documented systematic pattern. Sub-3000 sq ft homes still present = continued teardown risk = lot supply opportunity.",
+      "source_urls": [
+        "https://lakewood.advocatemag.com/can-building-earn-landmark-status-demolition-permits-filed-sort-new-territory/"
+      ]
+    },
+    {
+      "cluster_id": "TC-003",
+      "cluster_name": "West Dallas / Los Altos / Trinity Groves Multi-Parcel Demo Assemblage",
+      "neighborhoods": ["West Dallas", "Los Altos", "La Bajada", "Trinity Groves"],
+      "primary_zips": ["75212"],
+      "cluster_intensity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_type": "Named developer / named properties / sequential demolition / documented ground-up redevelopment",
+      "evidence_summary": "Developer Jackson acquired four adjacent commercial properties (former Barrow Filling Station, West Dallas Pharmacy, Chuyitas Taqueria, tire shop) in 2019 on Singleton Blvd at N Winnetka Ave. Asbestos abatement and sequential demolitions ran through 2024. Site then sold to Frank Nuchereno / Hello! Deluxe Car Wash. Ground-up construction active mid-2025. A broader wave of demolition-linked gentrification documented across West Dallas with Dallas Free Press covering multiple displacement events. Goldenrod Companies separately acquired ~90 parcels (~45 acres) in Trinity Groves in 2023 from West Dallas Investments LLC.",
+      "key_entities": [
+        {
+          "entity": "Developer Jackson",
+          "role": "Assembler / demo permit holder",
+          "parcels": 4,
+          "acquisition_year": 2019
+        },
+        {
+          "entity": "Goldenrod Companies",
+          "role": "Major land assembler",
+          "parcels": "~90",
+          "acreage": "~45 acres",
+          "acquisition_year": 2023
+        }
+      ],
+      "amara_os_targeting_priority": "TIER 2 — High value but large institutional players dominate. Smaller scattered lots around the Goldenrod assemblage edge may be AMARA OS targets.",
+      "source_urls": [
+        "https://dallasfreepress.com/west-dallas/west-dallas-site-of-demolished-bonnie-and-clyde-filling-station-to-become-a-car-wash/",
+        "https://dallasfreepress.com/west-dallas/3demolition-delay-overlay-dallas/",
+        "https://www.dmagazine.com/frontburner/2022/05/confusion-paved-path-for-barrow-service-station-demolition/",
+        "https://www.dmagazine.com/frontburner/2023/03/a-huge-chunk-of-west-dallas-now-belongs-to-a-nebraska-developer-the-community-wonders-what-comes-next/",
+        "https://dallasexpress.com/realestate/developer-buys-90-properties-in-west-dallas/"
+      ]
+    },
+    {
+      "cluster_id": "TC-004",
+      "cluster_name": "North Oak Cliff / Bishop Arts Cleared-Lot Townhome Pipeline",
+      "neighborhoods": ["North Oak Cliff", "Bishop Arts District"],
+      "primary_zips": ["75203", "75208"],
+      "cluster_intensity": "MEDIUM",
+      "confidence": "MEDIUM",
+      "evidence_type": "Active MLS listings of permit-approved cleared townhome assemblages; Redfin active land inventory data",
+      "evidence_summary": "Current listing data documents multiple shovel-ready, permit-approved townhome assemblages actively marketed to builders: a 14-townhome permitted project in Bishop Arts; a 16-unit permitted corner-lot assemblage (3+ contiguous lots); a 16-townhome project at 316 and 324 N Lancaster. Redfin shows 139 active land listings in Oak Cliff at median $310K. Recent month sales: 32 condos, 15 townhouses, 12 multi-family units — indicating active build-out of cleared lots.",
+      "active_pipeline": [
+        "14-townhome permitted project — Bishop Arts",
+        "16-unit permitted corner-lot assemblage (3+ contiguous lots) — Oak Cliff",
+        "16-townhome project at 316 and 324 N Lancaster Ave"
+      ],
+      "land_inventory": "139 active land listings per Redfin; median $310K",
+      "amara_os_targeting_priority": "TIER 2 — Active townhome demand confirmed but land prices elevated ($310K median). Watch for off-market lots adjacent to permit-approved assemblages.",
+      "source_urls": [
+        "https://www.redfin.com/neighborhood/49795/TX/Dallas/Oak-Cliff/land",
+        "https://www.homes.com/dallas-tx/oak-cliff-neighborhood/land-for-sale/"
+      ]
+    },
+    {
+      "cluster_id": "TC-005",
+      "cluster_name": "West Oak Cliff Hampton-Clarendon Corridor Emerging Redevelopment Zone",
+      "neighborhoods": ["West Oak Cliff", "Elmwood", "Jimtown"],
+      "primary_zips": ["75216", "75232"],
+      "cluster_intensity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_type": "City rezoning action (August 2025) — 35.25 acres to mixed-use/multifamily; cascading WOCAP-driven rezoning since 2022",
+      "evidence_summary": "Dallas City Council voted 12-3 on August 13, 2025 to rezone 35.25 acres at Hampton Road and Clarendon Drive intersection. WOCAP (adopted 2022) has spawned: Downtown Elmwood authorized hearing (January 2024); Jimtown authorized hearing (January 2025); Hampton-Clarendon (August 2025). Additional 3.2-acre apartment rezoning in Oak Cliff approved April 2026 citing ForwardDallas 2.0 and 2025 Texas state law.",
+      "regulatory_driver": "West Oak Cliff Area Plan (WOCAP) — adopted 2022; producing cascading rezoning authorizations through 2025-2026",
+      "amara_os_targeting_priority": "TIER 2 — Rezoning pipeline active. Auto-oriented parcels converting to mixed-use = infill opportunity. Watch for adjacent vacant/underutilized lots.",
+      "source_urls": [
+        "https://www.keranews.org/news/2025-08-14/dallas-city-council-approves-west-oak-cliff-rezoning-plan",
+        "https://therealdeal.com/texas/dallas/2025/08/12/dallas-city-council-to-rezone-35-acres-of-west-oak-cliff/",
+        "https://hoodline.com/2026/04/oak-cliff-showdown-as-dallas-council-oks-3-acre-apartment-rezoning/",
+        "https://oakcliff.advocatemag.com/2025/12/wocap/"
+      ]
+    }
+  ],
+  "data_gaps": {
+    "description": "Specific demolition permit records for 75217, 75227, 75232 require direct database query",
+    "recommended_action": "Direct API pull from Dallas OpenData (https://www.dallasopendata.com/Services/Building-Permits/e7gq-4sah) filtering permit_type = 'DEMOLITION' by ZIP for FY2024-2025. Also query DallasNow/Accela portal at https://aca-prod.accela.com/DALLASTX/Default.aspx",
+    "dallas_gis_layer": "https://egisdata-dallasgis.hub.arcgis.com/maps/bf301464418c43969d8ecb1e446df618 — FY23-24 building permit layer available but not queryable via web search"
+  }
+}

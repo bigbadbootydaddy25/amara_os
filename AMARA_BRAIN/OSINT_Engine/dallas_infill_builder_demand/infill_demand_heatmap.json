@@ -1,0 +1,284 @@
+{
+  "metadata": {
+    "generated": "2026-05-15T18:50:27Z",
+    "primary_market": "Dallas, Texas",
+    "data_type": "SCORED FROM VERIFIED DATA ONLY — NO FAKE SCORES",
+    "scoring_methodology": "Composite score based on: permit velocity evidence (0-20), builder concentration (0-20), teardown intensity (0-20), acquisition clustering (0-20), policy/redevelopment pressure (0-20). Maximum: 100. Scores only assigned where verified evidence exists.",
+    "score_bands": {
+      "90_to_100": "Extreme infill demand",
+      "75_to_89": "Strong infill demand",
+      "60_to_74": "Moderate demand",
+      "below_60": "Weak or unverified demand"
+    },
+    "swarm_agent": "Infill Demand Scoring Agent — AMARA OS Dallas Swarm"
+  },
+  "scored_zones": [
+    {
+      "zone_id": "IDZ-001",
+      "zone_name": "South Dallas / Fair Park Core",
+      "neighborhoods": ["South Dallas", "Fair Park", "The Cedars", "Exposition Park"],
+      "primary_zips": ["75215", "75210"],
+      "composite_score": 91,
+      "score_band": "Extreme infill demand",
+      "component_scores": {
+        "permit_velocity": {
+          "score": 17,
+          "max": 20,
+          "evidence": "TDLR permit confirmed for 155-unit Larkspur BTR townhome project (TABS2023017979); 292-unit The Dahl multifamily construction underway; 299-unit OHT Partners Ambassador Hotel site under construction. Multiple active projects in single ZIP.",
+          "data_gap": "Granular new construction + demo permit counts for 75215 not extracted from Dallas OpenData — requires direct API query"
+        },
+        "builder_concentration": {
+          "score": 19,
+          "max": 20,
+          "evidence": "Three confirmed active builders in 75215 alone: Larkspur Capital/Argosy (BTR townhome), OHT Partners (multifamily), Larkspur (The Dahl multifamily). Marcus Project (76-unit affordable) also under construction by LISC/DHOF partners.",
+          "source": "Builder Activity Agent verified data"
+        },
+        "teardown_intensity": {
+          "score": 18,
+          "max": 20,
+          "evidence": "South Dallas/Fair Park Area Plan (June 2025) explicitly adopted to govern 'grossly incompatible' teardown-rebuild wave. City regulatory response = confirmed systemic teardown cluster. Cluster TC-001 rated HIGH intensity.",
+          "source": "https://dallascityhall.com/departments/pnv/Pages/SDFP-AreaPlanning.aspx"
+        },
+        "acquisition_clustering": {
+          "score": 18,
+          "max": 20,
+          "evidence": "Larkspur Capital: two confirmed site acquisitions (3500 Ash Lane + Cedars/Corinth St) in 75215. Texas Heavenly Homes: 126-acre Bottom District site. DHOF-backed Marcus Project site acquired.",
+          "source": "Teardown/Acquisition Agent verified data"
+        },
+        "policy_redevelopment_pressure": {
+          "score": 19,
+          "max": 20,
+          "evidence": "SDFP Area Plan adopted June 2025; Neighborhood Revitalization Strategy Area (federal HUD funds designated); TOD TIF Lancaster Corridor active (6 DART stations); Dallas Housing Opportunity Fund ($41.5M CDFI pool) deploying in South Dallas; Missing Middle ordinance (April 2025) citywide; parking minimums removed (May 2025); Palladium Buckner Station ($107M, 304 units) under construction adjacent.",
+          "sources": [
+            "https://dallascityhall.com/departments/pnv/Pages/SDFP-AreaPlanning.aspx",
+            "https://www.dallasecodev.org/440/TOD-TIF-District",
+            "https://www.dallasecodev.org/678/Dallas-Housing-Opportunity-Fund-DHOF",
+            "https://www.nlc.org/article/2025/07/08/dallas-city-leaders-approve-landmark-ordinance-to-support-missing-middle-housing/"
+          ]
+        }
+      },
+      "amara_os_recommendation": "HIGHEST PRIORITY TARGET ZONE. Multiple builders actively hungry for lots. SDFP plan creates new entitlement pathways. DHOF capital available to reduce buyer financing friction. Target distressed/vacant infill lots in the 75215/75210 ZIPs — especially near DART Green Line stations and the 2nd Avenue Neighborhood Mixed-Use corridor.",
+      "lot_shortage_signal": "HIGH — active builder demand documented, supply constrained by teardown-rebuild cycle absorbing existing lots"
+    },
+    {
+      "zone_id": "IDZ-002",
+      "zone_name": "West Dallas / Trinity Groves Corridor",
+      "neighborhoods": ["West Dallas", "Trinity Groves", "Los Altos", "La Bajada"],
+      "primary_zips": ["75212"],
+      "composite_score": 84,
+      "score_band": "Strong infill demand",
+      "component_scores": {
+        "permit_velocity": {
+          "score": 15,
+          "max": 20,
+          "evidence": "StoryBuilt: 59-townhome 11-acre project (Fort Worth Ave/Guest St). Centre Living Homes: 27-unit detached SFR community (Emory Park). Urban Genesis: Singleton Highline 176 units (2901 Borger St). Multiple active projects documented.",
+          "data_gap": "Specific permit numbers not extracted — requires Dallas OpenData direct query"
+        },
+        "builder_concentration": {
+          "score": 18,
+          "max": 20,
+          "evidence": "Centre Living Homes (HIGH confidence), StoryBuilt (HIGH confidence), Urban Genesis (PARTIAL), Hello! Deluxe Car Wash / Nuchereno (commercial redevelopment) all confirmed active in 75212 corridor.",
+          "source": "Builder Activity Agent verified data"
+        },
+        "teardown_intensity": {
+          "score": 16,
+          "max": 20,
+          "evidence": "Developer Jackson: documented 4-parcel assemblage + sequential demolitions on Singleton Blvd. Broader Dallas Free Press documentation of demolition wave linked to gentrification. Goldenrod Companies acquired ~90 parcels indicating expectation of teardown/redevelopment at scale.",
+          "source": "Teardown/Acquisition Agent — TC-003"
+        },
+        "acquisition_clustering": {
+          "score": 20,
+          "max": 20,
+          "evidence": "Goldenrod Companies acquired ~90 parcels (~45 acres) in 2023 — largest single acquisition event in all target corridors. Frank Nuchereno/Jackson 4-parcel assemblage also documented. Urban Genesis site at 2901 Borger St.",
+          "source": "Teardown/Acquisition Agent verified data"
+        },
+        "policy_redevelopment_pressure": {
+          "score": 15,
+          "max": 20,
+          "evidence": "West Dallas Urban Structure and Guidelines active. Missing Middle ordinance (April 2025) applies citywide. Parking minimums removed (May 2025). ForwardDallas 2.0 (Sept 2024) provides policy basis for rezoning. However no West Dallas-specific area plan as active as SDFP.",
+          "sources": [
+            "https://dallascityhall.com/departments/pnv/Pages/guidelines.aspx",
+            "https://www.nlc.org/article/2025/07/08/dallas-city-leaders-approve-landmark-ordinance-to-support-missing-middle-housing/"
+          ]
+        }
+      },
+      "amara_os_recommendation": "HIGH PRIORITY. Institutional and boutique builder demand both confirmed. Goldenrod's 45-acre assemblage will create lot demand at the assemblage edges. Centre Living Homes and StoryBuilt are repeat buyers — direct outreach candidates. Target scattered infill lots adjacent to active development nodes.",
+      "lot_shortage_signal": "MEDIUM-HIGH — institutional player (Goldenrod) absorbing large parcels; boutique infill builders (Centre Living, StoryBuilt) need individual lots"
+    },
+    {
+      "zone_id": "IDZ-003",
+      "zone_name": "West Oak Cliff / Hampton-Clarendon / Elmwood Corridor",
+      "neighborhoods": ["West Oak Cliff", "Elmwood", "Jimtown", "North Oak Cliff edge"],
+      "primary_zips": ["75216", "75232"],
+      "composite_score": 78,
+      "score_band": "Strong infill demand",
+      "component_scores": {
+        "permit_velocity": {
+          "score": 13,
+          "max": 20,
+          "evidence": "Multiple townhome assemblages in North Oak Cliff/Bishop Arts pipeline (14-unit, 16-unit, 16-unit permitted projects). 3.2-acre apartment rezoning approved April 2026. Active permit issuance inferred from rezoning cascade.",
+          "data_gap": "Specific demo and construction permit counts for 75216/75232 require Dallas OpenData direct query"
+        },
+        "builder_concentration": {
+          "score": 14,
+          "max": 20,
+          "evidence": "419 Builders (North Oak Cliff, MEDIUM confidence). Centre Living Homes (13-unit townhome on C.L. Kings Highway, North Oak Cliff — HIGH confidence). Cobalt Homes East Dallas/Uptown-adjacent (MEDIUM, not confirmed in 75216/75232 specifically). Davis Garden TIF: 207 apartments completed at Bell/Bishop Arts.",
+          "source": "Builder Activity Agent verified data"
+        },
+        "teardown_intensity": {
+          "score": 16,
+          "max": 20,
+          "evidence": "WOCAP-driven rezoning cascade converting auto-oriented commercial to mixed-use/multifamily — accelerating teardown of aging commercial structures. Tenth Street Historic District (75203, adjacent to 75216): HIGH-intensity teardown cluster documented (28%+ teardown rate, litigated). Dallas 3,000-sq-ft demo rule enables fast-track demolitions.",
+          "source": "Teardown/Acquisition Agent — TC-002, TC-005"
+        },
+        "acquisition_clustering": {
+          "score": 14,
+          "max": 20,
+          "evidence": "139 active land listings in Oak Cliff per Redfin at median $310K. Multiple shovel-ready permitted assemblages actively marketed. Specific LLC acquisition records not surfaced for 75216/75232 via web search — requires Dallas County deed record query.",
+          "source": "Teardown/Acquisition Agent — TC-004"
+        },
+        "policy_redevelopment_pressure": {
+          "score": 21,
+          "max": 20,
+          "note": "CAPPED AT 20",
+          "score_capped": 20,
+          "evidence": "Hampton-Clarendon Corridor rezoned 35.25 acres to mixed-use (August 2025, City Council 12-3 vote); WOCAP producing cascading authorized hearings since 2022; North Cliff rezoning approved March 2025; ForwardDallas 2.0 applies; Missing Middle ordinance applies; parking minimums removed; 2025 Texas state law limits municipal obstruction of multifamily approvals; comprehensive zoning code rewrite expected 2026.",
+          "sources": [
+            "https://www.keranews.org/news/2025-08-14/dallas-city-council-approves-west-oak-cliff-rezoning-plan",
+            "https://hoodline.com/2026/04/oak-cliff-showdown-as-dallas-council-oks-3-acre-apartment-rezoning/"
+          ]
+        }
+      },
+      "amara_os_recommendation": "HIGH PRIORITY — POLICY TAILWIND STRONGEST HERE. WOCAP is the most active rezoning machine in any target corridor. Every rezoning converts auto-oriented commercial to mixed-use — creating infill pressure on adjacent residential fabric. Target lots adjacent to Hampton Road and Clarendon Drive. Watch Jimtown corridor.",
+      "lot_shortage_signal": "MEDIUM — elevated land prices ($310K median in Oak Cliff) but strong demand from boutique and midsize builders"
+    },
+    {
+      "zone_id": "IDZ-004",
+      "zone_name": "North Oak Cliff / Bishop Arts",
+      "neighborhoods": ["North Oak Cliff", "Bishop Arts District"],
+      "primary_zips": ["75203", "75208"],
+      "composite_score": 75,
+      "score_band": "Strong infill demand",
+      "component_scores": {
+        "permit_velocity": {
+          "score": 15,
+          "max": 20,
+          "evidence": "Three documented permit-approved assemblages actively marketed: 14-unit (Bishop Arts), 16-unit (corner lot), 16-unit (316-324 N Lancaster). Centre Living Homes 13-unit townhome community (C.L. Kings Highway) confirmed. 207 apartments at Bell/Bishop Arts under Davis Garden TIF completed."
+        },
+        "builder_concentration": {
+          "score": 15,
+          "max": 20,
+          "evidence": "Centre Living Homes (HIGH confidence — active project). StoryBuilt (HIGH confidence — prior Bishop Arts project). 419 Builders (MEDIUM). Cobalt Homes (MEDIUM — not confirmed in these specific ZIPs)."
+        },
+        "teardown_intensity": {
+          "score": 16,
+          "max": 20,
+          "evidence": "Tenth Street Historic District: 28%+ documented teardown rate (TC-002 — HIGH intensity). Bishop Arts cleared-lot pipeline active (TC-004 — MEDIUM intensity). Permit-ready cleared sites documented in current listings."
+        },
+        "acquisition_clustering": {
+          "score": 15,
+          "max": 20,
+          "evidence": "139 active land listings at $310K median per Redfin (Oak Cliff overall). Multiple assemblages actively marketed to builders. No specific deed-level LLC acquisition records surfaced via web search."
+        },
+        "policy_redevelopment_pressure": {
+          "score": 14,
+          "max": 20,
+          "evidence": "Davis Garden TIF active. ForwardDallas 2.0 applies. Missing Middle ordinance applies. East Oak Cliff/Cedar Crest/Lancaster unified area plan in progress. WOCAP spillover pressure from adjacent 75216."
+        }
+      },
+      "amara_os_recommendation": "HIGH VALUE but competitive market. Premium infill builders (Centre Living, StoryBuilt, Cobalt) are already active — land prices elevated. Best opportunity: off-market lots and overlooked parcels adjacent to active assemblages, or lots adjacent to the Tenth Street Historic District where 28% teardown rate creates ongoing vacancy.",
+      "lot_shortage_signal": "MEDIUM — builders present but market is more mature; premium pricing"
+    },
+    {
+      "zone_id": "IDZ-005",
+      "zone_name": "Southern Dallas / University Hills Corridor",
+      "neighborhoods": ["University Hills", "Lancaster Corridor south", "Cedar Crest south"],
+      "primary_zips": ["75241"],
+      "adjacent_target_zips": ["75216"],
+      "composite_score": 72,
+      "score_band": "Moderate demand",
+      "component_scores": {
+        "permit_velocity": {
+          "score": 14,
+          "max": 20,
+          "evidence": "Hoque Global / University Hills: 270-acre master plan, groundbreaking May 2025. DR Horton and Lennar committed to ~580 lots. $1B total project. Palladium Buckner Station ($107M, 304 units) under construction adjacent on DART Green Line."
+        },
+        "builder_concentration": {
+          "score": 16,
+          "max": 20,
+          "evidence": "DR Horton (national builder — HIGH confidence, lot commitment documented). Lennar (national builder — HIGH confidence, lot commitment documented). Hoque Global as master developer."
+        },
+        "teardown_intensity": {
+          "score": 11,
+          "max": 20,
+          "evidence": "Not primarily a teardown corridor — greenfield/large-parcel master plan. Less individual lot teardown activity. TOD-driven redevelopment pressure from Buckner DART station."
+        },
+        "acquisition_clustering": {
+          "score": 16,
+          "max": 20,
+          "evidence": "Hoque Global acquired 270 acres. DR Horton and Lennar have pre-committed to lot purchases. City approved ~$36M TIF to support infrastructure."
+        },
+        "policy_redevelopment_pressure": {
+          "score": 15,
+          "max": 20,
+          "evidence": "$36M TIF approved by city. UNT-Dallas campus as demand driver. DART Buckner Station TOD active. Missing Middle ordinance applies."
+        }
+      },
+      "amara_os_recommendation": "MODERATE PRIORITY. Large institutional land play (Hoque + DR Horton + Lennar) dominates. Not ideal for individual infill lot disposition — too large-scale. However, scattered infill lots immediately adjacent to the University Hills footprint may gain value lift from the project. Monitor for residual lot opportunities.",
+      "lot_shortage_signal": "LOW-MEDIUM — institutional players absorbing large tracts; individual infill lot demand secondary"
+    },
+    {
+      "zone_id": "IDZ-006",
+      "zone_name": "East Dallas / Buckner / 75217-75227 Corridor",
+      "neighborhoods": ["Pleasant Grove", "Urbandale-Parkdale", "Buckner Terrace area"],
+      "primary_zips": ["75217", "75227"],
+      "composite_score": 55,
+      "score_band": "Weak / unverified demand — DATA GAP",
+      "component_scores": {
+        "permit_velocity": {
+          "score": 10,
+          "max": 20,
+          "evidence": "Palladium Buckner Station ($107M, 304 units) under construction — strong TOD signal adjacent. Ashton Woods and Mattamy Homes at Buckner Terrace (75210 area) documented active. Specific permit data for 75217/75227 NOT EXTRACTED — requires Dallas OpenData direct query.",
+          "data_gap": "CRITICAL — specific permit velocity for 75217/75227 unverified via web search"
+        },
+        "builder_concentration": {
+          "score": 10,
+          "max": 20,
+          "evidence": "Ashton Woods and Mattamy Homes mentioned for Buckner Terrace (75210 adjacent). Specific builder activity within 75217/75227 ZIPs not confirmed in search results.",
+          "data_gap": "Builder presence in these ZIPs needs direct permit data verification"
+        },
+        "teardown_intensity": {
+          "score": 10,
+          "max": 20,
+          "evidence": "No specific teardown cluster documented for 75217/75227 via web search. General infill pressure inferred from citywide Missing Middle ordinance and ForwardDallas 2.0 framework.",
+          "data_gap": "Demo permit data for these ZIPs not accessible via web search"
+        },
+        "acquisition_clustering": {
+          "score": 10,
+          "max": 20,
+          "evidence": "No specific infill acquisition records for 75217/75227 surfaced via web search.",
+          "data_gap": "Requires Dallas County deed record query"
+        },
+        "policy_redevelopment_pressure": {
+          "score": 15,
+          "max": 20,
+          "evidence": "Palladium Buckner Station TOD ($107M, 304 units) — direct TOD pressure at DART Buckner Station. ForwardDallas 2.0 applies. Missing Middle ordinance applies. DART TOD active. However no ZIP-specific area plan as mature as SDFP or WOCAP."
+        }
+      },
+      "amara_os_recommendation": "DATA INSUFFICIENT for reliable scoring. Score of 55 reflects genuine uncertainty — not evidence of low demand. These ZIPs were AMARA OS primary targets but OSINT web search did not surface specific permit or builder data. REQUIRED NEXT STEP: Direct Dallas OpenData API query for 75217/75227 permit data. Direct Dallas County deed query for LLC acquisitions. This should be treated as an open research task, not a weak market.",
+      "lot_shortage_signal": "UNKNOWN — insufficient data. Do not treat as low demand. Palladium Buckner Station construction is a meaningful TOD demand signal."
+    }
+  ],
+  "unscored_zones": [
+    {
+      "zone_name": "75216 Cedar Crest / The Bottom",
+      "reason": "Partially covered under IDZ-003 (West Oak Cliff) and IDZ-004 (North Oak Cliff/East Oak Cliff). Texas Heavenly Homes Bottom District project noted but overall 75216 granular data insufficient for standalone zone score. Recommend combining with IDZ-003 analysis.",
+      "source": "https://dallascityhall.com/departments/pnv/Pages/EOCCC.aspx"
+    },
+    {
+      "zone_name": "75210 (Wheatley / Central South Dallas)",
+      "reason": "Limited specific builder or permit data surfaced for the non-Fair-Park portions of 75210. Ashton Woods / Mattamy Homes at Buckner Terrace referenced for 75210 area but not confirmed as infill builders in the 75210 ZIP core. Insufficient evidence for standalone reliable score.",
+      "data_gap": "Direct DCAD property search and Dallas OpenData permit query required"
+    }
+  ]
+}

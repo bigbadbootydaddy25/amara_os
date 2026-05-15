@@ -6,3 +6,4 @@ data/polk-county-fl/raw/*.csv
 
 # OpenClaw failed-message queue (runtime state)
 data/openclaw-failed-queue.json
+node_modules/

@@ -1,0 +1,52 @@
+{
+  "county": "Collin",
+  "state": "TX",
+  "fips": "48085",
+
+  "ccad": {
+    "baseUrl": "https://www.collincad.org",
+    "searchEndpoint": "/propertysearch",
+    "apiEndpoint":    "/api/v1/properties"
+  },
+
+  "clerk": {
+    "baseUrl": "https://countyclerk.collincountytx.gov",
+    "searchEndpoint": "/official-records/search"
+  },
+
+  "taxAuthority": {
+    "baseUrl": "https://www.collincountytx.gov",
+    "delinquentPath": "/tax/Pages/delinquent-accounts.aspx"
+  },
+
+  "buildingDept": {
+    "baseUrl": "https://www.collincountytx.gov",
+    "searchPath": "/development_services/Pages/permit-search.aspx",
+    "eTraKit":    "https://etrakit.collincountytx.gov"
+  },
+
+  "pipeline": {
+    "rateLimitMs":   1200,
+    "maxRetries":    3,
+    "retryBackoffMs":2000,
+    "timeoutMs":     30000,
+    "batchSize":     50,
+    "outputDir":     "./output",
+    "logLevel":      "info"
+  },
+
+  "platExpiration": {
+    "preliminaryPlatMaxAgeMonths": 24,
+    "warningWindowMonths":          3,
+    "dormancyThresholdYears":       5,
+    "lookbackYears":               10
+  },
+
+  "scoring": {
+    "minCompositeScore": 70
+  },
+
+  "agents": {
+    "00": { "id": "intake",                    "enabled": true, "module": "./agents/collin-county-tx/00-intake" }
+  }
+}

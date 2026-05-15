@@ -1,0 +1,56 @@
+{
+  "county": "Clark",
+  "state": "NV",
+  "fips": "32003",
+
+  "gis": {
+    "baseUrl": "https://gis.clarkcountynv.gov/arcgis/rest/services",
+    "parcelLayer": "CCRP/Parcels/MapServer/0",
+    "zoningLayer":  "CCRP/Zoning/MapServer/0",
+    "permitLayer":  "Development/BuildingPermits/MapServer/0"
+  },
+
+  "assessor": {
+    "baseUrl": "https://assessor.clarkcountynv.gov"
+  },
+
+  "recorder": {
+    "baseUrl": "https://recorder.clarkcountynv.gov",
+    "searchEndpoint": "/FindDocuments/Search"
+  },
+
+  "taxAuthority": {
+    "baseUrl": "https://www.clarkcountynv.gov",
+    "delinquentPath": "/government/departments/finance/property_tax/delinquent_tax"
+  },
+
+  "buildingDept": {
+    "baseUrl": "https://www.clarkcountynv.gov",
+    "searchPath": "/BuildingPermits/Search"
+  },
+
+  "pipeline": {
+    "rateLimitMs":   1200,
+    "maxRetries":    3,
+    "retryBackoffMs":2000,
+    "timeoutMs":     30000,
+    "batchSize":     50,
+    "outputDir":     "./output",
+    "logLevel":      "info"
+  },
+
+  "platExpiration": {
+    "preliminaryPlatMaxAgeMonths": 24,
+    "warningWindowMonths":          3,
+    "dormancyThresholdYears":       5,
+    "lookbackYears":               10
+  },
+
+  "scoring": {
+    "minCompositeScore": 70
+  },
+
+  "agents": {
+    "00": { "id": "intake",                    "enabled": true, "module": "./agents/clark-county-nv/00-intake" }
+  }
+}

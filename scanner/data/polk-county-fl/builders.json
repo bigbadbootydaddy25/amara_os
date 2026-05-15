@@ -1,0 +1,74 @@
+{
+  "_note": "CONFIRMED CONTACTS ONLY. Do not add any builder without a verified direct contact on file. No estimated or inferred buy-box data.",
+  "_last_updated": null,
+  "builders": [
+    {
+      "name": "DR Horton",
+      "division": "Lakeland FL",
+      "contact": "Blake Arnold",
+      "email": "BDArnold@drhorton.com",
+      "confirmed": true,
+      "buy_box": {
+        "target_markets": ["Polk County FL"],
+        "min_lots": 50,
+        "max_lots": 300,
+        "preferred_zoning": ["RSF", "PUD"],
+        "price_per_lot_min": 40000,
+        "price_per_lot_max": 80000,
+        "utility_requirement": "water + sewer at street",
+        "will_take_reinstatement": true,
+        "lot_count_sweet_spot": 100,
+        "avg_close_timeline_days": 75,
+        "active_appetite": "HIGH"
+      }
+    },
+    {
+      "name": "Lennar",
+      "division": "Tampa FL",
+      "contact": "Brock Nicholas",
+      "email": "brock.nicholas@lennar.com",
+      "confirmed": true,
+      "buy_box": {
+        "target_markets": ["Polk County FL"],
+        "min_lots": 80,
+        "max_lots": 400,
+        "preferred_zoning": ["RSF", "PUD"],
+        "price_per_lot_min": 50000,
+        "price_per_lot_max": 90000,
+        "utility_requirement": "water + sewer at street",
+        "will_take_reinstatement": false,
+        "lot_count_sweet_spot": 150,
+        "avg_close_timeline_days": 105,
+        "active_appetite": "HIGH"
+      }
+    },
+    {
+      "name": "Tri Pointe Homes",
+      "division": "Southeast",
+      "contact": "Max Perlman",
+      "email": "max.perlman@tripointehomes.com",
+      "confirmed": true,
+      "buy_box": {
+        "target_markets": ["Polk County FL"],
+        "min_lots": 50,
+        "max_lots": 200,
+        "preferred_zoning": ["PUD"],
+        "price_per_lot_min": 55000,
+        "price_per_lot_max": 95000,
+        "utility_requirement": "water + sewer at street",
+        "will_take_reinstatement": false,
+        "lot_count_sweet_spot": 100,
+        "avg_close_timeline_days": 105,
+        "active_appetite": "MEDIUM"
+      }
+    },
+    {
+      "name": "Local Broker",
+      "contact": "T.R. Wyman III",
+      "email": null,
+      "role": "Polk County Land Broker",
+      "confirmed": true,
+      "buy_box": null
+    }
+  ]
+}

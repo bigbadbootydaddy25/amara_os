@@ -1,2 +1,8 @@
 output/*/
 !output/.gitkeep
+
+# Real parcel data — not for version control (PII, large files)
+data/polk-county-fl/raw/*.csv
+
+# OpenClaw failed-message queue (runtime state)
+data/openclaw-failed-queue.json

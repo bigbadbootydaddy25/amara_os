@@ -52,12 +52,12 @@ function parseArgs(argv) {
 // ---------------------------------------------------------------------------
 
 const AGENT_MODULES = {
-  '01': './agents/01-plat-expiration-scanner',
-  '02': './agents/02-distress-scanner',
-  '03': './agents/03-builder-demand-scanner',
-  '04': './agents/04-opportunity-scorer',
-  '05': './agents/05-quick-flip-filter',
-  '06': './agents/06-builder-buybox-profiler',
+  '01': './agents/polk-county-fl/01-plat-expiration-scanner',
+  '02': './agents/polk-county-fl/02-distress-scanner',
+  '03': './agents/polk-county-fl/03-builder-demand-scanner',
+  '04': './agents/polk-county-fl/04-opportunity-scorer',
+  '05': './agents/polk-county-fl/05-quick-flip-filter',
+  '06': './agents/polk-county-fl/06-builder-buybox-profiler',
 };
 
 function resolveAgentList(requested) {

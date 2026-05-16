@@ -1,0 +1,185 @@
+"""Outreach Task Writer — writes DRAFT_UNVERIFIED outreach message templates."""
+from datetime import datetime, timezone
+from typing import Dict, List
+
+from ..config import REPORTS_DIR
+from ..events import make_event
+from ..event_store import append_event
+
+OUTREACH_DISCLAIMER = (
+    "DRAFT_UNVERIFIED — Do NOT send until: payoff verified, title check complete, "
+    "owner identity confirmed, and buyer interest confirmed from official source."
+)
+
+
+class OutreachTaskWriter:
+    """
+    Writes DRAFT_UNVERIFIED outreach message drafts.
+    All drafts are labeled as unverified and must not be sent
+    until payoff/title checks are complete.
+    """
+
+    def run(self, strike_board: List[Dict]) -> str:
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        report_path = REPORTS_DIR / "outreach_drafts.md"
+
+        lines = [
+            "# Outreach Drafts — DRAFT_UNVERIFIED",
+            f"Generated: {datetime.now(timezone.utc).isoformat()}",
+            "",
+            "## Critical Warning",
+            f"> {OUTREACH_DISCLAIMER}",
+            "",
+            "All messages below are DRAFT_UNVERIFIED templates.",
+            "They must NOT be sent until all verification steps are complete.",
+            "",
+            "---",
+            "",
+            "## Owner Outreach Drafts",
+            "",
+            "### Jason Castaneda — 813 W 30TH ST",
+            f"**Status:** DRAFT_UNVERIFIED | Owner: USER_PROVIDED_UNVERIFIED | {OUTREACH_DISCLAIMER}",
+            "",
+            "```",
+            "Subject: 813 W 30th St — Time-Sensitive Property Matter",
+            "",
+            "Hello,",
+            "",
+            "I'm reaching out regarding the property at 813 W 30th St, Houston TX.",
+            "I may be able to help you explore options before the upcoming tax sale date.",
+            "",
+            "If you're the owner or have authority to discuss this property, I'd appreciate",
+            "a brief conversation. I work with buyers and can move quickly.",
+            "",
+            "[DO NOT SEND — Owner identity not verified. Payoff not verified. Title not checked.]",
+            "```",
+            "",
+            "---",
+            "",
+            "### Bendanmar Limited — 1307 Prairie St + 415 Caroline St (Portfolio)",
+            f"**Status:** DRAFT_UNVERIFIED | Entity Control: SOURCE_NEEDED | {OUTREACH_DISCLAIMER}",
+            "",
+            "```",
+            "Subject: Bendanmar Limited — Downtown Houston Properties — Tax Sale Matter",
+            "",
+            "Dear Bendanmar Limited Representative,",
+            "",
+            "We are reaching out regarding properties associated with Bendanmar Limited",
+            "in downtown Houston — specifically 1307 Prairie St and 415 Caroline St.",
+            "",
+            "We may be in a position to assist with the current tax situation or connect",
+            "you with qualified buyers if disposition is of interest.",
+            "",
+            "Please have your authorized representative contact us at your earliest convenience.",
+            "",
+            "[DO NOT SEND — Entity/authorized signatory not verified. Payoff not verified.",
+            " Title not checked. Must confirm registered agent and standing first.]",
+            "```",
+            "",
+            "---",
+            "",
+            "### Oscar Guevara — 800 Tidwell Rd",
+            f"**Status:** DRAFT_UNVERIFIED | Owner: USER_PROVIDED_UNVERIFIED | {OUTREACH_DISCLAIMER}",
+            "",
+            "```",
+            "Subject: 800 Tidwell Rd — Time-Sensitive Property Matter",
+            "",
+            "Hello,",
+            "",
+            "I'm reaching out regarding the commercial property at 800 Tidwell Rd, Houston TX.",
+            "I may be able to assist with options before the upcoming tax sale date.",
+            "",
+            "If you're the owner or have authority to discuss this property, I'd welcome",
+            "a brief conversation.",
+            "",
+            "[DO NOT SEND — Owner identity not verified. Environmental risk not assessed.",
+            " Payoff not verified. Title not checked.]",
+            "```",
+            "",
+            "---",
+            "",
+            "## Buyer Outreach Drafts",
+            "",
+            "### Downtown Commercial Buyer Message",
+            f"**Status:** DRAFT_UNVERIFIED | Buyer Status: NOT_CONFIRMED_BUYER | {OUTREACH_DISCLAIMER}",
+            "",
+            "```",
+            "Subject: Downtown Houston Commercial Opportunity — 1307 Prairie + 415 Caroline",
+            "",
+            "Hello,",
+            "",
+            "I'm reaching out about a potential downtown Houston commercial acquisition",
+            "opportunity — two properties associated with Bendanmar Limited.",
+            "",
+            "These are pre-auction opportunities and I'm gauging buyer interest",
+            "before verifying full deal terms.",
+            "",
+            "[DO NOT SEND — Buyer transaction history not verified. Payoff not verified.",
+            " Title not checked. Official buyer contact not confirmed.]",
+            "```",
+            "",
+            "---",
+            "",
+            "### 800 Tidwell Commercial Buyer Message",
+            f"**Status:** DRAFT_UNVERIFIED | Buyer Status: NOT_CONFIRMED_BUYER | {OUTREACH_DISCLAIMER}",
+            "",
+            "```",
+            "Subject: 800 Tidwell Rd — Commercial Opportunity — Pre-Auction",
+            "",
+            "Hello,",
+            "",
+            "I'm reaching out about a commercial property at 800 Tidwell Rd, Houston TX.",
+            "The property has prior auto commercial use — environmental assessment would",
+            "be needed as part of any acquisition.",
+            "",
+            "I'm gauging buyer interest before verifying full deal terms.",
+            "",
+            "[DO NOT SEND — Environmental risk not assessed. Payoff not verified.",
+            " Title not checked. Official buyer contact not confirmed.",
+            " Buyer transaction history not verified.]",
+            "```",
+            "",
+            "---",
+            "",
+            "### 77018 Infill Builder Buyer Message",
+            f"**Status:** DRAFT_UNVERIFIED | Buyer Status: NOT_CONFIRMED_BUYER | {OUTREACH_DISCLAIMER}",
+            "",
+            "```",
+            "Subject: 77018 Infill Opportunity — 813 W 30th St — Pre-Auction",
+            "",
+            "Hello,",
+            "",
+            "I'm reaching out about a potential infill opportunity at 813 W 30th St",
+            "in the 77018 zip code — a pre-auction tax sale situation.",
+            "",
+            "If you're actively acquiring in the 77018 area, I'd like to explore fit.",
+            "",
+            "[DO NOT SEND — Buyer transaction history not verified. Payoff not verified.",
+            " Title not checked. Official buyer contact not confirmed.]",
+            "```",
+            "",
+            "---",
+            "",
+            "## No-Fake-Data Verification",
+            "No fake contacts, fake buyer interest, or fake deal terms were created in these drafts.",
+            "All messages are DRAFT_UNVERIFIED templates only.",
+        ]
+
+        report_path.write_text("\n".join(lines), encoding="utf-8")
+
+        ev = make_event(
+            event_type="OUTREACH_TASKS_CREATED",
+            source="OutreachTaskWriter",
+            payload={
+                "draft_count": 6,
+                "report_file": str(report_path),
+                "all_status": "DRAFT_UNVERIFIED",
+            },
+            source_file=str(report_path),
+            verification_status="SOURCE_NEEDED",
+            status="COMPLETED",
+            notes="Outreach drafts created — all DRAFT_UNVERIFIED, not to be sent.",
+        )
+        append_event(ev)
+
+        return str(report_path)

@@ -1,0 +1,21 @@
+doc_number,doc_type,grantor,grantee,recording_date,amount,lender,legal_desc,source_url,file_path,notes,verified
+UNKNOWN,Warranty Deed or Quitclaim (acquisition),UNKNOWN,NANGUNORRI RAMESHWARRAO,UNKNOWN,UNKNOWN,N/A,TR 20A GARDEN HOME,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],No deed document found in public web search. Must search Harris County Clerk RP records by grantor/grantee name and legal description.,NO
+UNKNOWN,Deed of Trust (if any),NANGUNORRI RAMESHWARRAO,UNKNOWN TRUSTEE,UNKNOWN,UNKNOWN,UNKNOWN LENDER,TR 20A GARDEN HOME,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],Must search for any deed of trust filed against this property. High likelihood given property value.,NO
+UNKNOWN,Release of Lien (if any),UNKNOWN LENDER/TRUSTEE,NANGUNORRI RAMESHWARRAO,UNKNOWN,UNKNOWN,UNKNOWN,TR 20A GARDEN HOME,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],Must confirm any DOT has been released if paid off.,NO
+UNKNOWN,Abstract of Judgment (if any),UNKNOWN JUDGMENT CREDITOR,Against NANGUNORRI / NANGUNOORI variants,UNKNOWN,UNKNOWN,N/A,N/A,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],Search all name variants. Any judgment abstracted in Harris County attaches to all real property.,NO
+UNKNOWN,IRS Notice of Federal Tax Lien (if any),Internal Revenue Service,Against NANGUNORRI / NANGUNOORI variants,UNKNOWN,UNKNOWN,IRS,N/A,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],IRS liens are recorded at county clerk. Critical to search - IRS liens survive state tax sales.,NO
+UNKNOWN,Lis Pendens (if any - non-tax),UNKNOWN PLAINTIFF,Against NANGUNORRI / NANGUNOORI variants or property,UNKNOWN,UNKNOWN,N/A,TR 20A GARDEN HOME,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],Search for any lis pendens beyond the tax suit. Could indicate title dispute or other litigation.,NO
+UNKNOWN,Mechanic's Lien (if any),UNKNOWN CONTRACTOR,Against NANGUNORRI / NANGUNOORI variants,UNKNOWN,UNKNOWN,N/A,TR 20A GARDEN HOME,https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],Especially important for older multi-family property. Must search.,NO
+UNKNOWN,Deed (possible 2023 transfer),NANGUNORRI RAMESHWARRAO (presumed),UNKNOWN GRANTEE,~March 9 2023 (per real estate portals),UNDISCLOSED,N/A,TR 20A GARDEN HOME (presumed),https://cclerk.hctx.net/applications/websearch/RP.aspx,downloads/[NOT RETRIEVED],"CRITICAL: Third-party real estate portals show a sale event ~March 9 2023. Must determine if a deed was recorded, and who the grantee is. If recorded, NANGUNORRI may no longer own the property.",NO
+UNKNOWN,Tax Suit Documents - Cause 201812599,Harris County / Taxing Entities,Against NANGUNORRI RAMESHWARRAO,Multiple,N/A,N/A,TR 20A GARDEN HOME,https://www.hcdistrictclerk.com/edocs/public/search.aspx,downloads/[NOT RETRIEVED],Full case docket including petition, service, answer (if any), judgment, order of sale.,NO
+,,,,,,,,,,,
+SEARCH INSTRUCTIONS FOR HARRIS COUNTY CLERK,,,,,,,,,,
+"URL: https://cclerk.hctx.net/applications/websearch/RP.aspx",,,,,,,,,,
+"Step 1: Select Grantor search",,,,,,,,,,
+"Step 2: Enter NANGUNORRI RAMESHWARRAO (no punctuation, last name first)",,,,,,,,,,
+"Step 3: Set date range 2000 to present",,,,,,,,,,
+"Step 4: Repeat for NANGUNOORI RAMESHWAR and all name variants",,,,,,,,,,
+"Step 5: Search by Grantee for same name variants",,,,,,,,,,
+"Step 6: Search by legal description TR 20A GARDEN HOME",,,,,,,,,,
+"Step 7: Search by property address 1516 W 34TH",,,,,,,,,,
+"Step 8: Download and index all documents found",,,,,,,,,,

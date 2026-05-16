@@ -1,0 +1,38 @@
+source_name,url,search_term_used,result_status,data_retrieved,timestamp,notes
+HCAD Real Property Records,https://public.hcad.org/records/details.asp?acct=0610390000020,Account 0610390000020,HTTP 403 BLOCKED,NONE,2026-05-16,Requires browser/manual access at hcad.org/property-search
+HCAD Property Search Portal,https://hcad.org/property-search/property-search,1516 W 34TH ST / 061-039-000-0020,HTTP 403 BLOCKED,NONE,2026-05-16,Must search manually by account or address
+Harris County Tax Office - Sale Detail,https://www.hctax.net/property/listings/saledetail?account=0610390000020,Account 0610390000020,HTTP 403 BLOCKED,NONE,2026-05-16,Direct URL confirmed in Google search results; must access manually
+Harris County Tax Office - Tax Sale Listing,https://www.hctax.net/Property/listings/taxsalelisting,General listing search,HTTP 403 BLOCKED,URL only,2026-05-16,URL confirmed via Google; property appears in listing
+Harris County Clerk - Real Property,https://cclerk.hctx.net/applications/websearch/RP.aspx,NANGUNORRI / 1516 W 34TH,HTTP 403 BLOCKED,NONE,2026-05-16,Must access via browser; search grantor/grantee without punctuation
+Harris County District Clerk,https://www.hcdistrictclerk.com/edocs/public/search.aspx,Cause 201812599 / NANGUNORRI,HTTP 403 BLOCKED,NONE,2026-05-16,Search by cause number 201812599
+Harris County Civil Court Search,https://www.cclerk.hctx.net/applications/websearch/CourtSearch.aspx?CaseType=Civil,NANGUNORRI RAMESHWARRAO,HTTP 403 BLOCKED,NONE,2026-05-16,Search by party name all variants
+Harris County Probate,https://www.cclerk.hctx.net/Probate.aspx,NANGUNORRI / NANGUNOORI / RAMESHWAR,NOT SEARCHED,NONE,2026-05-16,Manual search required; call 713-274-6390
+Harris County JP Court,https://jpwebsite.harriscountytx.gov/FindMyCase/search.jsp,NANGUNORRI / 1516 W 34TH,NOT SEARCHED,NONE,2026-05-16,Search eviction and small claims cases
+CountyTaxSaleApp.org,https://countytaxsaleapp.org/harris-county-tax-sales,061-039-000-0020 / 201812599,HTTP 403 BLOCKED,NONE,2026-05-16,Third-party tax sale aggregator; manual access required
+Precinct 1 Constable Tax Sales,https://pct1constable.net/divisions/civil-process/civil-executions/tax-sales/,1516 W 34TH / 201812599,HTTP 403 BLOCKED,NONE,2026-05-16,Manual access required
+Harris County Records Portal,https://records.harriscountytx.gov/property-records,1516 W 34TH / 061-039-000-0020,HTTP 403 BLOCKED,NONE,2026-05-16,Manual access required
+CourthouseDirect.com,https://www.courthousedirect.com/propertysearch/texas/harris,NANGUNORRI / 0610390000020,HTTP 403 BLOCKED,NONE,2026-05-16,Subscription service; manual access required
+PropertyShark,https://www.propertyshark.com/mason/tx/Harris-County/Property-Search,1516 W 34TH / 0610390000020,HTTP 403 BLOCKED,NONE,2026-05-16,Subscription service; manual access required
+Trellis.Law - Harris County,https://trellis.law/coverage/texas/harris,NANGUNORRI / NANGUNOORI,HTTP 403 BLOCKED,NONE,2026-05-16,Case search portal; search all name variants
+HAR.com MLS Listing,https://www.har.com/homedetail/1516-w-34th-st-1-houston-tx-77018/3104131,1516 W 34th St 1 Houston TX,HTTP 403 BLOCKED,NONE,2026-05-16,Houston Association of Realtors listing
+Redfin Property Listing,https://www.redfin.com/TX/Houston/1516-W-34th-St-77018/unit-1/home/29885602,1516 W 34th St Unit 1 Houston TX,HTTP 403 BLOCKED,NONE,2026-05-16,MLS listing with sale history
+Zillow Property Listing,https://www.zillow.com/homedetails/1516-W-34th-St-APT-1-Houston-TX-77018/27846978_zpid/,1516 W 34th St APT 1 Houston TX,HTTP 403 BLOCKED,NONE,2026-05-16,Sale date ~March 9 2023 referenced in search snippet
+Trulia Property Listing,https://www.trulia.com/p/tx/houston/1516-w-34th-st-1-houston-tx-77018--2434384098,1516 W 34th St #1 Houston TX 77018,HTTP 403 BLOCKED,NONE,2026-05-16,MLS# 53304123
+Apartments.com,https://www.apartments.com/1516-w-34th-st-houston-tx/70g4xtw/,1516 W 34th St Houston TX,HTTP 403 BLOCKED,NONE,2026-05-16,Confirms multi-unit apartment community
+Greenville County SC - Real Property,https://www.greenvillecounty.org/appsAS400/RealProperty/,344 Claybrooke Dr Greer SC 29650,HTTP 403 BLOCKED,NONE,2026-05-16,SC owner address verification - manual required
+Greenville County SC - ROD,https://www.greenvillecounty.org/rod/searchrecords.aspx,344 Claybrooke Dr / NANGUNOORI,HTTP 403 BLOCKED,NONE,2026-05-16,Deed records for SC address
+Texas SOS SOSDirect,https://www.sos.state.tx.us/corp/sosda/index.shtml,NANGUNOORI / NANGUNORRI / RAMESHWAR RAO,HTTP 403 BLOCKED,NONE,2026-05-16,Entity search for any LLC/corp in deed chain
+Houston Permitting Center,https://www.houstonpermittingcenter.org/community-code-enforcement,1516 W 34TH ST / 0610390000020,HTTP 403 BLOCKED,NONE,2026-05-16,Code enforcement search; call 832-394-8880
+HarrisRecords.us,https://harrisrecords.us/property-records,1516 W 34TH / NANGUNORRI,HTTP 403 BLOCKED,NONE,2026-05-16,Third-party aggregator
+Justex.net - Tax Master Court,https://www.justex.net/court/555,201812599,HTTP 403 BLOCKED,NONE,2026-05-16,Harris County Tax Master court docket
+PACER - Southern District TX Bankruptcy,https://pacer.uscourts.gov/file-case/court-cmecf-lookup/court/TXSBK,NANGUNORRI / NANGUNOORI / RAMESHWAR,NOT SEARCHED,NONE,2026-05-16,Requires PACER account and login; call 713-250-5500
+PACER Case Locator,https://pcl.uscourts.gov/pcl/pages/search/findParty.jsf,All name variants,NOT SEARCHED,NONE,2026-05-16,Free name search for bankruptcy cases nationally
+IRS Automated Lien System (via Harris Clerk),N/A - through cclerk.hctx.net,NANGUNORRI / NANGUNOORI,NOT ACCESSIBLE,NONE,2026-05-16,Federal tax liens recorded at county clerk; search RP records
+WebSearch - Property General,Google/Bing Search,1516 W 34th Houston TX 77018 Garden Home HCAD,PARTIAL DATA,Property size/year/type confirmed,2026-05-16,Built 1950; multi-family; HCAD acct confirmed
+WebSearch - Owner Name,Google/Bing Search,NANGUNORRI RAMESHWARRAO OR NANGUNOORI RAMESHWAR Houston Texas,NO DIRECT HITS,NONE,2026-05-16,No web presence found for owner name
+WebSearch - Cause Number,Google/Bing Search,201812599 Harris County tax suit,NO DIRECT HITS,NONE,2026-05-16,Cause number not indexed publicly
+WebSearch - Tax Sale Listing,Google/Bing Search,0610390000020 OR 061-039-000-0020 Harris County tax sale,URL CONFIRMED,hctax.net URL confirmed,2026-05-16,Property in Precinct 1 tax sale inventory confirmed by URL
+WebSearch - Bankruptcy,Google/Bing Search,Rameshwar Nangunoori bankruptcy Southern District Texas,NO RESULTS,NONE,2026-05-16,Absence of result NOT confirmation of no bankruptcy
+WebSearch - IRS Lien,Google/Bing Search,NANGUNORRI NANGUNOORI IRS federal tax lien Texas,NO RESULTS,NONE,2026-05-16,Absence of result NOT confirmation of no lien
+WebSearch - SC Property,Google/Bing Search,344 Claybrooke Dr Greer SC 29650 owner Nangunoori,PARTIAL DATA,Property data retrieved; owner not confirmed,2026-05-16,3 bed/2.5 bath; parcel 0533.23-01-129.00; tax assessment data only
+WebSearch - March 2023 Sale,Google/Bing Search,1516 W 34th Houston TX sold March 2023 owner,PARTIAL DATA,Sale date ~March 9 2023 referenced,2026-05-16,Non-disclosure state; price not available; new owner unknown

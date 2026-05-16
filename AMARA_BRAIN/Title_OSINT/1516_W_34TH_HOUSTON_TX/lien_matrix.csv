@@ -1,0 +1,19 @@
+lien_type,lienholder,amount,recording_date,doc_number,status,extinguished_by_tax_sale,source,verified,priority,notes
+Ad Valorem Tax Lien - Years 2016-2023,Harris County / Houston ISD / Other Taxing Entities,$188872.14+ (accruing daily),Unknown (liens attach Jan 1 each tax year),201812599 (suit number),ACTIVE - In Tax Sale Inventory,YES - Superior lien; tax sale extinguishes,Task data / hctax.net URL,UNVERIFIED - hctax.net blocked,FIRST/SUPERIOR,Accruing penalty + interest + collection fees daily. Get exact payoff from Harris County Tax Office: 713-274-8120
+Deed of Trust / Mortgage #1,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,POSSIBLY NOT - depends on priority date,Harris County Clerk RP search required,NOT FOUND,UNKNOWN,Must search Harris County Clerk RP records for any deed of trust. Absence here does NOT mean none exists.
+Deed of Trust / Mortgage #2 (if any),UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,POSSIBLY NOT,Harris County Clerk RP search required,NOT FOUND,UNKNOWN,Multiple liens possible on multi-family income property
+IRS Federal Tax Lien,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,NO - IRS liens survive tax sale unless IRS given notice,Harris County Clerk federal lien records search required,NOT FOUND,UNKNOWN,Critical: IRS liens recorded at county clerk. Must search under all name variants. IRS liens are NOT extinguished by state tax sale unless IRS given proper notice (26 USC 7425).
+Texas State Tax Lien,Texas Comptroller,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Likely NO,Harris County Clerk state lien records,NOT FOUND,UNKNOWN,Texas Comptroller files liens for franchise tax / sales tax delinquencies
+Abstract of Judgment #1,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Possibly YES (if junior to tax lien),Harris County Clerk RP search required,NOT FOUND,UNKNOWN,Any money judgment against owner filed in Harris County attaches to all real property in county
+Abstract of Judgment #2 (if any),UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Possibly YES,Harris County Clerk RP search required,NOT FOUND,UNKNOWN,Must search all name variants
+Mechanic's Lien,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Possibly YES,Harris County Clerk RP search required,NOT FOUND,UNKNOWN,Contractors / subcontractors on 1950 multi-family may have filed
+HOA Lien,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Possibly YES if HOA assessments present,HOA records / Harris County Clerk,NOT FOUND,UNKNOWN,HOA status for Garden Home subdivision unknown. Must confirm whether HOA exists and obtain status letter.
+Lis Pendens (non-tax),UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,NO - lis pendens is notice not lien,Harris County Clerk RP search required,NOT FOUND,UNKNOWN,Any civil suit that could affect title
+Code Enforcement Lien,City of Houston,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Possibly YES,City of Houston records,NOT FOUND,UNKNOWN,Multi-family 1950 building with deferred maintenance; high probability of code issues
+Environmental Lien,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,Possibly NO,TCEQ / EPA records,NOT SEARCHED,UNKNOWN,Phase I ESA recommended given property age and multi-family use
+,,,,,,,,,,,
+KEY RISK NOTES:,,,,,,,,,,,
+"1. IRS federal tax liens DO NOT automatically extinguish in a state tax sale. If IRS lien is on record, taxing entities must give IRS 25-day advance notice (IRC 7425). Failure to do so may allow IRS to redeem within 120 days.",,,,,,,,,,
+"2. The adjudged value ($877,917) vs. minimum bid ($192,085) gap suggests significant equity. This increases likelihood of active mortgage/deed of trust on the property.",,,,,,,,,,
+"3. Multi-family properties frequently have multiple encumbrances. A 1950-built building that has been delinquent on taxes since 2016 may have been used as collateral for multiple loans.",,,,,,,,,,
+"4. Tax sale does NOT clear all liens. Only ad valorem tax liens and junior liens are extinguished. Senior liens (including some federal liens) survive.",,,,,,,,,,

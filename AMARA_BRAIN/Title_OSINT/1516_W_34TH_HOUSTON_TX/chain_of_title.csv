@@ -1,0 +1,15 @@
+seq,doc_type,grantor,grantee,recording_date,execution_date,doc_number,amount,lender_beneficiary,legal_desc_match,release_found,source,notes,verified
+1,ACQUISITION DEED (UNKNOWN TYPE),UNKNOWN,NANGUNORRI RAMESHWARRAO,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,N/A,TR 20A GARDEN HOME (presumed),N/A,UNVERIFIED,No deed document found in public web search. Harris County Clerk search required.,NO
+2,AD VALOREM TAX SUIT FILING,Harris County / Taxing Entities,NANGUNORRI RAMESHWARRAO (Defendant),UNKNOWN (pre-2024),UNKNOWN,201812599,N/A,N/A,YES (inferred),N/A,UNVERIFIED - District Clerk blocked,"Tax cause #201812599 covering tax years 2016-2023. Filing date unknown from public data. Judgment date: 05/08/2024.",NO
+3,POSSIBLE DEED TRANSFER (UNCONFIRMED),NANGUNORRI RAMESHWARRAO (presumed grantor),UNKNOWN GRANTEE,~March 9 2023 (per real estate portals),UNKNOWN,UNKNOWN,UNDISCLOSED (TX non-disclosure),UNKNOWN,TR 20A GARDEN HOME (presumed),UNKNOWN,Third-party real estate portals (Zillow/Redfin) reference a sale event on ~March 9 2023. No deed document confirmed. Requires Harris County Clerk RP search.,NO
+4,TAX JUDGMENT LIEN,Harris County / Taxing Entities,Against: NANGUNORRI RAMESHWARRAO,05/08/2024,05/08/2024,UNKNOWN,~$188872.14+ accruing,N/A,YES (presumed),NO (judgment active),UNVERIFIED - hctax.net blocked,Tax judgment entered. Property placed in Precinct 1 tax sale inventory. Adjudged value $877917.,NO
+,,,,,,,,,,,,,
+NOTES FOR TITLE COMPANY:,,,,,,,,,,,,
+- Full 20+ year chain of title search required at Harris County Clerk Real Property Records (cclerk.hctx.net),,,,,,,,,,,,
+- Search ALL grantor/grantee name variants: NANGUNORRI RAMESHWARRAO / NANGUNORRI RAMESHWAR / RAMESHWAR RAO NANGUNOORI / RAMESHWAR NANGUNOORI / NANGUNOORI RAMESHWAR / RAM NANGUNOORI,,,,,,,,,,,,
+- Search by legal description: TR 20A GARDEN HOME,,,,,,,,,,,,
+- Search by property address: 1516 W 34TH ST,,,,,,,,,,,,
+- Search by HCAD account: 0610390000020,,,,,,,,,,,,
+- Confirm whether March 2023 sale deed was recorded and identify grantee,,,,,,,,,,,,
+- Confirm all deeds of trust / mortgages and whether released,,,,,,,,,,,,
+- Look for correction deeds / affidavits of heirship / probate instruments,,,,,,,,,,,,

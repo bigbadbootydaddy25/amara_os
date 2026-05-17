@@ -26,6 +26,41 @@ def _make_tools(episodic: EpisodicMemory, graph: GraphMemory) -> list[Any]:
         return "\n".join(f"{r['prompt']} → {r['response']}" for r in results) or "No results."
 
     @tool
+    def semantic_search(query: str) -> str:
+        """Search the Qdrant vector store for semantically similar past interactions."""
+        from memory.qdrant_memory import QdrantMemory
+        qm = QdrantMemory()
+        hits = qm.search(query)
+        return "\n".join(f"[{h['score']:.2f}] {h['text']}" for h in hits) or "No results."
+
+    @tool
+    def search_obsidian(query: str) -> str:
+        """Search the Obsidian vault for notes matching the query."""
+        from memory.claude_obsidian import ClaudeObsidian
+        co = ClaudeObsidian()
+        results = co.smart_search(query, limit=4)
+        return "\n\n".join(f"{r['title']}: {r['excerpt']}" for r in results) or "No notes found."
+
+    @tool
+    def create_obsidian_note(title_and_context: str) -> str:
+        """Create a new Obsidian note. Input format: 'Title|context text'."""
+        from memory.claude_obsidian import ClaudeObsidian
+        if "|" in title_and_context:
+            title, context = title_and_context.split("|", 1)
+        else:
+            title, context = title_and_context, title_and_context
+        co = ClaudeObsidian()
+        path = co.create_linked_note(title.strip(), context.strip())
+        return f"Note created: {path}"
+
+    @tool
+    def query_documents(question: str) -> str:
+        """Query ingested PDF/MD/TXT documents via the NotebookLLM RAG pipeline."""
+        from research.notebook_llm import NotebookLLM
+        nb = NotebookLLM()
+        return nb.query(question)
+
+    @tool
     def run_orchestrator(prompt: str) -> str:
         """Run the main orchestrator with the given prompt."""
         import asyncio
@@ -33,7 +68,15 @@ def _make_tools(episodic: EpisodicMemory, graph: GraphMemory) -> list[Any]:
         orch = Orchestrator()
         return asyncio.run(orch.run(prompt))
 
-    return [recall_memory, query_knowledge_graph, run_orchestrator]
+    return [
+        recall_memory,
+        query_knowledge_graph,
+        semantic_search,
+        search_obsidian,
+        create_obsidian_note,
+        query_documents,
+        run_orchestrator,
+    ]
 
 
 _REACT_TEMPLATE = """Answer the following questions as best you can. You have access to the following tools:

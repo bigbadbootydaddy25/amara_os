@@ -30,6 +30,12 @@ class Config:
     # Predictor
     improvement_loop_hour: int = int(os.getenv("IMPROVEMENT_LOOP_HOUR", "3"))
 
+    # Qdrant
+    qdrant_host: str = os.getenv("QDRANT_HOST", "localhost")
+    qdrant_port: int = int(os.getenv("QDRANT_PORT", "6333"))
+    qdrant_api_key: str = os.getenv("QDRANT_API_KEY", "")
+    qdrant_use_https: bool = os.getenv("QDRANT_USE_HTTPS", "false").lower() == "true"
+
     # API
     api_host: str = os.getenv("API_HOST", "0.0.0.0")
     api_port: int = int(os.getenv("API_PORT", "8000"))

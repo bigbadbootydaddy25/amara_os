@@ -1,4 +1,6 @@
 export type AmaraState = 'idle' | 'listening' | 'thinking' | 'speaking';
+
+export * from './contractor-intel';
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
 // ---------------------------------------------------------------------------

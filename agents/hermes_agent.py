@@ -3,11 +3,8 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
-from anthropic import Anthropic
-
-from config import cfg
+from core.llm_client import llm
 
 
 class Route(str, Enum):
@@ -25,23 +22,7 @@ class HermesResponse:
     sub_responses: dict[str, str] | None = None
 
 
-class HermesAgent:
-    """Multi-agent dispatcher.
-
-    Hermes classifies the intent of an incoming prompt and routes it to the
-    most appropriate agent (or fans out to several in parallel, then
-    synthesises a unified response).
-
-    Routing targets
-    ---------------
-    - orchestrator  → general chat / knowledge retrieval (core.Orchestrator)
-    - aegis         → memory-heavy reasoning / tool-use (agents.AegisAgent)
-    - notebook      → document Q&A (research.NotebookLLM)
-    - obsidian      → Obsidian vault operations (memory.ClaudeObsidian)
-    - parallel      → all agents in parallel, responses merged by Claude
-    """
-
-    _CLASSIFY_PROMPT = """You are a routing assistant for AmaraOS.
+_CLASSIFY_PROMPT = """You are a routing assistant for AmaraOS.
 Classify the user's intent into exactly one of these routes:
   orchestrator  – general conversation, knowledge retrieval, coding help
   aegis         – tasks requiring multi-step tool use or memory reasoning
@@ -53,12 +34,9 @@ Respond with only the route name, lowercase. No explanation.
 
 User prompt: {prompt}"""
 
-    def __init__(self) -> None:
-        self._claude = Anthropic(api_key=cfg.claude_api_key)
 
-    # ------------------------------------------------------------------
-    # Primary entry point
-    # ------------------------------------------------------------------
+class HermesAgent:
+    """Multi-agent dispatcher using Ollama for classification and synthesis."""
 
     def run(self, prompt: str, session_id: str = "default") -> HermesResponse:
         route = self._classify(prompt)
@@ -79,15 +57,7 @@ User prompt: {prompt}"""
     # ------------------------------------------------------------------
 
     def _classify(self, prompt: str) -> Route:
-        msg = self._claude.messages.create(
-            model=cfg.claude_model,
-            max_tokens=16,
-            messages=[{
-                "role": "user",
-                "content": self._CLASSIFY_PROMPT.format(prompt=prompt),
-            }],
-        )
-        raw = msg.content[0].text.strip().lower()
+        raw = llm.reason_fast(_CLASSIFY_PROMPT.format(prompt=prompt)).strip().lower()
         try:
             return Route(raw)
         except ValueError:
@@ -100,8 +70,7 @@ User prompt: {prompt}"""
     def _dispatch(self, route: Route, prompt: str, session_id: str) -> str:
         if route == Route.ORCHESTRATOR:
             from core.orchestrator import Orchestrator
-            orch = Orchestrator()
-            return asyncio.run(orch.run(prompt, session_id=session_id))
+            return asyncio.run(Orchestrator().run(prompt, session_id=session_id))
 
         if route == Route.AEGIS:
             from agents.aegis_agent import AegisAgent
@@ -109,8 +78,7 @@ User prompt: {prompt}"""
 
         if route == Route.NOTEBOOK:
             from research.notebook_llm import NotebookLLM
-            nb = NotebookLLM()
-            return nb.query(prompt)
+            return NotebookLLM().query(prompt)
 
         if route == Route.OBSIDIAN:
             return self._handle_obsidian(prompt)
@@ -122,12 +90,15 @@ User prompt: {prompt}"""
         co = ClaudeObsidian()
         lower = prompt.lower()
         if any(w in lower for w in ("create", "write", "new note", "add note")):
-            # Extract title from prompt via Claude
-            title = self._extract_title(prompt)
+            title = llm.reason_fast(
+                f"Extract a short note title (3-6 words) from this request. Return only the title.\n\n{prompt}"
+            ).strip().strip('"').strip("'")
             path = co.create_linked_note(title, prompt)
             return f"Created note: {path}"
         if any(w in lower for w in ("connect", "link", "suggest", "related")):
-            title = self._extract_title(prompt)
+            title = llm.reason_fast(
+                f"Extract a short note title (3-6 words) from this request. Return only the title.\n\n{prompt}"
+            ).strip().strip('"').strip("'")
             suggestions = co.suggest_connections(title)
             return "Related notes:\n" + "\n".join(f"- {s}" for s in suggestions)
         if "analyze" in lower or "analyse" in lower or "map" in lower:
@@ -140,17 +111,6 @@ User prompt: {prompt}"""
         if not results:
             return "No matching notes found."
         return "\n\n".join(f"**{r['title']}**\n{r['excerpt']}" for r in results)
-
-    def _extract_title(self, prompt: str) -> str:
-        msg = self._claude.messages.create(
-            model=cfg.claude_model,
-            max_tokens=32,
-            messages=[{
-                "role": "user",
-                "content": f"Extract a short note title (3-6 words) from this request. Return only the title.\n\n{prompt}",
-            }],
-        )
-        return msg.content[0].text.strip().strip('"').strip("'")
 
     # ------------------------------------------------------------------
     # Parallel fan-out
@@ -184,19 +144,10 @@ User prompt: {prompt}"""
         return HermesResponse(route=Route.PARALLEL, response=merged, sub_responses=sub)
 
     def _merge(self, original_prompt: str, sub: dict[str, str]) -> str:
-        responses_block = "\n\n".join(
-            f"[{name}]:\n{text}" for name, text in sub.items()
+        responses_block = "\n\n".join(f"[{name}]:\n{text}" for name, text in sub.items())
+        synthesis_prompt = (
+            f"Original question: {original_prompt}\n\n"
+            f"Multiple agents responded:\n\n{responses_block}\n\n"
+            "Synthesise these into a single, coherent answer."
         )
-        msg = self._claude.messages.create(
-            model=cfg.claude_model,
-            max_tokens=1024,
-            messages=[{
-                "role": "user",
-                "content": (
-                    f"Original question: {original_prompt}\n\n"
-                    f"Multiple agents responded:\n\n{responses_block}\n\n"
-                    "Synthesise these into a single, coherent answer."
-                ),
-            }],
-        )
-        return msg.content[0].text.strip()
+        return llm.think(synthesis_prompt, depth=3)

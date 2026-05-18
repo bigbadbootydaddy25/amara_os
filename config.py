@@ -7,7 +7,8 @@ from typing import Optional
 class Config:
     # Routing
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    ollama_model: str = os.getenv("OLLAMA_MODEL", "llama3")
+    ollama_model: str = os.getenv("OLLAMA_MODEL", "llama3.2")
+    ollama_embed_model: str = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
     claude_model: str = os.getenv("CLAUDE_MODEL", "claude-opus-4-7")
     claude_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
 

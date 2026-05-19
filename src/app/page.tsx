@@ -1,5 +1,5 @@
-import { NeuralInterface } from '@/components/neural/NeuralInterface';
+import { EnergyOSInterface } from '@/components/energy/EnergyOSInterface';
 
 export default function Home() {
-  return <NeuralInterface />;
+  return <EnergyOSInterface />;
 }

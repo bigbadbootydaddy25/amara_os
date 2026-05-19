@@ -4,318 +4,276 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useNeuralStore, AGENT_CONFIG, type AgentState } from '@/stores/neural-store';
 
-// ── constants ────────────────────────────────────────────────────────────────
+// ── constants ─────────────────────────────────────────────────────────────────
 
-const ORBIT_RADIUS = 4.5;
-const RING_TILT = 0.38; // radians — ~22°
+const ORBIT_R  = 5.2;
+const TILT     = 0.34;
+const STREAM_N = 40;
 
 const INTENSITY: Record<AgentState, number> = {
-  idle: 0.28, searching: 0.60, processing: 0.85, verified: 1.10, nuclear: 1.50,
+  idle: 0.18, searching: 0.55, processing: 0.80, verified: 1.05, nuclear: 1.40,
 };
-const PULSE_SPEED: Record<AgentState, number> = {
-  idle: 0.8, searching: 2.0, processing: 3.5, verified: 1.2, nuclear: 8.0,
+const PULSE_HZ: Record<AgentState, number> = {
+  idle: 0.6, searching: 2.0, processing: 3.5, verified: 1.0, nuclear: 9.0,
 };
 const COLOR_OVERRIDE: Partial<Record<AgentState, string>> = {
   verified: '#00ff88',
-  nuclear: '#ff6600',
+  nuclear:  '#ff5500',
 };
 
-const NUM_STREAM_PARTICLES = 40;
+// ── shaders ───────────────────────────────────────────────────────────────────
 
-// ── shaders ──────────────────────────────────────────────────────────────────
+const VERT = /* glsl */`
+  varying vec3 vN; varying vec3 vV;
+  void main(){
+    vN=normalize(normalMatrix*normal);
+    vec4 mv=modelViewMatrix*vec4(position,1.);
+    vV=normalize(-mv.xyz);
+    gl_Position=projectionMatrix*mv;
+  }`;
 
-const CORE_VERT = /* glsl */ `
-  varying vec3 vNormal;
-  varying vec3 vViewDir;
-  void main() {
-    vNormal = normalize(normalMatrix * normal);
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vViewDir = normalize(-mv.xyz);
-    gl_Position = projectionMatrix * mv;
-  }
-`;
+const FRAG = /* glsl */`
+  uniform float uT; uniform float uNuc; uniform float uFreq;
+  varying vec3 vN; varying vec3 vV;
+  void main(){
+    float f=pow(1.-clamp(dot(vN,vV),0.,1.),2.1);
+    vec3 ca=mix(vec3(.1,.7,1.),vec3(.5,.95,1.),f);
+    vec3 na=mix(vec3(.9,.2,.0),vec3(1.,.65,.1),f);
+    vec3 col=mix(ca,na,uNuc);
+    float osc=.8+.2*sin(uT*uFreq*6.283);
+    float a=(.3+.7*f)*osc;
+    gl_FragColor=vec4(col*(1.6+f*2.),a);
+  }`;
 
-const CORE_FRAG = /* glsl */ `
-  uniform float uTime;
-  uniform float uNuclear;
-  uniform float uOscFreq;
-  varying vec3 vNormal;
-  varying vec3 vViewDir;
-  void main() {
-    float fresnel = pow(1.0 - clamp(dot(vNormal, vViewDir), 0.0, 1.0), 2.5);
-    vec3 coolA = vec3(0.05, 0.20, 0.90);
-    vec3 coolB = vec3(0.10, 0.80, 1.00);
-    vec3 hotA  = vec3(0.65, 0.08, 0.00);
-    vec3 hotB  = vec3(1.00, 0.50, 0.10);
-    vec3 color = mix(mix(coolA, coolB, fresnel), mix(hotA, hotB, fresnel), uNuclear);
-    float osc   = 0.85 + 0.15 * sin(uTime * uOscFreq);
-    float alpha = (0.28 + 0.72 * fresnel) * osc;
-    gl_FragColor = vec4(color * (1.0 + fresnel * 1.8), alpha);
-  }
-`;
+// ── glow sprite factory ───────────────────────────────────────────────────────
 
-// ── helpers ──────────────────────────────────────────────────────────────────
-
-function easeInOut(t: number) {
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+function glowSprite(hexColor: string, size: number, alpha = 1.0): THREE.Sprite {
+  const SZ = 256;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = SZ;
+  const ctx = cv.getContext('2d')!;
+  const r = SZ / 2;
+  const g = ctx.createRadialGradient(r, r, 0, r, r, r);
+  const c = new THREE.Color(hexColor);
+  const hex6 = `#${c.getHexString()}`;
+  g.addColorStop(0.00, hex6 + 'ff');
+  g.addColorStop(0.25, hex6 + 'cc');
+  g.addColorStop(0.60, hex6 + '44');
+  g.addColorStop(1.00, hex6 + '00');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, SZ, SZ);
+  const mat = new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(cv),
+    transparent: true, opacity: alpha,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const s = new THREE.Sprite(mat);
+  s.scale.setScalar(size);
+  return s;
 }
 
-function hexToThree(hex: string): THREE.Color {
-  return new THREE.Color(hex);
+// ── ring builder ──────────────────────────────────────────────────────────────
+
+function makeRing(r: number, thickness: number, color: number, euler: THREE.Euler) {
+  const m = new THREE.Mesh(
+    new THREE.TorusGeometry(r, thickness, 12, 128),
+    new THREE.MeshBasicMaterial({
+      color, transparent: true, opacity: 0.65,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    }),
+  );
+  m.rotation.copy(euler);
+  return m;
 }
 
-// ── scene builder ─────────────────────────────────────────────────────────────
+// ── star layer ────────────────────────────────────────────────────────────────
 
-function buildScene() {
+function starLayer(n: number, rMin: number, rMax: number, sz: number, op: number) {
+  const pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const r  = rMin + Math.random() * (rMax - rMin);
+    pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+    pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+    pos[i*3+2] = r * Math.cos(ph);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  return new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0xc8dfff, size: sz, transparent: true, opacity: op,
+    blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+  }));
+}
+
+// ── main scene builder ────────────────────────────────────────────────────────
+
+function build() {
   const scene = new THREE.Scene();
 
-  // ── AMARA core ──────────────────────────────────────────────────────────────
-  const coreUniforms = {
-    uTime: { value: 0 },
-    uNuclear: { value: 0 },
-    uOscFreq: { value: 1.0 },
-  };
-  const coreMat = new THREE.ShaderMaterial({
-    uniforms: coreUniforms,
-    vertexShader: CORE_VERT,
-    fragmentShader: CORE_FRAG,
-    transparent: true,
-    depthWrite: false,
-    side: THREE.FrontSide,
-  });
-  const coreGeo = new THREE.SphereGeometry(1.0, 48, 48);
-  const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+  // stars
+  const s0 = starLayer(1500, 60, 100, 0.08, 0.55);
+  const s1 = starLayer(400,  50,  80, 0.20, 0.30);
+  const s2 = starLayer(100,  40,  65, 0.45, 0.18);
+  scene.add(s0, s1, s2);
 
-  // outer glow
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(0x0055ff),
-    transparent: true,
-    opacity: 0.08,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.BackSide,
-  });
-  const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(1.7, 32, 32), glowMat);
+  // ── AMARA core ───────────────────────────────────────────────────────────
+  const uniforms = { uT: {value:0}, uNuc: {value:0}, uFreq: {value:1} };
+  const coreMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(1.0, 64, 64),
+    new THREE.ShaderMaterial({
+      uniforms, vertexShader: VERT, fragmentShader: FRAG,
+      transparent: true, depthWrite: false,
+    }),
+  );
 
-  // rings
-  const ringColors = [0x00ccff, 0x0088ff, 0x0044cc];
-  const ringAngles = [
-    new THREE.Euler(Math.PI / 2, 0, 0),
-    new THREE.Euler(0, 0, Math.PI / 3),
-    new THREE.Euler(Math.PI / 5, Math.PI / 4, 0),
+  // glow layers around core (sprites — radial canvas gradient)
+  const coreGlowLg = glowSprite('#0055ff', 9.0, 0.35);
+  const coreGlowMd = glowSprite('#22aaff', 4.5, 0.55);
+  const coreGlowSm = glowSprite('#88ddff', 1.8, 0.80);
+
+  const coreGlowMats = [
+    coreGlowLg.material as THREE.SpriteMaterial,
+    coreGlowMd.material as THREE.SpriteMaterial,
+    coreGlowSm.material as THREE.SpriteMaterial,
   ];
-  const ringMeshes: THREE.Mesh[] = ringAngles.map((euler, i) => {
-    const mat = new THREE.MeshBasicMaterial({
-      color: ringColors[i],
-      transparent: true,
-      opacity: 0.55,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const m = new THREE.Mesh(new THREE.TorusGeometry(2.1 + i * 0.18, 0.012, 8, 96), mat);
-    m.rotation.copy(euler);
-    return m;
-  });
+
+  // orbital rings
+  const rings = [
+    makeRing(2.05, 0.018, 0x00aaff, new THREE.Euler(Math.PI/2, 0, 0)),
+    makeRing(2.40, 0.013, 0x0066dd, new THREE.Euler(0, 0, Math.PI/3.2)),
+    makeRing(2.75, 0.009, 0x0033aa, new THREE.Euler(Math.PI/5, Math.PI/4.5, 0)),
+  ];
+  const ringSpeeds = [0.42, 0.28, 0.17];
+
+  const coreLight = new THREE.PointLight(0x0088ff, 5, 16);
 
   const coreGroup = new THREE.Group();
-  coreGroup.add(coreMesh, glowMesh, ...ringMeshes);
+  coreGroup.add(coreMesh, coreGlowLg, coreGlowMd, coreGlowSm, coreLight, ...rings);
   scene.add(coreGroup);
 
-  // ── agent orbs ──────────────────────────────────────────────────────────────
+  // ── agent orbs ───────────────────────────────────────────────────────────
   const orbGroup = new THREE.Group();
-  orbGroup.rotation.x = RING_TILT;
+  orbGroup.rotation.x = TILT;
   scene.add(orbGroup);
 
-  const orbMeshes: THREE.Mesh[] = [];
-  const orbGlows: THREE.Mesh[] = [];
-  const labelSprites: THREE.Sprite[] = [];
+  // per-agent references
+  type OrbRefs = {
+    glowLg: THREE.Sprite; glowSm: THREE.Sprite;
+    dot: THREE.Mesh; mesh: THREE.Mesh;
+  };
+  const orbRefs: OrbRefs[] = [];
+
+  // raycasting targets (invisible, larger clickable sphere)
+  const hitTargets: THREE.Mesh[] = [];
 
   AGENT_CONFIG.forEach((cfg, i) => {
     const angle = (i / AGENT_CONFIG.length) * Math.PI * 2;
-    const x = Math.cos(angle) * ORBIT_RADIUS;
-    const z = Math.sin(angle) * ORBIT_RADIUS;
+    const x = Math.cos(angle) * ORBIT_R;
+    const z = Math.sin(angle) * ORBIT_R;
 
-    const color = hexToThree(cfg.color);
+    // large soft glow sprite
+    const glowLg = glowSprite(cfg.color, 2.8, 0.22);
+    glowLg.position.set(x, 0, z);
 
-    // orb
-    const orbMat = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: INTENSITY.idle,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+    // tight bright glow sprite
+    const glowSm = glowSprite(cfg.color, 1.0, 0.60);
+    glowSm.position.set(x, 0, z);
+
+    // visible mesh (small bright sphere)
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(cfg.color),
+      transparent: true, opacity: 0.90,
+      blending: THREE.AdditiveBlending, depthWrite: false,
     });
-    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), orbMat);
-    orb.position.set(x, 0, z);
-    orb.userData = { agentIndex: i };
-    orbMeshes.push(orb);
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 20, 20), mat);
+    mesh.position.set(x, 0, z);
+    mesh.userData = { agentIndex: i };
 
-    // glow
-    const glowOrbMat = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: 0.06,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const glowOrb = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 16), glowOrbMat);
-    glowOrb.position.copy(orb.position);
-    orbGlows.push(glowOrb);
+    // white inner dot
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.07, 12, 12),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff, transparent: true, opacity: 0.8,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      }),
+    );
+    dot.position.set(x, 0, z);
 
-    // label canvas texture
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 32;
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 14px monospace';
-    ctx.fillStyle = cfg.color;
-    ctx.textAlign = 'center';
-    ctx.fillText(cfg.name, 64, 20);
-    const tex = new THREE.CanvasTexture(canvas);
-    const spriteMat = new THREE.SpriteMaterial({
-      map: tex,
-      transparent: true,
-      opacity: 0.75,
-      depthWrite: false,
-    });
-    const sprite = new THREE.Sprite(spriteMat);
-    sprite.scale.set(1.0, 0.25, 1);
-    sprite.position.set(x, 0.55, z);
-    labelSprites.push(sprite);
+    // invisible click target (larger)
+    const hit = new THREE.Mesh(
+      new THREE.SphereGeometry(0.55, 8, 8),
+      new THREE.MeshBasicMaterial({ visible: false }),
+    );
+    hit.position.set(x, 0, z);
+    hit.userData = { agentIndex: i };
+    hitTargets.push(hit);
 
-    orbGroup.add(orb, glowOrb, sprite);
+    orbRefs.push({ glowLg, glowSm, dot, mesh });
+    orbGroup.add(glowLg, glowSm, mesh, dot, hit);
   });
 
-  // ── connection beams ────────────────────────────────────────────────────────
+  // ── beams ────────────────────────────────────────────────────────────────
   const beamGroup = new THREE.Group();
   scene.add(beamGroup);
 
-  const beamLines: THREE.Line[] = [];
-  const beamGeos: THREE.BufferGeometry[] = [];
-  const pulseMeshes: THREE.Mesh[] = [];
+  const beamGeos:  THREE.BufferGeometry[]    = [];
+  const beamMats:  THREE.LineBasicMaterial[]  = [];
+  const beamGlows: THREE.LineBasicMaterial[]  = [];
+  const beads:     THREE.Sprite[]             = [];
 
-  AGENT_CONFIG.forEach((cfg, i) => {
+  AGENT_CONFIG.forEach((cfg) => {
+    const pa = new Float32Array(6);
     const geo = new THREE.BufferGeometry();
-    const posArr = new Float32Array(6); // [cx,cy,cz, ox,oy,oz]
-    geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
-    const mat = new THREE.LineBasicMaterial({
-      color: hexToThree(cfg.color),
-      transparent: true,
-      opacity: 0.12,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const line = new THREE.Line(geo, mat);
-    beamLines.push(line);
+    geo.setAttribute('position', new THREE.BufferAttribute(pa, 3));
     beamGeos.push(geo);
-    beamGroup.add(line);
 
-    // pulse bead
-    const bead = new THREE.Mesh(
-      new THREE.SphereGeometry(0.055, 8, 8),
-      new THREE.MeshBasicMaterial({
-        color: hexToThree(cfg.color),
-        transparent: true,
-        opacity: 0,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      }),
-    );
-    bead.userData = { beadIndex: i };
-    pulseMeshes.push(bead);
+    const main = new THREE.LineBasicMaterial({
+      color: new THREE.Color(cfg.color), transparent: true, opacity: 0.15,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const glow = new THREE.LineBasicMaterial({
+      color: new THREE.Color(cfg.color), transparent: true, opacity: 0.06,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    beamMats.push(main);
+    beamGlows.push(glow);
+
+    beamGroup.add(new THREE.Line(geo, main), new THREE.Line(geo, glow));
+
+    // pulse bead as glow sprite (starts invisible)
+    const bead = glowSprite(cfg.color, 0.6, 0);
+    beads.push(bead);
     beamGroup.add(bead);
   });
 
-  // ── data streams ────────────────────────────────────────────────────────────
+  // ── data streams ─────────────────────────────────────────────────────────
   const streamGroup = new THREE.Group();
   scene.add(streamGroup);
 
-  const streamGeos: THREE.BufferGeometry[] = [];
-  const streamPoints: THREE.Points[] = [];
+  const streamGeos: THREE.BufferGeometry[]  = [];
+  const streamMats: THREE.PointsMaterial[]  = [];
 
   AGENT_CONFIG.forEach((cfg) => {
     const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(NUM_STREAM_PARTICLES * 3);
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(STREAM_N*3), 3));
     const mat = new THREE.PointsMaterial({
-      color: hexToThree(cfg.color),
-      size: 0.045,
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+      color: new THREE.Color(cfg.color), size: 0.07,
+      transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
     });
-    const pts = new THREE.Points(geo, mat);
     streamGeos.push(geo);
-    streamPoints.push(pts);
-    streamGroup.add(pts);
+    streamMats.push(mat);
+    streamGroup.add(new THREE.Points(geo, mat));
   });
 
-  // ── background ──────────────────────────────────────────────────────────────
-
-  // stars
-  const starGeo = new THREE.BufferGeometry();
-  const starPos = new Float32Array(2000 * 3);
-  for (let i = 0; i < 2000; i++) {
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(2 * Math.random() - 1);
-    const r = 60 + Math.random() * 40;
-    starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-    starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-    starPos[i * 3 + 2] = r * Math.cos(phi);
-  }
-  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-  const starField = new THREE.Points(
-    starGeo,
-    new THREE.PointsMaterial({
-      color: 0xaaccff,
-      size: 0.15,
-      transparent: true,
-      opacity: 0.6,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    }),
-  );
-  scene.add(starField);
-
-  // nebula clouds
-  const nebGeo = new THREE.BufferGeometry();
-  const nebPos = new Float32Array(600 * 3);
-  for (let i = 0; i < 600; i++) {
-    nebPos[i * 3] = (Math.random() - 0.5) * 80;
-    nebPos[i * 3 + 1] = (Math.random() - 0.5) * 50;
-    nebPos[i * 3 + 2] = -20 - Math.random() * 40;
-  }
-  nebGeo.setAttribute('position', new THREE.BufferAttribute(nebPos, 3));
-  const nebula = new THREE.Points(
-    nebGeo,
-    new THREE.PointsMaterial({
-      color: 0x1133aa,
-      size: 1.8,
-      transparent: true,
-      opacity: 0.18,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    }),
-  );
-  scene.add(nebula);
-
   return {
-    scene,
-    coreGroup,
-    coreUniforms,
-    glowMat,
-    ringMeshes,
-    orbGroup,
-    orbMeshes,
-    orbGlows,
-    beamLines,
-    beamGeos,
-    pulseMeshes,
-    streamGeos,
-    streamPoints,
-    starField,
-    nebula,
+    scene, stars: [s0, s1, s2],
+    uniforms, coreGlowMats, coreLight,
+    rings, ringSpeeds,
+    orbGroup, orbRefs, hitTargets,
+    beamGeos, beamMats, beamGlows, beads,
+    streamGeos, streamMats,
   };
 }
 
@@ -328,43 +286,48 @@ export function NeuralBrainScene() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const W = window.innerWidth, H = window.innerHeight;
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 300);
-    camera.position.set(0, 2.5, 11);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x010208, 1);
+
+    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 300);
+    camera.position.set(0, 3, 12);
     camera.lookAt(0, 0, 0);
 
-    const refs = buildScene();
-    const { scene, coreUniforms, ringMeshes, orbGroup, orbMeshes, orbGlows,
-      beamLines, beamGeos, pulseMeshes, streamGeos, streamPoints, starField } = refs;
+    const refs = build();
+    const {
+      scene, stars, uniforms, coreGlowMats, coreLight,
+      rings, ringSpeeds, orbGroup, orbRefs, hitTargets,
+      beamGeos, beamMats, beamGlows, beads,
+      streamGeos, streamMats,
+    } = refs;
 
-    // particle time offsets for data streams
-    const streamOffsets = AGENT_CONFIG.map(() =>
-      Array.from({ length: NUM_STREAM_PARTICLES }, (_, j) => j / NUM_STREAM_PARTICLES),
+    // staggered offsets for stream particles
+    const offsets = AGENT_CONFIG.map(() =>
+      Array.from({ length: STREAM_N }, (_, j) => j / STREAM_N),
     );
 
-    // raycaster
-    const raycaster = new THREE.Raycaster();
-    raycaster.params.Points = { threshold: 0.2 };
+    // ── events ────────────────────────────────────────────────────────────
+    const ray   = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    const onCanvasClick = (e: MouseEvent) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    const onClick = (e: MouseEvent) => {
+      mouse.x =  (e.clientX / window.innerWidth)  * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects(orbMeshes);
-      if (hits.length > 0) {
+      ray.setFromCamera(mouse, camera);
+      const hits = ray.intersectObjects(hitTargets);
+      if (hits.length) {
         const idx = (hits[0].object as THREE.Mesh).userData.agentIndex as number;
         useNeuralStore.getState().selectAgent(AGENT_CONFIG[idx].id);
       } else {
         useNeuralStore.getState().selectAgent(null);
       }
     };
-    canvas.addEventListener('click', onCanvasClick);
+    canvas.addEventListener('click', onClick);
 
-    // resize
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -372,126 +335,132 @@ export function NeuralBrainScene() {
     };
     window.addEventListener('resize', onResize);
 
-    // ── animation loop ────────────────────────────────────────────────────────
-    let rafId = 0;
-    let time = 0;
-    let prevTs = performance.now();
-    const center = new THREE.Vector3(0, 0, 0);
+    // ── animation loop ─────────────────────────────────────────────────────
+    const O = new THREE.Vector3();
+    const eio = (t: number) => t < .5 ? 2*t*t : -1+(4-2*t)*t;
+
+    let raf = 0, t = 0, prev = performance.now();
 
     const tick = (ts: number) => {
-      rafId = requestAnimationFrame(tick);
-      const delta = Math.min((ts - prevTs) / 1000, 0.05);
-      prevTs = ts;
-      time += delta;
+      raf = requestAnimationFrame(tick);
+      const dt = Math.min((ts - prev) / 1000, 0.05);
+      prev = ts;
+      t += dt;
 
-      const store = useNeuralStore.getState();
-      const { agents } = store;
-      const isNuclear = store.nuclearAgentId !== null;
+      const store   = useNeuralStore.getState();
+      const agents  = store.agents;
+      const nuclear = store.nuclearAgentId !== null;
+      const nv      = uniforms.uNuc.value;
 
-      // ── AMARA core ─────────────────────────────────────────────────────────
-      coreUniforms.uTime.value = time;
-      const nuclearTarget = isNuclear ? 1.0 : 0.0;
-      coreUniforms.uNuclear.value += (nuclearTarget - coreUniforms.uNuclear.value) * delta * 3;
-      coreUniforms.uOscFreq.value = isNuclear ? 8.0 : 1.0;
+      // ── AMARA core ──────────────────────────────────────────────────────
+      uniforms.uT.value    = t;
+      uniforms.uNuc.value += ((nuclear ? 1 : 0) - nv) * dt * 4;
+      uniforms.uFreq.value = nuclear ? 8 : 1;
 
-      const ringSpeedMult = isNuclear ? 3 : 1;
-      ringMeshes[0].rotation.y += delta * 0.4 * ringSpeedMult;
-      ringMeshes[1].rotation.z += delta * 0.28 * ringSpeedMult;
-      ringMeshes[2].rotation.x += delta * 0.18 * ringSpeedMult;
+      const coreCol = nuclear ? '#ff4400' : '#0066ff';
+      coreGlowMats[0].color.set(nuclear ? '#550000' : '#0033aa');
+      coreGlowMats[0].opacity = 0.30 + nv * 0.20;
+      coreGlowMats[1].color.set(nuclear ? '#ff2200' : '#0066ff');
+      coreGlowMats[1].opacity = 0.50 + nv * 0.15;
+      coreGlowMats[2].color.set(nuclear ? '#ffaa00' : '#88ddff');
+      coreLight.color.set(coreCol);
+      coreLight.intensity = nuclear ? 7 : 5;
 
-      // glow tint
-      (refs.glowMat as THREE.MeshBasicMaterial).color.set(isNuclear ? 0xff3300 : 0x0055ff);
+      const rMult = nuclear ? 3.2 : 1;
+      rings[0].rotation.y += dt * ringSpeeds[0] * rMult;
+      rings[1].rotation.z += dt * ringSpeeds[1] * rMult;
+      rings[2].rotation.x += dt * ringSpeeds[2] * rMult;
 
-      // ── orbital ring rotation ──────────────────────────────────────────────
-      orbGroup.rotation.y += delta * 0.08;
+      // ── orbital ring rotation ────────────────────────────────────────────
+      orbGroup.rotation.y += dt * 0.06;
       orbGroup.updateMatrixWorld(true);
 
-      // ── per-agent updates ──────────────────────────────────────────────────
+      // ── star slow drift ──────────────────────────────────────────────────
+      stars[0].rotation.y += dt * 0.005;
+      stars[1].rotation.y -= dt * 0.003;
+
+      // ── per-agent ────────────────────────────────────────────────────────
       agents.forEach((agent, i) => {
-        const agentColor = COLOR_OVERRIDE[agent.state]
-          ? hexToThree(COLOR_OVERRIDE[agent.state]!)
-          : hexToThree(agent.color);
-        const intensity = INTENSITY[agent.state];
-        const pulseSpeed = PULSE_SPEED[agent.state];
-        const pulse = 0.6 + 0.4 * Math.sin(time * pulseSpeed * Math.PI * 2);
+        const colStr  = COLOR_OVERRIDE[agent.state] ?? agent.color;
+        const col     = new THREE.Color(colStr);
+        const intens  = INTENSITY[agent.state];
+        const hz      = PULSE_HZ[agent.state];
+        const pulse   = 0.50 + 0.50 * Math.sin(t * hz * Math.PI * 2);
+        const active  = agent.state !== 'idle';
 
-        const orbMat = orbMeshes[i].material as THREE.MeshBasicMaterial;
-        orbMat.color.copy(agentColor);
-        orbMat.opacity = intensity * pulse;
+        const { glowLg, glowSm, mesh, dot } = orbRefs[i];
 
-        const glowMat = orbGlows[i].material as THREE.MeshBasicMaterial;
-        glowMat.color.copy(agentColor);
-        glowMat.opacity = intensity * 0.12 * pulse;
+        // glow sprites
+        const lgMat = glowLg.material as THREE.SpriteMaterial;
+        lgMat.color.copy(col);
+        lgMat.opacity = intens * 0.32 * pulse;
+        const smMat = glowSm.material as THREE.SpriteMaterial;
+        smMat.color.copy(col);
+        smMat.opacity = intens * 0.70 * pulse;
 
-        // world position of this orb
-        const worldPos = new THREE.Vector3();
-        orbMeshes[i].getWorldPosition(worldPos);
+        // sphere mesh
+        (mesh.material as THREE.MeshBasicMaterial).color.copy(col);
+        (mesh.material as THREE.MeshBasicMaterial).opacity = intens * pulse;
 
-        // sync glow to orb world pos (glow is a sibling in orbGroup)
-        // they share the same local position so this is automatic
+        // inner dot
+        (dot.material as THREE.MeshBasicMaterial).opacity = intens * 0.9 * pulse;
 
-        // ── beam ──────────────────────────────────────────────────────────────
-        const beamPosArr = beamGeos[i].attributes.position.array as Float32Array;
-        beamPosArr[0] = 0; beamPosArr[1] = 0; beamPosArr[2] = 0;
-        beamPosArr[3] = worldPos.x; beamPosArr[4] = worldPos.y; beamPosArr[5] = worldPos.z;
+        // world position
+        const wp = new THREE.Vector3();
+        mesh.getWorldPosition(wp);
+
+        // ── beam ────────────────────────────────────────────────────────────
+        const pa = beamGeos[i].attributes.position.array as Float32Array;
+        pa[3] = wp.x; pa[4] = wp.y; pa[5] = wp.z;
         beamGeos[i].attributes.position.needsUpdate = true;
 
-        const beamMat = beamLines[i].material as THREE.LineBasicMaterial;
-        const active = agent.state !== 'idle';
-        beamMat.opacity = active ? intensity * 0.45 * pulse : 0.08;
+        const beamOp = active ? intens * 0.55 * pulse : 0.10;
+        beamMats[i].color.copy(col);
+        beamMats[i].opacity = beamOp;
+        beamGlows[i].color.copy(col);
+        beamGlows[i].opacity = beamOp * 0.35;
 
-        // ── pulse bead ────────────────────────────────────────────────────────
-        const bead = pulseMeshes[i];
-        const beadMat = bead.material as THREE.MeshBasicMaterial;
+        // ── pulse bead ───────────────────────────────────────────────────────
+        const beadMat = beads[i].material as THREE.SpriteMaterial;
         if (active && agent.state !== 'verified') {
-          const t = easeInOut((time * pulseSpeed * 0.25) % 1);
-          bead.position.lerpVectors(center, worldPos, t);
-          beadMat.opacity = 0.9 * pulse;
-          beadMat.color.copy(agentColor);
+          const bt = eio((t * hz * 0.20) % 1);
+          beads[i].position.lerpVectors(O, wp, bt);
+          beadMat.color.copy(col);
+          beadMat.opacity = 0.85 * pulse;
         } else {
           beadMat.opacity = 0;
         }
 
-        // ── data stream particles ─────────────────────────────────────────────
-        const showStream = agent.state === 'processing' || agent.state === 'nuclear';
-        const streamPts = streamPoints[i];
-        const streamMat = streamPts.material as THREE.PointsMaterial;
-        streamMat.opacity = showStream ? intensity * 0.65 : 0;
-        streamMat.color.copy(agentColor);
-
-        if (showStream) {
-          const posArr = streamGeos[i].attributes.position.array as Float32Array;
-          const offsets = streamOffsets[i];
-          for (let p = 0; p < NUM_STREAM_PARTICLES; p++) {
-            const t = easeInOut(((time * 0.4 + offsets[p]) % 1));
-            const px = worldPos.x + (center.x - worldPos.x) * t;
-            const py = worldPos.y + (center.y - worldPos.y) * t;
-            const pz = worldPos.z + (center.z - worldPos.z) * t;
-            posArr[p * 3] = px;
-            posArr[p * 3 + 1] = py;
-            posArr[p * 3 + 2] = pz;
+        // ── data streams ─────────────────────────────────────────────────────
+        const streaming = agent.state === 'processing' || agent.state === 'nuclear';
+        streamMats[i].color.copy(col);
+        streamMats[i].opacity = streaming ? intens * 0.80 : 0;
+        if (streaming) {
+          const spa = streamGeos[i].attributes.position.array as Float32Array;
+          for (let p = 0; p < STREAM_N; p++) {
+            const st = eio(((t * 0.36 + offsets[i][p]) % 1));
+            spa[p*3]   = wp.x * (1 - st);
+            spa[p*3+1] = wp.y * (1 - st);
+            spa[p*3+2] = wp.z * (1 - st);
           }
           streamGeos[i].attributes.position.needsUpdate = true;
         }
       });
 
-      // ── camera drift ──────────────────────────────────────────────────────
-      camera.position.x = Math.sin(time * 0.2) * 0.55;
-      camera.position.y = 2.5 + Math.sin(time * 0.15) * 0.35;
+      // ── camera drift ─────────────────────────────────────────────────────
+      camera.position.x = Math.sin(t * 0.17) * 0.65;
+      camera.position.y = 3.0 + Math.sin(t * 0.12) * 0.40;
       camera.lookAt(0, 0, 0);
-
-      // ── star rotation ────────────────────────────────────────────────────
-      starField.rotation.y += delta * 0.008;
 
       renderer.render(scene, camera);
     };
 
-    rafId = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
-      canvas.removeEventListener('click', onCanvasClick);
+      canvas.removeEventListener('click', onClick);
       renderer.dispose();
     };
   }, []);

@@ -1,5 +1,5 @@
-import { AmaraContainer } from '@/components/AmaraContainer';
+import { NeuralInterface } from '@/components/NeuralInterface';
 
 export default function Home() {
-  return <AmaraContainer />;
+  return <NeuralInterface />;
 }

@@ -1,5 +1,5 @@
 ── ACCEPTED LEAD ──────────────────────────────
-SOURCE FILE : /tmp/rrc_w1_permits_20260520.csv
+SOURCE FILE : data/rrc_w1_ector_sample.csv
 SOURCE ROW  : 2
 RAW ROW     : 101234,PIONEER NATURAL RESOURCES,W-1001,ECTOR,SPRABERRY NORTH,7H,05/20/2026,SPRABERRY (TREND AREA),OIL
 
@@ -13,7 +13,7 @@ PARSED FIELDS:
   permit_date       : 05/20/2026
   field_name        : SPRABERRY (TREND AREA)
   well_type         : OIL
-  source_file_path  : /tmp/rrc_w1_permits_20260520.csv
+  source_file_path  : data/rrc_w1_ector_sample.csv
   source_row_index  : 2
 
 ESTIMATES (from real data — no LLM):
@@ -26,7 +26,7 @@ ALERT STATUS  : DRY-RUN (no Telegram sent)
 ───────────────────────────────────────────────
 
 ── ACCEPTED LEAD ──────────────────────────────
-SOURCE FILE : /tmp/rrc_w1_permits_20260520.csv
+SOURCE FILE : data/rrc_w1_ector_sample.csv
 SOURCE ROW  : 3
 RAW ROW     : 101235,DIAMONDBACK ENERGY,W-1002,ECTOR,MIDLAND A,3H,05/20/2026,WOLFCAMP,OIL
 
@@ -40,7 +40,7 @@ PARSED FIELDS:
   permit_date       : 05/20/2026
   field_name        : WOLFCAMP
   well_type         : OIL
-  source_file_path  : /tmp/rrc_w1_permits_20260520.csv
+  source_file_path  : data/rrc_w1_ector_sample.csv
   source_row_index  : 3
 
 ESTIMATES (from real data — no LLM):
@@ -53,7 +53,7 @@ ALERT STATUS  : DRY-RUN (no Telegram sent)
 ───────────────────────────────────────────────
 
 ── ACCEPTED LEAD ──────────────────────────────
-SOURCE FILE : /tmp/rrc_w1_permits_20260520.csv
+SOURCE FILE : data/rrc_w1_ector_sample.csv
 SOURCE ROW  : 4
 RAW ROW     : 101236,ENDEAVOR ENERGY RESOURCES,W-1003,ECTOR,GARDEN CITY,12H,05/20/2026,DEAN,GAS
 
@@ -67,7 +67,7 @@ PARSED FIELDS:
   permit_date       : 05/20/2026
   field_name        : DEAN
   well_type         : GAS
-  source_file_path  : /tmp/rrc_w1_permits_20260520.csv
+  source_file_path  : data/rrc_w1_ector_sample.csv
   source_row_index  : 4
 
 ESTIMATES (from real data — no LLM):

@@ -3,3 +3,5 @@
 2026-05-20T19:45:45.667128Z  ERROR  ABORT: Source file schema invalid — 'OPER_NO' column not found. Columns present: ['WRONG_COL1', 'WRONG_COL2']. Wrong file loaded. No alerts will fire.
 2026-05-20T19:45:52.290016Z  ERROR  ABORT: Source file stale — last modified 8 days ago (2026-05-12). Re-download before running. No alerts will fire.
 2026-05-20T20:39:18.823452Z  ERROR  LIVE MODE BLOCKED: only 0 accepted lead(s) this run (minimum 3 required). No Telegram alerts sent.
+2026-05-20T21:12:36.798897Z  ERROR  ABORT: Source file stale — last modified 8 days ago (2026-05-12). Re-download before running. No alerts will fire.
+2026-05-20T21:13:06Z  MILESTONE  LIVE-MODE GATE VERIFIED

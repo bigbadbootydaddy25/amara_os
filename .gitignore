@@ -44,3 +44,4 @@ next-env.d.ts
 # frac-lead-osint downloaded data (can be large; re-downloaded at runtime)
 ai-brain/agents/frac-lead-osint/data/rrc/*.csv
 ai-brain/agents/frac-lead-osint/data/fracfocus/*.csv
+__pycache__/

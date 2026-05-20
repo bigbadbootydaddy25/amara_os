@@ -1,7 +1,7 @@
 ── ACCEPTED LEAD ──────────────────────────────
 SOURCE FILE : /tmp/rrc_w1_permits_20260520.csv
 SOURCE ROW  : 2
-RAW ROW     : 101234,PIONEER NATURAL RESOURCES,W-1001,ECTOR,SPRABERRY NORTH,7H,2026-05-18,SPRABERRY (TREND AREA),OIL
+RAW ROW     : 101234,PIONEER NATURAL RESOURCES,W-1001,ECTOR,SPRABERRY NORTH,7H,05/20/2026,SPRABERRY (TREND AREA),OIL
 
 PARSED FIELDS:
   rrc_operator_name : PIONEER NATURAL RESOURCES
@@ -10,20 +10,25 @@ PARSED FIELDS:
   county_name       : ECTOR
   lease_name        : SPRABERRY NORTH
   well_number       : 7H
-  permit_date       : 2026-05-18
+  permit_date       : 05/20/2026
   field_name        : SPRABERRY (TREND AREA)
   well_type         : OIL
   source_file_path  : /tmp/rrc_w1_permits_20260520.csv
   source_row_index  : 2
 
-VALIDATION    : PASS — all required fields present from RRC W-1 source
+ESTIMATES (from real data — no LLM):
+  sand_estimate     : Data pending
+  water_estimate    : Data pending
+  estimates_source  : No RRC production report available for this operator
+
+VALIDATION    : PASS — P-5 confirmed, all required fields present from RRC W-1
 ALERT STATUS  : DRY-RUN (no Telegram sent)
 ───────────────────────────────────────────────
 
 ── ACCEPTED LEAD ──────────────────────────────
 SOURCE FILE : /tmp/rrc_w1_permits_20260520.csv
 SOURCE ROW  : 3
-RAW ROW     : 101235,DIAMONDBACK ENERGY,W-1002,ECTOR,MIDLAND A,3H,2026-05-19,WOLFCAMP,OIL
+RAW ROW     : 101235,DIAMONDBACK ENERGY,W-1002,ECTOR,MIDLAND A,3H,05/20/2026,WOLFCAMP,OIL
 
 PARSED FIELDS:
   rrc_operator_name : DIAMONDBACK ENERGY
@@ -32,20 +37,25 @@ PARSED FIELDS:
   county_name       : ECTOR
   lease_name        : MIDLAND A
   well_number       : 3H
-  permit_date       : 2026-05-19
+  permit_date       : 05/20/2026
   field_name        : WOLFCAMP
   well_type         : OIL
   source_file_path  : /tmp/rrc_w1_permits_20260520.csv
   source_row_index  : 3
 
-VALIDATION    : PASS — all required fields present from RRC W-1 source
+ESTIMATES (from real data — no LLM):
+  sand_estimate     : Data pending
+  water_estimate    : Data pending
+  estimates_source  : No RRC production report available for this operator
+
+VALIDATION    : PASS — P-5 confirmed, all required fields present from RRC W-1
 ALERT STATUS  : DRY-RUN (no Telegram sent)
 ───────────────────────────────────────────────
 
 ── ACCEPTED LEAD ──────────────────────────────
 SOURCE FILE : /tmp/rrc_w1_permits_20260520.csv
 SOURCE ROW  : 4
-RAW ROW     : 101236,ENDEAVOR ENERGY RESOURCES,W-1003,ECTOR,GARDEN CITY,12H,2026-05-20,DEAN,GAS
+RAW ROW     : 101236,ENDEAVOR ENERGY RESOURCES,W-1003,ECTOR,GARDEN CITY,12H,05/20/2026,DEAN,GAS
 
 PARSED FIELDS:
   rrc_operator_name : ENDEAVOR ENERGY RESOURCES
@@ -54,12 +64,17 @@ PARSED FIELDS:
   county_name       : ECTOR
   lease_name        : GARDEN CITY
   well_number       : 12H
-  permit_date       : 2026-05-20
+  permit_date       : 05/20/2026
   field_name        : DEAN
   well_type         : GAS
   source_file_path  : /tmp/rrc_w1_permits_20260520.csv
   source_row_index  : 4
 
-VALIDATION    : PASS — all required fields present from RRC W-1 source
+ESTIMATES (from real data — no LLM):
+  sand_estimate     : Data pending
+  water_estimate    : Data pending
+  estimates_source  : No RRC production report available for this operator
+
+VALIDATION    : PASS — P-5 confirmed, all required fields present from RRC W-1
 ALERT STATUS  : DRY-RUN (no Telegram sent)
 ───────────────────────────────────────────────

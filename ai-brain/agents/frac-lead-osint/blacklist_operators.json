@@ -1,0 +1,4 @@
+{
+  "_comment": "Add RRC P-5 operator numbers that must never receive frac-lead alerts. Parallel to blacklist_homevestors_franchisees.json pattern.",
+  "blacklisted_operator_numbers": []
+}

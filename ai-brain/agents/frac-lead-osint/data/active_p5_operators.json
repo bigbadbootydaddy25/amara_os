@@ -1,0 +1,4 @@
+{
+  "_instructions": "Populate operator_numbers from the RRC Organization Report. Download from: https://www.rrc.texas.gov/resource-center/research/data-sets-available-for-download/ — look for the 'Organization' or 'Operator' dataset. Each entry is the P-5 number (OPER_NO column) as a string.",
+  "operator_numbers": []
+}

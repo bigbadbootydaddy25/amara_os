@@ -1,0 +1,20 @@
+{
+  "_comment": "Frac Lead OSINT Agent configuration. All paths are relative to the agent directory unless absolute.",
+  "rrc_data_dir": "data/rrc",
+  "fracfocus_data_dir": "data/fracfocus",
+  "p5_operators_file": "data/active_p5_operators.json",
+  "blacklist_file": "blacklist_operators.json",
+  "target_county": "ECTOR",
+  "target_county_code": "068",
+  "permit_days_back": 30,
+  "ector_county_medians": {
+    "sand_tons_per_well": 3500,
+    "water_bbls_per_well": 21000,
+    "source": "FracFocus county-level median, Ector County"
+  },
+  "live_mode_min_dry_run_leads": 3,
+  "telegram": {
+    "bot_token_env_var": "TELEGRAM_BOT_TOKEN",
+    "chat_id_env_var": "TELEGRAM_CHAT_ID"
+  }
+}

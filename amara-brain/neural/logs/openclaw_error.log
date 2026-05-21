@@ -1,0 +1,1 @@
+2026-05-21T02:06:30.936572+00:00 | pain_point_analysis | HTTPConnectionPool(host='127.0.0.1', port=18789): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=18789): Failed to establish a new connection: [Errno 111] Connection refused"))

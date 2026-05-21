@@ -1,176 +1,199 @@
 """
 DSPy-powered prompt optimizer.
-Pulls real decisions from Supabase, runs MIPROv2, saves improved prompts.
-Only runs on agents with >= 10 decisions with known outcomes.
-No synthetic data.
+Attempts to import from OpenJarvis if available, then falls back to
+direct DSPy MIPROv2 implementation.
+Only optimizes on real outcomes — never synthetic data.
 """
 
-import os
 import json
+import logging
+import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import dspy
+log = logging.getLogger(__name__)
 
-from neural import accuracy_tracker
-
-_SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-_SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+_AMARA_BRAIN = Path(os.getenv("AMARA_BRAIN", str(Path(__file__).parent.parent / "Brain")))
+_OUTCOMES_FILE = _AMARA_BRAIN / "Outcomes" / "outcomes.jsonl"
 _AGENTS_DIR = Path(__file__).parent.parent / "core" / "agents"
-_LOG_PATH = Path(__file__).parent / "accuracy_log.csv"
+_LOG_DIR = _AMARA_BRAIN / "Logs"
+_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-lm = dspy.LM(
-    model="openai/hermes3",
-    api_base="http://127.0.0.1:18789/v1",
-    api_key="none",
+# Attempt to use OpenJarvis optimizer if available on this machine
+_OPENJARVIS_PATH = Path(
+    os.getenv("OPENJARVIS_PATH", "/Users/user/OpenJarvis/src")
 )
-dspy.configure(lm=lm)
-
-
-def _fetch_decisions(agent_id: str, limit: int = 30) -> list:
-    if not _SUPABASE_URL or not _SUPABASE_KEY:
-        return []
-    import requests
+_openjarvis_available = False
+if _OPENJARVIS_PATH.exists() and str(_OPENJARVIS_PATH) not in sys.path:
+    sys.path.insert(0, str(_OPENJARVIS_PATH))
     try:
-        resp = requests.get(
-            f"{_SUPABASE_URL}/rest/v1/decision_log",
-            headers={
-                "apikey": _SUPABASE_KEY,
-                "Authorization": f"Bearer {_SUPABASE_KEY}",
-            },
-            params={
-                "select": "evidence_context,correct_answer,outcome",
-                "agent_id": f"eq.{agent_id}",
-                "outcome": "not.is.null",
-                "order": "created_at.desc",
-                "limit": str(limit),
-            },
-            timeout=20,
-        )
-        resp.raise_for_status()
-        return resp.json()
-    except Exception:
+        from openjarvis.learning.agents.dspy_optimizer import optimize as _oj_optimize
+        _openjarvis_available = True
+        log.info("OpenJarvis dspy_optimizer loaded from %s", _OPENJARVIS_PATH)
+    except ImportError:
+        _openjarvis_available = False
+
+# Configure DSPy with OpenClaw endpoint
+_dspy_configured = False
+try:
+    import dspy
+    _lm = dspy.LM(
+        model="openai/hermes3",
+        api_base=os.getenv("OPENCLAW_BASE_URL", "http://127.0.0.1:18789") + "/v1",
+        api_key=os.getenv("OPENCLAW_API_KEY", "none"),
+    )
+    dspy.configure(lm=_lm)
+    _dspy_configured = True
+except Exception as e:
+    log.warning("DSPy configuration failed: %s — optimization will be skipped", e)
+
+
+def _load_outcomes_for_agent(agent_id: str, limit: int = 30) -> list:
+    """Loads real outcomes from JSONL file. No synthetic data."""
+    if not _OUTCOMES_FILE.exists():
         return []
+    entries = []
+    with open(_OUTCOMES_FILE) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+                if (
+                    entry.get("agent_id") == agent_id
+                    and entry.get("outcome") in {"CORRECT", "INCORRECT", "PARTIAL"}
+                    and entry.get("evidence_context")
+                    and entry.get("correct_answer")
+                ):
+                    entries.append(entry)
+            except json.JSONDecodeError:
+                continue
+    return entries[-limit:]
 
 
-def _get_current_prompt_version(agent_dir: Path) -> int:
+def _get_prompt_version(agent_dir: Path) -> int:
     versions = sorted(agent_dir.glob("prompt_v*.txt"))
     if not versions:
         return 0
-    latest = versions[-1].stem
     try:
-        return int(latest.replace("prompt_v", ""))
+        return int(versions[-1].stem.replace("prompt_v", ""))
     except ValueError:
         return 0
 
 
-def _save_optimized_prompt(agent_id: str, prompt_text: str) -> str:
+def _save_prompt(agent_id: str, prompt_text: str) -> Path:
     agent_dir = _AGENTS_DIR / agent_id
     agent_dir.mkdir(parents=True, exist_ok=True)
-    version = _get_current_prompt_version(agent_dir) + 1
-    prompt_file = agent_dir / f"prompt_v{version}.txt"
-    prompt_file.write_text(prompt_text)
-    registry_file = _AGENTS_DIR / "registry.json"
-    registry = {}
-    if registry_file.exists():
-        with open(registry_file) as f:
-            try:
-                registry = json.load(f)
-            except Exception:
-                registry = {}
-    registry[agent_id] = {
+    version = _get_prompt_version(agent_dir) + 1
+    out = agent_dir / f"prompt_v{version}.txt"
+    out.write_text(prompt_text)
+
+    registry = _AGENTS_DIR / "registry.json"
+    data = {}
+    if registry.exists():
+        try:
+            data = json.loads(registry.read_text())
+        except Exception:
+            data = {}
+    data[agent_id] = {
         "prompt_version": version,
-        "prompt_file": str(prompt_file),
+        "prompt_file": str(out),
         "optimized_at": datetime.now(timezone.utc).isoformat(),
     }
-    with open(registry_file, "w") as f:
-        json.dump(registry, f, indent=2)
-    accuracy_tracker.log_inference(
-        task_type="prompt_optimization",
-        model="hermes3",
-        tokens_in=0,
-        tokens_out=0,
-        agent_id=agent_id,
-    )
-    return str(prompt_file)
-
-
-class AgentDecisionSignature(dspy.Signature):
-    """Given evidence context, produce the correct agent analysis output."""
-    evidence_context: str = dspy.InputField(desc="Evidence and context for the decision")
-    analysis: str = dspy.OutputField(desc="Correct structured analysis output")
-
-
-class AgentPredictor(dspy.Module):
-    def __init__(self):
-        self.predict = dspy.Predict(AgentDecisionSignature)
-
-    def forward(self, evidence_context: str) -> dspy.Prediction:
-        return self.predict(evidence_context=evidence_context)
+    registry.write_text(json.dumps(data, indent=2))
+    return out
 
 
 def optimize_agent(agent_id: str) -> str | None:
     """
-    Pulls last 30 decisions with known outcomes for agent_id from Supabase.
-    Runs MIPROv2. Saves improved prompt. Archives old prompt — never deletes.
-    Returns new prompt text, or None if data is insufficient.
+    Optimizes the system prompt for agent_id using real outcome data.
+    Returns path to new prompt file, or None if data is insufficient or
+    optimization infrastructure is unavailable.
+    Skips silently if fewer than 10 real outcomes with evidence context.
     """
-    decisions = _fetch_decisions(agent_id, limit=30)
-    decisions_with_outcomes = [
-        d for d in decisions
-        if d.get("outcome") and d.get("evidence_context") and d.get("correct_answer")
-    ]
-
-    if len(decisions_with_outcomes) < 10:
-        log_msg = (
+    outcomes = _load_outcomes_for_agent(agent_id, limit=30)
+    if len(outcomes) < 10:
+        msg = (
             f"{datetime.now(timezone.utc).isoformat()} | {agent_id} | "
-            f"insufficient data ({len(decisions_with_outcomes)} decisions) — skipping optimization\n"
+            f"insufficient data ({len(outcomes)} usable outcomes) — skipping\n"
         )
-        log_file = Path(__file__).parent / "logs" / "dspy_optimizer.log"
-        log_file.parent.mkdir(exist_ok=True)
-        with open(log_file, "a") as f:
-            f.write(log_msg)
+        with open(_LOG_DIR / "dspy_optimizer.log", "a") as f:
+            f.write(msg)
+        log.info("Skipping optimization for %s: %d outcomes < 10 minimum", agent_id, len(outcomes))
         return None
 
-    trainset = [
-        dspy.Example(
-            evidence_context=d["evidence_context"],
-            analysis=d["correct_answer"],
-        ).with_inputs("evidence_context")
-        for d in decisions_with_outcomes
-    ]
+    if _openjarvis_available:
+        try:
+            prompt_text = _oj_optimize(agent_id=agent_id, outcomes=outcomes)
+            saved = _save_prompt(agent_id, prompt_text)
+            log.info("OpenJarvis optimization complete for %s -> %s", agent_id, saved)
+            return str(saved)
+        except Exception as e:
+            log.warning("OpenJarvis optimization failed for %s: %s — trying DSPy directly", agent_id, e)
 
-    def accuracy_metric(example, pred, trace=None) -> float:
-        expected = example.analysis.strip().lower()
-        predicted = pred.analysis.strip().lower()
-        if expected == predicted:
-            return 1.0
-        shared = set(expected.split()) & set(predicted.split())
-        return len(shared) / max(len(expected.split()), 1)
+    if not _dspy_configured:
+        msg = (
+            f"{datetime.now(timezone.utc).isoformat()} | {agent_id} | "
+            "DSPy not configured (OpenClaw unavailable) — skipping\n"
+        )
+        with open(_LOG_DIR / "dspy_optimizer.log", "a") as f:
+            f.write(msg)
+        log.warning("DSPy not configured — cannot optimize %s", agent_id)
+        return None
 
-    program = AgentPredictor()
-    optimizer = dspy.MIPROv2(metric=accuracy_metric, auto="light")
     try:
-        optimized = optimizer.compile(program, trainset=trainset)
+        class AgentSignature(dspy.Signature):
+            """Given evidence context, produce correct structured analysis."""
+            evidence_context: str = dspy.InputField(desc="Evidence and context for the decision")
+            analysis: str = dspy.OutputField(desc="Correct structured analysis output")
+
+        class AgentPredictor(dspy.Module):
+            def __init__(self):
+                self.predict = dspy.Predict(AgentSignature)
+
+            def forward(self, evidence_context: str) -> dspy.Prediction:
+                return self.predict(evidence_context=evidence_context)
+
+        trainset = [
+            dspy.Example(
+                evidence_context=o["evidence_context"],
+                analysis=o["correct_answer"],
+            ).with_inputs("evidence_context")
+            for o in outcomes
+        ]
+
+        def accuracy_metric(example, pred, trace=None) -> float:
+            expected = example.analysis.strip().lower()
+            predicted = pred.analysis.strip().lower()
+            if expected == predicted:
+                return 1.0
+            shared = set(expected.split()) & set(predicted.split())
+            return len(shared) / max(len(expected.split()), 1)
+
+        optimizer = dspy.MIPROv2(metric=accuracy_metric, auto="light")
+        optimized = optimizer.compile(AgentPredictor(), trainset=trainset)
         prompt_text = str(optimized.predict.signature)
-        return _save_optimized_prompt(agent_id, prompt_text)
+        saved = _save_prompt(agent_id, prompt_text)
+        log.info("DSPy MIPROv2 optimization complete for %s -> %s", agent_id, saved)
+        return str(saved)
+
     except Exception as e:
-        log_file = Path(__file__).parent / "logs" / "dspy_optimizer.log"
-        with open(log_file, "a") as f:
+        with open(_LOG_DIR / "dspy_optimizer.log", "a") as f:
             f.write(
                 f"{datetime.now(timezone.utc).isoformat()} | {agent_id} | "
-                f"optimization failed: {e}\n"
+                f"optimization error: {e}\n"
             )
+        log.error("Optimization failed for %s: %s", agent_id, e)
         return None
 
 
 def run_all_agents() -> None:
-    """
-    Optimizes every agent whose accuracy < 0.70 over last 30 decisions.
-    Called by weekly_learning_run().
-    """
+    """Runs optimize_agent for all agents below 0.70 accuracy."""
+    from neural.feedback_loop import get_agent_accuracy
     agents = ["Jade", "Red", "Dakota", "Oracle", "Geo"]
     for agent in agents:
-        acc = accuracy_tracker.get_agent_accuracy(agent, last_n=30)
+        acc = get_agent_accuracy(agent, last_n=30)
         if acc is not None and acc < 0.70:
             optimize_agent(agent)

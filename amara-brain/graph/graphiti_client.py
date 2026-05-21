@@ -15,35 +15,85 @@ _NEO4J_URI    = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 _OPENCLAW_KEY  = os.getenv("OPENCLAW_API_KEY", "none")
 _OPENCLAW_BASE = os.getenv("OPENCLAW_BASE_URL", "http://127.0.0.1:18789")
 
+# Candidate docker-compose files to probe for NEO4J_AUTH, in priority order.
+# The first file that exists and contains NEO4J_AUTH wins.
+_COMPOSE_CANDIDATES = [
+    Path(os.getenv("NEO4J_COMPOSE_FILE", "")),   # explicit override
+    Path("/Users/user/projects/amara-jarvis-brain/docker-compose.neo4j.yml"),
+    Path.home() / "projects/amara-jarvis-brain/docker-compose.neo4j.yml",
+    Path(__file__).parent.parent.parent / "docker-compose.neo4j.yml",
+]
 
-def _resolve_neo4j_auth() -> tuple[str, str]:
+
+def _parse_auth_string(value: str, source: str) -> tuple[str, str] | None:
     """
-    Resolves Neo4j credentials from environment.
-
-    Priority order:
-      1. NEO4J_AUTH=username/password  (Docker-standard: NEO4J_AUTH=neo4j/mypassword)
-      2. NEO4J_USER + NEO4J_PASSWORD   (separate vars)
-      3. Raises EnvironmentError with clear fix instructions.
+    Parses a NEO4J_AUTH value of the form 'user/password' or 'none'.
+    Returns (user, password), or None for no-auth mode.
     """
-    neo4j_auth = os.getenv("NEO4J_AUTH", "")
-    if neo4j_auth:
-        if "/" in neo4j_auth:
-            user, password = neo4j_auth.split("/", 1)
-            return user.strip(), password.strip()
+    value = value.strip().strip("'\"")
+    if value.lower() == "none":
+        log.info("Neo4j: auth disabled (NEO4J_AUTH=none from %s)", source)
+        return None
+    if "/" not in value:
         raise EnvironmentError(
-            f"NEO4J_AUTH='{neo4j_auth}' is not in 'username/password' format. "
-            "Set it as e.g. NEO4J_AUTH=neo4j/yourpassword"
+            f"NEO4J_AUTH from {source} is '{value}' — expected 'username/password' format.\n"
+            "Example: NEO4J_AUTH=neo4j/yourpassword"
         )
+    user, password = value.split("/", 1)
+    return user.strip(), password.strip()
 
-    user     = os.getenv("NEO4J_USER",     "neo4j")
-    password = os.getenv("NEO4J_PASSWORD", "")
-    if not password:
-        raise EnvironmentError(
-            "Neo4j password not configured. Set one of:\n"
-            "  export NEO4J_AUTH=neo4j/yourpassword   # matches docker-compose NEO4J_AUTH\n"
-            "  export NEO4J_PASSWORD=yourpassword     # with NEO4J_USER=neo4j"
-        )
-    return user, password
+
+def _auth_from_compose() -> tuple[str, str] | None:
+    """
+    Reads NEO4J_AUTH from the first docker-compose candidate that exists.
+    Handles both YAML list format (- NEO4J_AUTH=neo4j/pass)
+    and dict format (NEO4J_AUTH: neo4j/pass).
+    Returns (user, password) | None (no-auth) | raises FileNotFoundError.
+    """
+    import re
+    pattern = re.compile(r'NEO4J_AUTH[=:]\s*["\']?([^\s"\'#]+)["\']?')
+    for path in _COMPOSE_CANDIDATES:
+        if not path or not path.exists():
+            continue
+        try:
+            text = path.read_text()
+            m = pattern.search(text)
+            if m:
+                log.info("Neo4j: reading NEO4J_AUTH from %s", path)
+                return _parse_auth_string(m.group(1), source=str(path))
+        except OSError:
+            continue
+    raise FileNotFoundError(
+        "No docker-compose file with NEO4J_AUTH found. Set one of:\n"
+        "  export NEO4J_AUTH=neo4j/yourpassword\n"
+        "  export NEO4J_PASSWORD=yourpassword\n"
+        f"  export NEO4J_COMPOSE_FILE=/path/to/docker-compose.neo4j.yml"
+    )
+
+
+def _resolve_neo4j_auth() -> tuple[str, str] | None:
+    """
+    Resolves Neo4j credentials. Priority:
+      1. NEO4J_AUTH env var  (e.g. NEO4J_AUTH=neo4j/pass or NEO4J_AUTH=none)
+      2. NEO4J_USER + NEO4J_PASSWORD env vars
+      3. docker-compose.neo4j.yml at known paths (reads NEO4J_AUTH from file)
+    Returns (user, password), or None for no-auth mode.
+    Raises EnvironmentError / FileNotFoundError if nothing resolves.
+    """
+    # 1. NEO4J_AUTH env var
+    auth_env = os.getenv("NEO4J_AUTH", "").strip()
+    if auth_env:
+        return _parse_auth_string(auth_env, source="NEO4J_AUTH env var")
+
+    # 2. Separate env vars
+    password = os.getenv("NEO4J_PASSWORD", "").strip()
+    if password:
+        user = os.getenv("NEO4J_USER", "neo4j")
+        log.info("Neo4j: using NEO4J_USER=%s from env", user)
+        return user, password
+
+    # 3. Read from docker-compose file
+    return _auth_from_compose()
 
 
 def _build_graphiti_client():
@@ -79,7 +129,10 @@ def _build_graphiti_client():
                 model="hermes3",
             )
         )
-        neo4j_user, neo4j_password = _resolve_neo4j_auth()
+        auth = _resolve_neo4j_auth()   # (user, password) or None
+
+        neo4j_user     = auth[0] if auth else ""
+        neo4j_password = auth[1] if auth else ""
 
         g = Graphiti(
             uri=_NEO4J_URI,
@@ -91,17 +144,18 @@ def _build_graphiti_client():
         )
         # Verify Neo4j is actually reachable before claiming connected.
         from neo4j import GraphDatabase, basic_auth
-        driver = GraphDatabase.driver(
-            _NEO4J_URI,
-            auth=basic_auth(neo4j_user, neo4j_password),
-        )
+        driver_auth = basic_auth(neo4j_user, neo4j_password) if auth else None
+        driver = GraphDatabase.driver(_NEO4J_URI, auth=driver_auth)
         driver.verify_connectivity()
         driver.close()
-        log.info("Graphiti: Neo4j connected at %s (user=%s)", _NEO4J_URI, neo4j_user)
+        log.info(
+            "Graphiti: Neo4j connected at %s (auth=%s)",
+            _NEO4J_URI, f"user={neo4j_user}" if auth else "none",
+        )
         return g, True
 
-    except EnvironmentError as e:
-        log.error("Graphiti: credentials not configured — %s", e)
+    except (EnvironmentError, FileNotFoundError) as e:
+        log.error("Graphiti: credentials not resolved — %s", e)
         return None, False
     except Exception as e:
         log.warning(

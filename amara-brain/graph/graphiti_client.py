@@ -11,11 +11,39 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-_NEO4J_URI      = os.getenv("NEO4J_URI",      "bolt://localhost:7687")
-_NEO4J_USER     = os.getenv("NEO4J_USER",      "neo4j")
-_NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD",  "")
-_OPENCLAW_KEY   = os.getenv("OPENCLAW_API_KEY", "none")
-_OPENCLAW_BASE  = os.getenv("OPENCLAW_BASE_URL", "http://127.0.0.1:18789")
+_NEO4J_URI    = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+_OPENCLAW_KEY  = os.getenv("OPENCLAW_API_KEY", "none")
+_OPENCLAW_BASE = os.getenv("OPENCLAW_BASE_URL", "http://127.0.0.1:18789")
+
+
+def _resolve_neo4j_auth() -> tuple[str, str]:
+    """
+    Resolves Neo4j credentials from environment.
+
+    Priority order:
+      1. NEO4J_AUTH=username/password  (Docker-standard: NEO4J_AUTH=neo4j/mypassword)
+      2. NEO4J_USER + NEO4J_PASSWORD   (separate vars)
+      3. Raises EnvironmentError with clear fix instructions.
+    """
+    neo4j_auth = os.getenv("NEO4J_AUTH", "")
+    if neo4j_auth:
+        if "/" in neo4j_auth:
+            user, password = neo4j_auth.split("/", 1)
+            return user.strip(), password.strip()
+        raise EnvironmentError(
+            f"NEO4J_AUTH='{neo4j_auth}' is not in 'username/password' format. "
+            "Set it as e.g. NEO4J_AUTH=neo4j/yourpassword"
+        )
+
+    user     = os.getenv("NEO4J_USER",     "neo4j")
+    password = os.getenv("NEO4J_PASSWORD", "")
+    if not password:
+        raise EnvironmentError(
+            "Neo4j password not configured. Set one of:\n"
+            "  export NEO4J_AUTH=neo4j/yourpassword   # matches docker-compose NEO4J_AUTH\n"
+            "  export NEO4J_PASSWORD=yourpassword     # with NEO4J_USER=neo4j"
+        )
+    return user, password
 
 
 def _build_graphiti_client():
@@ -51,24 +79,30 @@ def _build_graphiti_client():
                 model="hermes3",
             )
         )
+        neo4j_user, neo4j_password = _resolve_neo4j_auth()
+
         g = Graphiti(
             uri=_NEO4J_URI,
-            user=_NEO4J_USER,
-            password=_NEO4J_PASSWORD,
+            user=neo4j_user,
+            password=neo4j_password,
             llm_client=llm,
             embedder=embedder,
             cross_encoder=cross_encoder,
         )
-        # Verify Neo4j is actually reachable
-        from neo4j import GraphDatabase
+        # Verify Neo4j is actually reachable before claiming connected.
+        from neo4j import GraphDatabase, basic_auth
         driver = GraphDatabase.driver(
-            _NEO4J_URI, auth=(_NEO4J_USER, _NEO4J_PASSWORD)
+            _NEO4J_URI,
+            auth=basic_auth(neo4j_user, neo4j_password),
         )
         driver.verify_connectivity()
         driver.close()
-        log.info("Graphiti: Neo4j connected at %s", _NEO4J_URI)
+        log.info("Graphiti: Neo4j connected at %s (user=%s)", _NEO4J_URI, neo4j_user)
         return g, True
 
+    except EnvironmentError as e:
+        log.error("Graphiti: credentials not configured — %s", e)
+        return None, False
     except Exception as e:
         log.warning(
             "Graphiti: Neo4j NOT connected at %s — %s. "

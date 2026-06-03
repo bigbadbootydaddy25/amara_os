@@ -18,6 +18,8 @@ import { IngestionLogRepo } from '../memory/postgres/ingestion-log-repo.js';
 import { syncProperty, syncSimulation } from '../memory/neo4j/graph-sync.js';
 import { upsertProperty } from '../memory/qdrant/vector-store.js';
 import { traceIngestion, traceLearning } from '../observability/tracer.js';
+import { rememberDealSimulation, rememberDealOutcome } from '../memory/mem0/episodic-memory.js';
+import { metrics } from '../telemetry/otel.js';
 
 export function persistDeal(
   raw: Record<string, unknown>,
@@ -63,6 +65,13 @@ async function _persistDeal(
       console.warn('[qdrant] upsertProperty failed:', err.message),
     );
 
+    // Remember in episodic memory (non-fatal)
+    await rememberDealSimulation({ ...property, id: propertyId }, sim).catch((err: Error) =>
+      console.warn('[mem0] rememberDealSimulation failed:', err.message),
+    );
+
+    metrics.ingestTotal.inc();
+
     // Log ingestion
     await IngestionLogRepo.log({
       source,
@@ -90,6 +99,8 @@ async function _persistDeal(
       errorMessage: message,
       processingMs: Date.now() - start,
     }).catch(() => undefined);
+
+    metrics.ingestErrors.inc();
 
     return {
       success: false,
@@ -192,6 +203,16 @@ async function _recordOutcomeAndLearn(
       modelVersion: updated.version,
     },
   );
+
+  // Remember outcome in episodic memory (non-fatal)
+  const prop = await PropertyRepo.findById(outcome.dealId).catch(() => null);
+  if (prop) {
+    await rememberDealOutcome(outcome, prop).catch((err: Error) =>
+      console.warn('[mem0] rememberDealOutcome failed:', err.message),
+    );
+  }
+
+  metrics.weightUpdates.inc();
 
   return { weightVersion: updated.version, mae: update.mae };
 }

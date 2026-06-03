@@ -16,11 +16,21 @@ import { SimulationRepo } from '../memory/postgres/simulation-repo.js';
 import { WeightsRepo } from '../memory/postgres/weights-repo.js';
 import { IngestionLogRepo } from '../memory/postgres/ingestion-log-repo.js';
 import { syncProperty, syncSimulation } from '../memory/neo4j/graph-sync.js';
+import { upsertProperty } from '../memory/qdrant/vector-store.js';
+import { traceIngestion, traceLearning } from '../observability/tracer.js';
 
-export async function persistDeal(
+export function persistDeal(
   raw: Record<string, unknown>,
   source: IngestionSource,
   marketRegime: MarketRegime = 'neutral',
+): Promise<IngestionResult> {
+  return traceIngestion(source, () => _persistDeal(raw, source, marketRegime));
+}
+
+async function _persistDeal(
+  raw: Record<string, unknown>,
+  source: IngestionSource,
+  marketRegime: MarketRegime,
 ): Promise<IngestionResult> {
   const start = Date.now();
 
@@ -46,6 +56,11 @@ export async function persistDeal(
     );
     await syncSimulation(sim).catch((err: Error) =>
       console.warn('[neo4j] syncSimulation failed:', err.message),
+    );
+
+    // Upsert to Qdrant vector store (non-fatal)
+    await upsertProperty({ ...property, id: propertyId }, sim).catch((err: Error) =>
+      console.warn('[qdrant] upsertProperty failed:', err.message),
     );
 
     // Log ingestion
@@ -138,7 +153,19 @@ export async function persistJsonBatch(
 /**
  * Record deal outcome → update weights → persist new weights.
  */
-export async function recordOutcomeAndLearn(
+export function recordOutcomeAndLearn(
+  outcome: DealOutcomeInput,
+  predictedMao: number,
+  predictedArv: number,
+  predictedRehab: number,
+  zip: string,
+): Promise<{ weightVersion: string; mae: number }> {
+  return traceLearning(outcome.dealId, () =>
+    _recordOutcomeAndLearn(outcome, predictedMao, predictedArv, predictedRehab, zip),
+  );
+}
+
+async function _recordOutcomeAndLearn(
   outcome: DealOutcomeInput,
   predictedMao: number,
   predictedArv: number,

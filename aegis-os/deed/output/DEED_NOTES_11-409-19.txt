@@ -1,0 +1,98 @@
+2026-06-04T23:31:35Z [DEED_RUN] INFO — 
+2026-06-04T23:31:35Z [DEED_RUN] INFO — ======================================================================
+2026-06-04T23:31:35Z [DEED_RUN] INFO —   AMARA DEED CREW — STARTING
+2026-06-04T23:31:35Z [DEED_RUN] INFO — ======================================================================
+2026-06-04T23:31:35Z [DEED_RUN] INFO — Parcel:     11-409-19
+2026-06-04T23:31:35Z [DEED_RUN] INFO — District:   Elk
+2026-06-04T23:31:35Z [DEED_RUN] INFO — County:     Harrison County, WV
+2026-06-04T23:31:35Z [DEED_RUN] INFO — Acres:      118.0000
+2026-06-04T23:31:35Z [DEED_RUN] INFO — Type:       WHITE SPACE (WS) — no prior title on file
+2026-06-04T23:31:35Z [DEED_RUN] INFO — Assignment: Marcus Strunk RPL / Texhoma Land Partners
+2026-06-04T23:31:35Z [DEED_RUN] INFO — Run Date:   2026-06-04
+2026-06-04T23:31:35Z [DEED_RUN] INFO — Output Dir: /root/aegis-os/deed/output
+2026-06-04T23:31:35Z [DEED_RUN] INFO — 
+2026-06-04T23:31:35Z [DEED_RUN] ERROR — HARD FAIL — OpenClaw DOWN at http://127.0.0.1:18789: HTTPConnectionPool(host='127.0.0.1', port=18789): Max retries exceeded with url: / (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=18789): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-06-04T23:31:35Z [DEED_RUN] ERROR — OpenClaw hard fail — agents will run without LLM synthesis
+2026-06-04T23:31:35Z [DEED_RUN] INFO — 
+2026-06-04T23:31:35Z [DEED_RUN] INFO — ▶ Starting CHAIN agent...
+2026-06-04T23:31:35Z [CHAIN] INFO — 
+2026-06-04T23:31:35Z [CHAIN] INFO — ======================================================================
+2026-06-04T23:31:35Z [CHAIN] INFO —   CHAIN AGENT — Parcel 11-409-19 | Harrison County WV
+2026-06-04T23:31:35Z [CHAIN] INFO — ======================================================================
+2026-06-04T23:31:35Z [CHAIN] INFO — Target: https://harrison.countyclerk.us/online-records/
+2026-06-04T23:31:35Z [CHAIN] INFO — Searching grantor/grantee index for parcel 11-409-19
+2026-06-04T23:31:35Z [CHAIN] INFO — Loading online records search page...
+2026-06-04T23:31:36Z [CHAIN] ERROR —   ✗ FAILED [CHAIN-LOAD]: Cannot reach https://harrison.countyclerk.us/online-records/. This site blocks cloud/non-local IPs. Must run from Mac on local network.
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ◀ CHAIN complete in 0.3s — status: FAILED
+2026-06-04T23:31:36Z [DEED_RUN] INFO — 
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ▶ Starting VEST agent...
+2026-06-04T23:31:36Z [VEST] INFO — 
+2026-06-04T23:31:36Z [VEST] INFO — ======================================================================
+2026-06-04T23:31:36Z [VEST] INFO —   VEST AGENT — Parcel 11-409-19 | mapwv.gov
+2026-06-04T23:31:36Z [VEST] INFO — ======================================================================
+2026-06-04T23:31:36Z [VEST] INFO — Target: https://mapwv.gov/parcel/
+2026-06-04T23:31:36Z [VEST] INFO — Trying ArcGIS endpoint: https://mapwv.gov/arcgis/rest/services/Parcels/Harrison/MapServer/0/query
+2026-06-04T23:31:36Z [VEST] INFO — Trying ArcGIS endpoint: https://mapwv.gov/arcgis/rest/services/wvgis/Parcels/MapServer/0/query
+2026-06-04T23:31:36Z [VEST] INFO — Trying direct mapwv.gov parcel search...
+2026-06-04T23:31:36Z [VEST] ERROR —   ✗ FAILED [VEST-LOAD]: Cannot reach https://mapwv.gov/parcel/. mapwv.gov blocks cloud IPs. Must run from Mac.
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ◀ VEST complete in 0.1s — status: FAILED
+2026-06-04T23:31:36Z [DEED_RUN] INFO — 
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ▶ Starting TAX agent...
+2026-06-04T23:31:36Z [TAX] INFO — 
+2026-06-04T23:31:36Z [TAX] INFO — ======================================================================
+2026-06-04T23:31:36Z [TAX] INFO —   TAX AGENT — Parcel 11-409-19 | Harrison County Assessor
+2026-06-04T23:31:36Z [TAX] INFO — ======================================================================
+2026-06-04T23:31:36Z [TAX] INFO — Target: https://harrisoncountyassessor.com/ownershipsearch.aspx
+2026-06-04T23:31:36Z [TAX] INFO — District: 11-Elk | Parcel: 11-409-19
+2026-06-04T23:31:36Z [TAX] INFO — Loading Harrison County Assessor search page...
+2026-06-04T23:31:36Z [TAX] ERROR —   ✗ FAILED [TAX-LOAD]: Cannot reach https://harrisoncountyassessor.com/ownershipsearch.aspx. Site blocks cloud IPs. Must run from Mac.
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ◀ TAX complete in 0.3s — status: FAILED
+2026-06-04T23:31:36Z [DEED_RUN] INFO — 
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ▶ Starting WELL agent...
+2026-06-04T23:31:36Z [WELL] INFO — 
+2026-06-04T23:31:36Z [WELL] INFO — ======================================================================
+2026-06-04T23:31:36Z [WELL] INFO —   WELL AGENT — Harrison County / Elk District | WVGS OGWIS
+2026-06-04T23:31:36Z [WELL] INFO — ======================================================================
+2026-06-04T23:31:36Z [WELL] INFO — Target: https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx
+2026-06-04T23:31:36Z [WELL] INFO — Parcel: 11-409-19 | County: Harrison | District: Elk
+2026-06-04T23:31:36Z [WELL] INFO — Trying WVGS API: https://wvgs.wvnet.edu/pipe2/ogwis/wells?county=17&district=Elk&format=json
+2026-06-04T23:31:36Z [WELL] INFO — Trying WVGS API: https://wvgs.wvnet.edu/pipe2/ogwis/wells?county=Harrison&district=Elk&format=json
+2026-06-04T23:31:36Z [WELL] INFO — Trying WVGS API: https://wvgs.wvnet.edu/pipe2/ogwis/wells.aspx?CountyCode=17&District=Elk
+2026-06-04T23:31:36Z [WELL] INFO — Trying OGWIS search form: https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx
+2026-06-04T23:31:36Z [WELL] ERROR —   ✗ FAILED [WELL-LOAD]: Cannot reach https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx. wvgs.wvnet.edu may be down or blocking cloud IPs. Must run from Mac on local network.
+2026-06-04T23:31:36Z [WELL] INFO — NO WELLS FOUND for parcel 11-409-19 / Elk District / Harrison County
+2026-06-04T23:31:36Z [WELL] INFO — This is a definitive finding if the search completed successfully.
+2026-06-04T23:31:36Z [WELL] INFO — If site was unreachable, wells status is UNKNOWN.
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ◀ WELL complete in 0.1s — status: COMPLETE
+2026-06-04T23:31:36Z [DEED_RUN] INFO — 
+2026-06-04T23:31:36Z [DEED_RUN] INFO — ▶ Starting DEP agent...
+2026-06-04T23:31:36Z [DEP] INFO — 
+2026-06-04T23:31:36Z [DEP] INFO — ======================================================================
+2026-06-04T23:31:36Z [DEP] INFO —   DEP AGENT — Harrison County / Elk District | WV DEP OOG
+2026-06-04T23:31:36Z [DEP] INFO — ======================================================================
+2026-06-04T23:31:36Z [DEP] INFO — Target: https://tagis.dep.wv.gov/oog/
+2026-06-04T23:31:36Z [DEP] INFO — Parcel: 11-409-19 | County: Harrison | District: Elk
+2026-06-04T23:31:36Z [DEP] INFO — Trying DEP ArcGIS: https://tagis.dep.wv.gov/arcgis/rest/services/OOG/WellStatus/MapServer/0/query
+2026-06-04T23:31:37Z [DEP] INFO — Trying DEP ArcGIS: https://tagis.dep.wv.gov/arcgis/rest/services/OOG/WellStatus/MapServer/0/query
+2026-06-04T23:31:37Z [DEP] INFO — Trying WV DEP OOG portal: https://tagis.dep.wv.gov/oog/
+2026-06-04T23:31:37Z [DEP] ERROR —   ✗ FAILED [DEP-LOAD]: Cannot reach https://tagis.dep.wv.gov/oog/. tagis.dep.wv.gov blocks cloud IPs. Must run from Mac.
+2026-06-04T23:31:37Z [DEP] INFO — Trying WV DEP IRIS fallback: https://apps.dep.wv.gov/oogwells
+2026-06-04T23:31:37Z [DEP] INFO — NO DEP RECORDS FOUND for Harrison County / Elk District
+2026-06-04T23:31:37Z [DEP] INFO — Search was blocked — DEP status is UNKNOWN (site unreachable from cloud IP)
+2026-06-04T23:31:37Z [DEED_RUN] INFO — ◀ DEP complete in 0.5s — status: COMPLETE
+2026-06-04T23:31:37Z [DEED_RUN] INFO — 
+2026-06-04T23:31:37Z [DEED_RUN] INFO — ======================================================================
+2026-06-04T23:31:37Z [DEED_RUN] INFO —   BUILDING OR SPREADSHEET
+2026-06-04T23:31:37Z [DEED_RUN] INFO — ======================================================================
+2026-06-04T23:31:40Z [OR_BUILDER] INFO — OR saved: /root/aegis-os/deed/output/WS_11-409-19_OR_2026-06-04.xlsx
+2026-06-04T23:31:40Z [DEED_RUN] INFO — OR saved: /root/aegis-os/deed/output/WS_11-409-19_OR_2026-06-04.xlsx
+2026-06-04T23:31:40Z [DEED_RUN] INFO — Results JSON: /root/aegis-os/deed/output/DEED_RESULTS_11-409-19_2026-06-04.json
+2026-06-04T23:31:40Z [DEED_RUN] INFO — 
+2026-06-04T23:31:40Z [DEED_RUN] INFO — ======================================================================
+2026-06-04T23:31:40Z [DEED_RUN] INFO —   SENDING TELEGRAM REPORT
+2026-06-04T23:31:40Z [DEED_RUN] INFO — ======================================================================
+2026-06-04T23:31:40Z [DEED_RUN] INFO — 
+2026-06-04T23:31:40Z [DEED_RUN] INFO — === DEED CREW COMPLETE ===
+2026-06-04T23:31:40Z [DEED_RUN] INFO — OR:    /root/aegis-os/deed/output/WS_11-409-19_OR_2026-06-04.xlsx
+2026-06-04T23:31:40Z [DEED_RUN] INFO — Notes: /root/aegis-os/deed/output/DEED_NOTES_11-409-19.txt
+2026-06-04T23:31:40Z [DEED_RUN] INFO — JSON:  /root/aegis-os/deed/output/DEED_RESULTS_11-409-19_2026-06-04.json

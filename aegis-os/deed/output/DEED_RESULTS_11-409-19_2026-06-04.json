@@ -1,0 +1,53 @@
+{
+  "chain": {
+    "agent": "CHAIN",
+    "status": "FAILED",
+    "parcel": "11-409-19",
+    "instruments": [],
+    "gaps": [],
+    "errors": [
+      "Cannot reach https://harrison.countyclerk.us/online-records/. This site blocks cloud/non-local IPs. Must run from Mac on local network."
+    ],
+    "count": 0
+  },
+  "vest": {
+    "agent": "VEST",
+    "status": "FAILED",
+    "record": {},
+    "missing": [],
+    "errors": [
+      "Cannot reach https://mapwv.gov/parcel/. mapwv.gov blocks cloud IPs. Must run from Mac."
+    ]
+  },
+  "tax": {
+    "agent": "TAX",
+    "status": "FAILED",
+    "records": [],
+    "missing": [],
+    "errors": [
+      "Cannot reach https://harrisoncountyassessor.com/ownershipsearch.aspx. Site blocks cloud IPs. Must run from Mac."
+    ],
+    "count": 0
+  },
+  "well": {
+    "agent": "WELL",
+    "status": "COMPLETE",
+    "wells_found": false,
+    "count": 0,
+    "wells": [],
+    "errors": [
+      "Cannot reach https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx. wvgs.wvnet.edu may be down or blocking cloud IPs. Must run from Mac on local network."
+    ],
+    "note": "NO WELLS CONFIRMED ABSENT"
+  },
+  "dep": {
+    "agent": "DEP",
+    "status": "COMPLETE",
+    "count": 0,
+    "records": [],
+    "errors": [
+      "Cannot reach https://tagis.dep.wv.gov/oog/. tagis.dep.wv.gov blocks cloud IPs. Must run from Mac."
+    ],
+    "note": "NO DEP RECORDS \u2014 CONFIRMED ABSENT"
+  }
+}

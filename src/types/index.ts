@@ -117,6 +117,7 @@ export interface ConversationMessage {
 export interface ChatRequestBody {
   message: string;
   history?: ConversationMessage[];
+  callTranscripts?: string[];
 }
 
 export interface TtsRequestBody {
@@ -139,6 +140,8 @@ export interface AmaraStore {
   response: string;
   error: string | null;
   errorPulse: number;
+  isCallCaptureEnabled: boolean;
+  callTranscripts: string[];
   setState: (state: AmaraState) => void;
   setAudioLevel: (level: number) => void;
   setMicActive: (active: boolean) => void;
@@ -149,6 +152,9 @@ export interface AmaraStore {
   setResponse: (text: string) => void;
   setError: (error: string | null) => void;
   triggerErrorPulse: () => void;
+  setCallCaptureEnabled: (enabled: boolean) => void;
+  addCallTranscript: (text: string) => void;
+  clearCallTranscripts: () => void;
 }
 
 export interface OrbParticle {

@@ -125,8 +125,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No message provided' }, { status: 400 });
     }
 
+    const callTranscripts = Array.isArray(body.callTranscripts)
+      ? (body.callTranscripts as unknown[])
+          .filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
+          .slice(-10)
+          .map((t) => t.trim())
+      : [];
+
     const messages: ConversationMessage[] = [
       { role: 'system', content: AMARA_SYSTEM_PROMPT },
+      ...(callTranscripts.length > 0
+        ? [
+            {
+              role: 'system' as ConversationRole,
+              content: `LIVE CALL CONTEXT — transcribed from ongoing call:\n${callTranscripts.map((t, i) => `[${i + 1}] ${t}`).join('\n')}`,
+            },
+          ]
+        : []),
       ...sanitiseHistory(body.history).slice(-20),
       { role: 'user', content: message },
     ];

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { AmaraStore } from '@/types';
 
+const MAX_CALL_TRANSCRIPTS = 30;
+
 export const useAmaraStore = create<AmaraStore>((set) => ({
   state: 'idle',
   audioLevel: 0,
@@ -12,6 +14,8 @@ export const useAmaraStore = create<AmaraStore>((set) => ({
   response: '',
   error: null,
   errorPulse: 0,
+  isCallCaptureEnabled: false,
+  callTranscripts: [],
   setState: (state) => set({ state }),
   setAudioLevel: (audioLevel) => set({ audioLevel }),
   setMicActive: (isMicActive) => set({ isMicActive }),
@@ -22,4 +26,10 @@ export const useAmaraStore = create<AmaraStore>((set) => ({
   setResponse: (response) => set({ response }),
   setError: (error) => set({ error }),
   triggerErrorPulse: () => set({ errorPulse: Date.now() }),
+  setCallCaptureEnabled: (isCallCaptureEnabled) => set({ isCallCaptureEnabled }),
+  addCallTranscript: (text) =>
+    set((s) => ({
+      callTranscripts: [...s.callTranscripts, text].slice(-MAX_CALL_TRANSCRIPTS),
+    })),
+  clearCallTranscripts: () => set({ callTranscripts: [] }),
 }));

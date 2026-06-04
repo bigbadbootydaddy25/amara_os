@@ -152,6 +152,7 @@ export function useConversation({ speak }: UseConversationOptions) {
           body: JSON.stringify({
             message,
             history: historyRef.current,
+            callTranscripts: useAmaraStore.getState().callTranscripts,
           }),
           signal: controller.signal,
         });

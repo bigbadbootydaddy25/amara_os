@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AnimationLoop } from '@/canvas/animation-loop';
+import { useCallCapture } from '@/hooks/useCallCapture';
 import { useConversation } from '@/hooks/useConversation';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useVoiceOutput } from '@/hooks/useVoiceOutput';
@@ -28,8 +29,17 @@ export function AmaraContainer() {
   const error = useAmaraStore((store) => store.error);
   const isOnline = useAmaraStore((store) => store.isOnline);
   const isVoiceSupported = useAmaraStore((store) => store.isVoiceSupported);
+  const isCallCaptureEnabled = useAmaraStore((store) => store.isCallCaptureEnabled);
+  const callTranscripts = useAmaraStore((store) => store.callTranscripts);
   const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
   const { primeAudio, speak, stopSpeaking } = useVoiceOutput();
+  const callTranscriptRef = useRef<HTMLDivElement>(null);
+
+  const { isCapturing: isCallCapturing, deviceLabel: callDeviceLabel } = useCallCapture({
+    enabled: !isDemoMode && isActivated && isCallCaptureEnabled,
+    onTranscript: (text) => useAmaraStore.getState().addCallTranscript(text),
+    onError: (msg) => useAmaraStore.getState().setError(msg),
+  });
   const { cancelPending, handleSpeechComplete } = useConversation({ speak });
   const { isSupported, startListening, stopListening } = useVoiceInput({
     enabled: !isDemoMode && isActivated,
@@ -192,6 +202,18 @@ export function AmaraContainer() {
     };
   }, [cancelPending, stopListening, stopSpeaking]);
 
+  useEffect(() => {
+    const el = callTranscriptRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [callTranscripts]);
+
+  const toggleCallCapture = () => {
+    const store = useAmaraStore.getState();
+    const next = !store.isCallCaptureEnabled;
+    store.setCallCaptureEnabled(next);
+    if (!next) store.clearCallTranscripts();
+  };
+
   const activateAmara = () => {
     if (isActivating || isDemoMode) {
       return;
@@ -272,6 +294,49 @@ export function AmaraContainer() {
           </span>
         </button>
       ) : null}
+      {isActivated && !isDemoMode ? (
+        <div className="fixed bottom-20 left-6 z-30 flex flex-col items-start gap-2">
+          <button
+            type="button"
+            onClick={toggleCallCapture}
+            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.34em] backdrop-blur-md transition-colors duration-300 ${
+              isCallCaptureEnabled
+                ? 'border-red-400/40 bg-red-900/30 text-red-200/90 hover:bg-red-900/50'
+                : 'border-white/10 bg-black/40 text-white/40 hover:text-white/70 hover:border-white/20'
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${isCallCapturing ? 'animate-pulse bg-red-400' : 'bg-current'}`}
+            />
+            {isCallCaptureEnabled ? 'End Call' : 'Call Mode'}
+          </button>
+          {isCallCapturing && callDeviceLabel ? (
+            <span className="rounded-full border border-white/8 bg-black/30 px-2 py-0.5 text-[9px] font-mono text-white/30 backdrop-blur-md">
+              {callDeviceLabel}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {callTranscripts.length > 0 ? (
+        <div
+          ref={callTranscriptRef}
+          className="fixed bottom-36 left-4 right-4 z-30 max-h-40 overflow-y-auto rounded-xl border border-white/8 bg-black/55 px-4 py-3 backdrop-blur-md"
+        >
+          <div className="mb-1.5 text-[9px] font-mono uppercase tracking-[0.4em] text-white/30">
+            Call transcript
+          </div>
+          {callTranscripts.map((text, index) => (
+            <p
+              key={index}
+              className="text-[11px] leading-relaxed text-white/55"
+            >
+              {text}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
       <StatusIndicator />
     </main>
   );

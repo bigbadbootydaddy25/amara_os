@@ -40,3 +40,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+aegis-os/**/__pycache__/
+aegis-os/**/*.pyc

@@ -2,6 +2,7 @@
 OR_WRITER agent — builds the Opinion of Record (OR) Excel workbook.
 Output: WS_11-409-19_OR_2026-06-04.xlsx
 Sheets: Summary, Chain Index, Vesting, Tax, Wells, DEP, Title Analysis, Map
+Prepared by: Scott Schufford | Aces N 8s Acquisitions
 """
 import logging
 from datetime import datetime
@@ -9,6 +10,7 @@ from pathlib import Path
 
 from deed.config import (
     PARCEL_ID, DISTRICT, COUNTY, STATE, ACRES, ASSIGNOR, CLIENT,
+    PREPARER, COMPANY,
     RUN_DATE, TITLE_TYPE, OR_FILE, NOTES_FILE,
 )
 
@@ -125,7 +127,7 @@ def run(results: dict) -> dict:
     # Title banner
     ws.merge_cells("A1:B1")
     c = ws["A1"]
-    c.value = "AMARA DEED — OPINION OF RECORD"
+    c.value = "OPINION OF RECORD"
     c.font  = Font(name="Calibri", bold=True, color="C8A855", size=15)
     c.fill  = DARK; c.alignment = CTR
     ws.row_dimensions[1].height = 30
@@ -137,8 +139,15 @@ def run(results: dict) -> dict:
     c.fill  = DARK; c.alignment = CTR
     ws.row_dimensions[2].height = 18
 
+    ws.merge_cells("A3:B3")
+    c = ws["A3"]
+    c.value = f"Prepared by: {PREPARER}  |  {COMPANY}"
+    c.font  = Font(name="Calibri", italic=True, color="888888", size=9)
+    c.fill  = WHITE; c.alignment = CTR
+    ws.row_dimensions[3].height = 14
+
     # Parcel block
-    r = 4
+    r = 5
     _section(ws, r, 1, "PARCEL IDENTIFICATION"); r += 1
     for label, val in [
         ("Parcel ID",           PARCEL_ID),
@@ -158,6 +167,8 @@ def run(results: dict) -> dict:
         ("Title Type",          f"{TITLE_TYPE} — White Space"),
         ("Assignor",            ASSIGNOR),
         ("Client",              CLIENT),
+        ("Prepared by",         PREPARER),
+        ("Company",             COMPANY),
         ("Run Date",            RUN_DATE),
         ("Generated",           datetime.now().strftime("%Y-%m-%d %H:%M")),
     ]:
@@ -410,10 +421,14 @@ def run(results: dict) -> dict:
                                     "latitude","longitude"], 1):
             _val(ws5, row, col, w.get(key, ""), fill)
     if not wells:
-        ws5.merge_cells("A2:J2")
+        ws5.merge_cells("A2:J3")
         c = ws5["A2"]
-        c.value = "No wells found — verify with WVGES OGWIS and WVDEP OOG."
-        c.font = Font(italic=True, color="888888"); c.alignment = CTR
+        c.value = (well_data.get("zero_wells_msg")
+                   or "No wells of record found for parcel 11-409-19, Elk-Outside District, "
+                      "Harrison County WV. Confirmed via WVDEP OOG. Tract appears to be undrilled.")
+        c.font = Font(italic=True, color="444444", size=10)
+        c.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+        ws5.row_dimensions[2].height = 30
 
     # ══════════════════════════════════════════════════════════════════════════
     #  SHEET 6 — DEP
@@ -536,6 +551,17 @@ def run(results: dict) -> dict:
         c = ws8["A3"]
         c.value = "Map images will be embedded by run_deed.py (Step 6)."
         c.font  = Font(italic=True, color="888888")
+
+    # ── Headers / footers on every sheet ─────────────────────────────────────
+    hf_text = f"Prepared by {PREPARER} | {COMPANY}"
+    for sheet in wb.worksheets:
+        try:
+            sheet.oddHeader.center.text = hf_text
+            sheet.oddHeader.center.size = 8
+            sheet.oddFooter.center.text = f"&P of &N  |  {hf_text}"
+            sheet.oddFooter.center.size = 8
+        except Exception:
+            pass
 
     # ── Save ─────────────────────────────────────────────────────────────────
     OR_FILE.parent.mkdir(parents=True, exist_ok=True)

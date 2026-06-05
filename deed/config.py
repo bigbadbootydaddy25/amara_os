@@ -1,5 +1,5 @@
 """
-AMARA DEED crew config.
+DEED crew config.
 All credentials from Mac Keychain only — never hardcoded.
 """
 import os
@@ -14,6 +14,8 @@ STATE          = "WV"
 ACRES          = 118.00
 ASSIGNOR       = "Marcus Strunk RPL"
 CLIENT         = "Texhoma Land Partners"
+PREPARER       = "Scott Schufford"
+COMPANY        = "Aces N 8s Acquisitions"
 RUN_DATE       = "2026-06-04"
 TITLE_TYPE     = "WS"   # White Space — no prior title on file
 

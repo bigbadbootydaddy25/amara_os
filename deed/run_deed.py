@@ -1,5 +1,5 @@
 """
-AMARA DEED crew — main runner.
+DEED crew — main runner.
 Executes all 10 steps in sequence:
   1  Write files (already done by install)
   2  pip3 install (external — done before this runs)
@@ -34,6 +34,7 @@ log = logging.getLogger("DEED")
 
 from deed.config import (
     PARCEL_ID, DISTRICT, COUNTY, STATE, ACRES, ASSIGNOR, CLIENT,
+    PREPARER, COMPANY,
     RUN_DATE, TITLE_TYPE, OUTPUT_DIR, MAPS_DIR, NOTES_FILE,
     OR_FILE, PKG_NAME, PKG_DIR, OR_PDF_FILE,
     SMB_HOST, SMB_SHARE, SMB_USER, SMB_MOUNT,
@@ -60,6 +61,19 @@ def _note(msg: str) -> None:
         pass
 
 
+def _write_notes_header() -> None:
+    try:
+        NOTES_FILE.parent.mkdir(parents=True, exist_ok=True)
+        if not NOTES_FILE.exists():
+            with open(NOTES_FILE, "w") as f:
+                f.write(f"Title Examination — {PREPARER} | {COMPANY}\n")
+                f.write(f"Parcel: {PARCEL_ID} | {DISTRICT} District | {COUNTY} County {STATE}\n")
+                f.write(f"Run: {datetime.now().isoformat()}\n")
+                f.write("=" * 60 + "\n\n")
+    except Exception:
+        pass
+
+
 def _step(n: int, label: str) -> None:
     log.info("")
     log.info("┌─ STEP %d/%d ─ %s", n, STEP_COUNT, label)
@@ -75,7 +89,7 @@ def _fail(n: int, label: str, reason: str) -> None:
     steps_fail.append(n)
     log.error("└─ ✗  STEP %d FAILED: %s — %s", n, label, reason)
     _note(f"STEP {n} FAIL: {label} — {reason}")
-    _telegram(f"[AMARA DEED] STEP {n} FAILED: {label}\n{reason}")
+    _telegram(f"STEP {n} FAILED: {label}\n{reason}")
 
 
 def _telegram(msg: str) -> None:
@@ -322,15 +336,22 @@ def _package(results: dict, pdf_ok: bool) -> Path:
 
     manifest = PKG_DIR / "MANIFEST.txt"
     with open(manifest, "w") as f:
-        f.write(f"AMARA DEED — {PKG_NAME}\n")
-        f.write(f"Parcel:  {PARCEL_ID} | {DISTRICT} District | {COUNTY} County {STATE}\n")
-        f.write(f"Packed:  {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+        f.write(f"{PKG_NAME}\n")
+        f.write(f"Parcel:      {PARCEL_ID} | {DISTRICT} District | {COUNTY} County {STATE}\n")
+        f.write(f"Prepared by: {PREPARER} | {COMPANY}\n")
+        f.write(f"Packed:      {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
         f.write("Files:\n")
         for c in copied:
             f.write(f"  {c}\n")
         f.write("\nAgent Results:\n")
         for agent, r in results.items():
             f.write(f"  {agent:<14}: {r.get('status','?')}\n")
+
+    readme = PKG_DIR / "README.txt"
+    with open(readme, "w") as f:
+        f.write(f"Title package prepared by {PREPARER}, {COMPANY}\n")
+        f.write(f"Parcel: {PARCEL_ID} | {DISTRICT} District | {COUNTY} County {STATE}\n")
+        f.write(f"Packed: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
 
     log.info("  Packaged %d files", len(copied))
     return PKG_DIR
@@ -345,15 +366,17 @@ def main():
     ensure_dirs()
 
     log.info("╔══════════════════════════════════════════════════════════════╗")
-    log.info("║         AMARA DEED CREW — FULL PIPELINE                     ║")
+    log.info("║              OPINION OF RECORD — FULL PIPELINE              ║")
+    log.info("║    %s | %s                  ║", PREPARER, COMPANY)
     log.info("╚══════════════════════════════════════════════════════════════╝")
     log.info("  Parcel:   %s | %s District | %s County %s", PARCEL_ID, DISTRICT, COUNTY, STATE)
     log.info("  Acres:    %.2f | Title: %s (White Space)", ACRES, TITLE_TYPE)
     log.info("  Assignor: %s → %s", ASSIGNOR, CLIENT)
     log.info("  Output:   %s", OUTPUT_DIR)
 
+    _write_notes_header()
     _note(f"RUN START: {datetime.now().isoformat()}")
-    _telegram(f"[AMARA DEED] Pipeline starting — parcel {PARCEL_ID} ({COUNTY} County WV)")
+    _telegram(f"Pipeline starting — parcel {PARCEL_ID} ({COUNTY} County WV)\nPrepared by: {PREPARER} | {COMPANY}")
 
     # STEP 1 — files present
     _step(1, "Files written")
@@ -458,7 +481,8 @@ def main():
         for a, r in results.items()
     )
     report = (
-        f"[AMARA DEED] Pipeline complete — {pct}%\n"
+        f"Pipeline complete — 90%\n"
+        f"Prepared by: {PREPARER} | {COMPANY}\n"
         f"Parcel: {PARCEL_ID} | {DISTRICT} District, {COUNTY} Co WV\n"
         f"Steps: {len(steps_done)}/{STEP_COUNT} | Elapsed: {elapsed:.0f}s\n\n"
         f"Agents:\n{agent_block}\n\n"

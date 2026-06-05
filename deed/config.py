@@ -36,8 +36,17 @@ TELEGRAM_CHAT  = os.getenv("TELEGRAM_CHAT_ID",   "7977783351")
 
 # ── SMB ──────────────────────────────────────────────────────────────────────
 SMB_HOST       = "WVDATA.TEXHOMALP.COM"
-SMB_SHARE      = "DOCLIBRARY"
-SMB_MOUNT      = Path("/Volumes/TEXHOMA_DOCLIBRARY")
+SMB_SHARE      = "DATA"
+SMB_USER       = "SSchufford"
+SMB_MOUNT      = Path("/Volumes/TEXHOMA_DATA")
+
+# ── Hermes ────────────────────────────────────────────────────────────────────
+HERMES_DIR     = Path(os.getenv("HERMES_DIR", "/Users/user/.hermes/hermes-agent"))
+
+# ── Package output ────────────────────────────────────────────────────────────
+PKG_NAME       = f"{TITLE_TYPE}_{PARCEL_ID}_OR_{RUN_DATE}"
+PKG_DIR        = OUTPUT_DIR / PKG_NAME
+OR_PDF_FILE    = PKG_DIR / f"{PKG_NAME}.pdf"
 
 # ── HTTP scraper headers ─────────────────────────────────────────────────────
 HEADERS = {

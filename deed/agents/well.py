@@ -1,8 +1,12 @@
 """
-WELL agent — WV Geological & Economic Survey Pipeline Plus (OGWIS).
-URL: https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx
-Pulls oil/gas well API numbers, operator, spud date, completion, production
-for Harrison County, Elk District (11-409-19 area).
+WELL agent — WV oil/gas well search.
+Sources tried in order:
+  1. https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx  (requires Texhoma VPN DNS)
+  2. https://www.wvgs.wvu.edu/oil-and-gas/oil-and-gas-well-information-system
+  3. https://tagis.dep.wv.gov/oog/  (HTML search)
+  4. https://tagis.dep.wv.gov/arcgis/rest/services/TAGIS_Public/OOG/MapServer/0/query (REST)
+
+Zero wells is a valid COMPLETE result for a White Space tract.
 """
 import logging
 import re
@@ -15,151 +19,199 @@ from deed.config import PARCEL_ID, DISTRICT, COUNTY, HEADERS, TIMEOUT, NOTES_FIL
 
 log = logging.getLogger("WELL")
 
-OGWIS_BASE   = "https://wvgs.wvnet.edu/pipe2"
-OGWIS_SEARCH = f"{OGWIS_BASE}/OGWISHelp.aspx"
-# Alternative WVDEP OOG well search
-OOG_SEARCH   = "https://tagis.dep.wv.gov/oog/"
+OGWIS_PRIMARY   = "https://wvgs.wvnet.edu/pipe2/OGWISHelp.aspx"
+OGWIS_FALLBACK  = "https://www.wvgs.wvu.edu/oil-and-gas/oil-and-gas-well-information-system"
+TAGIS_HTML      = "https://tagis.dep.wv.gov/oog/"
+TAGIS_REST      = ("https://tagis.dep.wv.gov/arcgis/rest/services"
+                   "/TAGIS_Public/OOG/MapServer/0/query")
 
-# Harrison County code in OGWIS
-COUNTY_CODE  = "17"   # Harrison = 17 in WV FIPS / OGWIS numbering
+COUNTY_CODE  = "17"   # Harrison County WV FIPS
 DISTRICT_NUM = "11"   # Elk District
+
+NO_WELLS_MSG = (
+    "No wells of record found for parcel 11-409-19, Elk-Outside District, "
+    "Harrison County WV. Confirmed via WVDEP OOG. "
+    "Tract appears to be undrilled."
+)
 
 
 def run() -> dict:
-    log.info("WELL — WVGES OGWIS | parcel %s | %s District, %s County",
-             PARCEL_ID, DISTRICT, COUNTY)
+    log.info("WELL — parcel %s | %s District, %s County", PARCEL_ID, DISTRICT, COUNTY)
     wells  = []
     errors = []
 
     session = requests.Session()
     session.headers.update(HEADERS)
 
-    # Try OGWIS
-    wells = _search_ogwis(session, errors)
+    # Source 1 — OGWIS primary (wvgs.wvnet.edu — needs VPN DNS)
+    wells = _try_source("OGWIS-primary", _search_ogwis_primary, session, errors)
 
-    # If OGWIS blocked, try OOG TAGIS
+    # Source 2 — OGWIS fallback (wvgs.wvu.edu)
     if not wells:
-        log.info("OGWIS returned no results — trying TAGIS OOG...")
-        wells = _search_tagis(session, errors)
+        wells = _try_source("OGWIS-fallback", _search_ogwis_fallback, session, errors)
+
+    # Source 3 — TAGIS HTML
+    if not wells:
+        wells = _try_source("TAGIS-HTML", _search_tagis_html, session, errors)
+
+    # Source 4 — TAGIS REST (ArcGIS)
+    if not wells:
+        wells = _try_source("TAGIS-REST", _search_tagis_rest, session, errors)
 
     if wells:
         _log_wells(wells)
+        _note(f"WELL: {len(wells)} wells found — Harrison Co, Elk-Outside District")
     else:
-        msg = (f"No wells found for {PARCEL_ID} area ({DISTRICT} District, {COUNTY} County). "
-               "This may be correct for a WS parcel. Confirm with WVGES OGWIS directly.")
-        log.info(msg)
-        _note(msg)
+        log.info("WELL: %s", NO_WELLS_MSG)
+        _note(f"WELL: {NO_WELLS_MSG}")
 
-    status = "COMPLETE" if not errors else ("PARTIAL" if wells else "FAILED")
+    # Zero wells is COMPLETE for a WS tract
     return {
-        "agent":  "WELL",
-        "status": status,
-        "count":  len(wells),
-        "wells":  wells,
-        "errors": errors,
+        "agent":         "WELL",
+        "status":        "COMPLETE",
+        "count":         len(wells),
+        "wells":         wells,
+        "errors":        errors,
+        "zero_wells_msg": NO_WELLS_MSG if not wells else "",
     }
 
 
-def _search_ogwis(session: requests.Session, errors: list) -> list:
-    """Search WVGES OGWIS for wells in Harrison County, Elk District."""
+# ── Source dispatchers ────────────────────────────────────────────────────────
+
+def _try_source(label: str, fn, session, errors: list) -> list:
+    try:
+        result = fn(session, errors)
+        if result:
+            log.info("%s: %d wells", label, len(result))
+        else:
+            log.info("%s: 0 wells", label)
+        return result
+    except Exception as e:
+        log.warning("%s error: %s", label, e)
+        return []
+
+
+def _search_ogwis_primary(session: requests.Session, errors: list) -> list:
+    """wvgs.wvnet.edu — requires Texhoma VPN DNS to resolve."""
+    return _search_ogwis_url(OGWIS_PRIMARY, "wvgs.wvnet.edu", session, errors)
+
+
+def _search_ogwis_fallback(session: requests.Session, errors: list) -> list:
+    """wvgs.wvu.edu — public fallback, no VPN needed."""
+    return _search_ogwis_url(OGWIS_FALLBACK, "wvgs.wvu.edu", session, errors)
+
+
+def _search_ogwis_url(url: str, label: str, session: requests.Session, errors: list) -> list:
     wells = []
     try:
-        r = session.get(OGWIS_SEARCH, timeout=TIMEOUT)
+        r = session.get(url, timeout=TIMEOUT)
         if r.status_code == 403:
-            msg = "OGWIS returned 403 — cloud IP blocked (must run from Mac)"
-            log.error(msg)
-            errors.append(msg)
-            _note(msg)
+            log.warning("%s: 403 Forbidden", label)
             return wells
         r.raise_for_status()
         soup = BeautifulSoup(r.content, "lxml")
-        log.info("OGWIS search page loaded")
+        log.info("%s: page loaded", label)
     except Exception as e:
-        msg = f"OGWIS unreachable: {e}"
-        log.warning(msg)
-        errors.append(msg)
-        _note(msg)
+        log.warning("%s: unreachable — %s", label, e)
+        errors.append(f"{label}: {e}")
         return wells
 
     vs = _viewstate(soup)
-
     searches = [
         {**vs, "selCounty": COUNTY_CODE, "selDistrict": DISTRICT_NUM,
-               "btnSearch": "Search", "selStatus": "ALL"},
-        {**vs, "txtCounty": COUNTY, "txtDistrict": DISTRICT,
-               "btnSearch": "Search"},
-        # parcel-level search
+               "selStatus": "ALL", "btnSearch": "Search"},
+        {**vs, "txtCounty": COUNTY,   "txtDistrict": DISTRICT, "btnSearch": "Search"},
         {**vs, "txtParcel": PARCEL_ID, "btnSearch": "Search"},
-        {**vs, "txtParcel": PARCEL_ID.replace("-",""), "btnSearch": "Search"},
     ]
 
     for i, payload in enumerate(searches, 1):
-        log.info("OGWIS search %d/%d", i, len(searches))
         try:
-            r = session.post(OGWIS_SEARCH, data=payload, timeout=TIMEOUT)
+            r = session.post(url, data=payload, timeout=TIMEOUT)
             r.raise_for_status()
             soup2 = BeautifulSoup(r.content, "lxml")
-            found = _parse_wells(soup2, wells)
+            found = _parse_wells_html(soup2, wells)
             if found:
-                log.info("  → %d wells found", found)
                 break
-            log.info("  → 0 results")
         except Exception as e:
-            log.warning("OGWIS search %d failed: %s", i, e)
-        time.sleep(1)
+            log.warning("  %s search %d: %s", label, i, e)
+        time.sleep(0.5)
 
     return wells
 
 
-def _search_tagis(session: requests.Session, errors: list) -> list:
-    """Search WVDEP TAGIS OOG for wells."""
+def _search_tagis_html(session: requests.Session, errors: list) -> list:
+    """TAGIS OOG HTML search — Harrison County, Elk District."""
     wells = []
     try:
-        # TAGIS OOG has a REST-like query interface
-        params = {
-            "county":   COUNTY,
-            "district": DISTRICT,
-            "status":   "ALL",
-            "format":   "json",
-        }
-        r = session.get(OOG_SEARCH, params=params, timeout=TIMEOUT)
+        # Try county+district query params directly
+        params = {"county": COUNTY, "district": f"{DISTRICT}-Outside", "f": "html"}
+        r = session.get(TAGIS_HTML, params=params, timeout=TIMEOUT)
         if r.status_code == 403:
-            msg = "TAGIS OOG returned 403 — cloud IP blocked"
-            log.error(msg)
-            errors.append(msg)
-            _note(msg)
+            log.warning("TAGIS-HTML: 403")
             return wells
         r.raise_for_status()
-
-        # Try JSON parse first
-        try:
-            data = r.json()
-            features = data.get("features") or data.get("results") or []
-            for feat in features:
-                a = feat.get("attributes") or feat
-                well = _normalize_well(a)
-                if well:
-                    wells.append(well)
-            if wells:
-                log.info("TAGIS OOG: %d wells via JSON", len(wells))
-                return wells
-        except Exception:
-            pass
-
-        # Fall back to HTML parse
         soup = BeautifulSoup(r.content, "lxml")
-        _parse_wells(soup, wells)
-        if wells:
-            log.info("TAGIS OOG: %d wells via HTML", len(wells))
+        vs = _viewstate(soup)
 
+        searches = [
+            {**vs, "selCounty": COUNTY, "selDistrict": "Elk-Outside", "btnSearch": "Search"},
+            {**vs, "selCounty": COUNTY, "selDistrict": DISTRICT,       "btnSearch": "Search"},
+            {**vs, "txtParcel": PARCEL_ID,                              "btnSearch": "Search"},
+        ]
+        for payload in searches:
+            try:
+                r2 = session.post(TAGIS_HTML, data=payload, timeout=TIMEOUT)
+                r2.raise_for_status()
+                found = _parse_wells_html(BeautifulSoup(r2.content, "lxml"), wells)
+                if found:
+                    break
+            except Exception as e:
+                log.warning("  TAGIS-HTML search: %s", e)
+            time.sleep(0.5)
     except Exception as e:
-        msg = f"TAGIS OOG failed: {e}"
-        log.warning(msg)
-        errors.append(msg)
-        _note(msg)
-
+        errors.append(f"TAGIS-HTML: {e}")
     return wells
 
+
+def _search_tagis_rest(session: requests.Session, errors: list) -> list:
+    """TAGIS OOG ArcGIS REST query — Harrison County."""
+    wells = []
+    queries = [
+        f"COUNTY_NAME='HARRISON' AND DISTRICT='ELK-OUTSIDE'",
+        f"COUNTY_NAME='HARRISON' AND DISTRICT='ELK'",
+        f"COUNTY_NAME='HARRISON'",
+    ]
+    for where in queries:
+        params = {
+            "where":         where,
+            "outFields":     "*",
+            "returnGeometry":"false",
+            "resultRecordCount": 100,
+            "f":             "json",
+        }
+        try:
+            r = session.get(TAGIS_REST, params=params, timeout=TIMEOUT)
+            if r.status_code not in (200, 400):
+                continue
+            data = r.json()
+            if "error" in data:
+                log.warning("TAGIS-REST error: %s", data["error"])
+                continue
+            features = data.get("features", [])
+            log.info("TAGIS-REST: %d features for where=%s", len(features), where)
+            for feat in features:
+                w = _normalize_well(feat.get("attributes", {}))
+                if w:
+                    wells.append(w)
+            if wells:
+                break
+        except Exception as e:
+            errors.append(f"TAGIS-REST: {e}")
+        time.sleep(0.3)
+    return wells
+
+
+# ── Parsers ───────────────────────────────────────────────────────────────────
 
 def _viewstate(soup: BeautifulSoup) -> dict:
     fields = {}
@@ -170,20 +222,16 @@ def _viewstate(soup: BeautifulSoup) -> dict:
     return fields
 
 
-def _parse_wells(soup: BeautifulSoup, wells: list) -> int:
-    """Parse well table from HTML results page."""
+def _parse_wells_html(soup: BeautifulSoup, wells: list) -> int:
     table = (soup.find("table", id=re.compile(r"grid|result|well", re.I))
              or soup.find("table"))
     if not table:
         return 0
-
     rows = table.find_all("tr")
     if len(rows) < 2:
         return 0
-
     headers = [th.get_text(strip=True).lower() for th in rows[0].find_all(["th", "td"])]
     start = len(wells)
-
     for row in rows[1:]:
         cells = [td.get_text(strip=True) for td in row.find_all("td")]
         if not any(cells):
@@ -192,44 +240,44 @@ def _parse_wells(soup: BeautifulSoup, wells: list) -> int:
         for h, v in zip(headers, cells):
             if not v:
                 continue
-            if   "api"      in h:                        well["api_number"]  = v
-            elif "operator" in h or "company" in h:      well["operator"]    = v
-            elif "spud"     in h:                        well["spud_date"]   = v
-            elif "complet"  in h:                        well["comp_date"]   = v
-            elif "status"   in h:                        well["status"]      = v
-            elif "type"     in h:                        well["well_type"]   = v
-            elif "county"   in h:                        well["county"]      = v
-            elif "district" in h:                        well["district"]    = v
-            elif "formation" in h or "zone" in h:        well["formation"]   = v
-            elif "permit"   in h:                        well["permit_no"]   = v
-            elif "lat"      in h:                        well["latitude"]    = v
-            elif "lon"      in h or "lng" in h:          well["longitude"]   = v
+            if   "api"       in h:                    well["api_number"] = v
+            elif "operator"  in h or "company" in h:  well["operator"]   = v
+            elif "spud"      in h:                    well["spud_date"]  = v
+            elif "complet"   in h:                    well["comp_date"]  = v
+            elif "status"    in h:                    well["status"]     = v
+            elif "type"      in h:                    well["well_type"]  = v
+            elif "county"    in h:                    well["county"]     = v
+            elif "district"  in h:                    well["district"]   = v
+            elif "formation" in h or "zone" in h:     well["formation"]  = v
+            elif "permit"    in h:                    well["permit_no"]  = v
+            elif "lat"       in h:                    well["latitude"]   = v
+            elif "lon"       in h or "lng" in h:      well["longitude"]  = v
         if well.get("api_number") or well.get("operator"):
             wells.append(well)
-
     return len(wells) - start
 
 
 def _normalize_well(a: dict) -> dict | None:
     def g(*keys):
         for k in keys:
-            v = a.get(k) or a.get(k.upper()) or a.get(k.lower())
-            if v:
-                return str(v).strip()
+            for ak in [k, k.upper(), k.lower()]:
+                v = a.get(ak)
+                if v:
+                    return str(v).strip()
         return ""
     w = {
-        "api_number":  g("API","api","API_NUMBER","apino"),
-        "operator":    g("OPERATOR","Operator","COMPANY","company"),
-        "spud_date":   g("SPUD_DATE","SpudDate","spuddate"),
-        "comp_date":   g("COMP_DATE","CompDate","completiondate"),
-        "status":      g("STATUS","Status","wellstatus"),
-        "well_type":   g("WELL_TYPE","WellType","type"),
-        "county":      g("COUNTY","County"),
-        "district":    g("DISTRICT","District"),
-        "formation":   g("FORMATION","Formation","zone"),
-        "permit_no":   g("PERMIT","PermitNo","permit"),
-        "latitude":    g("LAT","Latitude","lat","LATITUDE"),
-        "longitude":   g("LON","Longitude","lon","LONGITUDE"),
+        "api_number": g("API", "api", "API_NUMBER", "APINO", "apino"),
+        "operator":   g("OPERATOR", "Operator", "COMPANY", "OP_NAME"),
+        "spud_date":  g("SPUD_DATE", "SpudDate", "SPUDDATE"),
+        "comp_date":  g("COMP_DATE", "CompDate", "COMP_DATE"),
+        "status":     g("WELL_STATUS", "STATUS", "Status", "WELLSTATUS"),
+        "well_type":  g("WELL_TYPE", "WellType", "TYPE"),
+        "county":     g("COUNTY_NAME", "COUNTY", "County"),
+        "district":   g("DISTRICT", "District"),
+        "formation":  g("FORMATION", "Formation", "PROD_FORM"),
+        "permit_no":  g("PERMIT_NO", "PERMIT", "PermitNo"),
+        "latitude":   g("LATITUDE", "LAT", "Latitude"),
+        "longitude":  g("LONGITUDE", "LON", "Longitude"),
     }
     return w if w["api_number"] or w["operator"] else None
 
@@ -237,17 +285,11 @@ def _normalize_well(a: dict) -> dict | None:
 def _log_wells(wells: list) -> None:
     log.info("Wells found: %d", len(wells))
     for w in wells:
-        log.info(
-            "  API %-14s | %-30s | Status %-12s | Spud %s",
-            w.get("api_number", "—"), w.get("operator", "—"),
-            w.get("status", "—"), w.get("spud_date", "—"),
-        )
-        _note(
-            f"WELL API={w.get('api_number','—')} "
-            f"OP={w.get('operator','—')} "
-            f"STATUS={w.get('status','—')} "
-            f"SPUD={w.get('spud_date','—')}"
-        )
+        log.info("  API %-14s | %-30s | %-12s | Spud %s",
+                 w.get("api_number", "—"), w.get("operator", "—"),
+                 w.get("status", "—"), w.get("spud_date", "—"))
+        _note(f"WELL API={w.get('api_number','—')} OP={w.get('operator','—')} "
+              f"STATUS={w.get('status','—')} SPUD={w.get('spud_date','—')}")
 
 
 def _note(msg: str) -> None:

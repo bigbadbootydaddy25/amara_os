@@ -402,12 +402,21 @@ def main():
     else:
         _ok(2, "All packages present")
 
-    # STEP 3 — SMB mount
-    _step(3, f"Mount smb://{SMB_HOST}/{SMB_SHARE}")
-    if _smb_mount():
+    # STEP 3 — SMB mount + server doc search
+    _step(3, f"Mount smb://{SMB_HOST}/{SMB_SHARE} + search server docs")
+    smb_ok = _smb_mount()
+    if smb_ok:
         _ok(3, f"SMB mounted → {SMB_MOUNT}")
+        log.info("  Running server doc search...")
+        try:
+            import deed.smb_search as _smb_search
+            server_docs = _smb_search.main()
+            log.info("  Server docs found: %d", len(server_docs))
+            _note(f"SMB SEARCH: {len(server_docs)} files copied to server_docs/")
+        except Exception as e:
+            log.warning("  SMB search error: %s", e)
     else:
-        _fail(3, "SMB mount", f"Add Keychain: security add-generic-password -s Texhoma-SMB -a {SMB_USER} -w <pw>")
+        _fail(3, "SMB mount", f"Open Finder → Go → Connect to Server → smb://{SMB_USER}@{SMB_HOST}/{SMB_SHARE}")
 
     # STEP 4 — run agents
     _step(4, "Agents: CHAIN, VEST, TAX, WELL, DEP, PLOT")

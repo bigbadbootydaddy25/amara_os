@@ -38,7 +38,7 @@ TELEGRAM_CHAT  = os.getenv("TELEGRAM_CHAT_ID",   "7977783351")
 SMB_HOST       = "WVDATA.TEXHOMALP.COM"
 SMB_SHARE      = "DATA"
 SMB_USER       = "SSchufford"
-SMB_MOUNT      = Path("/Volumes/TEXHOMA_DATA")
+SMB_MOUNT      = Path("/Volumes/DATA")
 
 # ── Hermes ────────────────────────────────────────────────────────────────────
 HERMES_DIR     = Path(os.getenv("HERMES_DIR", "/Users/user/.hermes/hermes-agent"))

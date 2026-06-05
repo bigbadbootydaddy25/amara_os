@@ -1,7 +1,13 @@
 """
-SMB search — scans mounted Texhoma share for parcel 11-409-19 documents.
-Searches: DOC LIBRARY, DEED BOOK, Doddridge Library, Old Farm Maps, Landmen
-Copies matches to deed/output/server_docs/
+SMB search — scans /Volumes/DATA/ for parcel 11-409-19 documents.
+
+Searches:
+  DOC LIBRARY, DEED BOOK*, Old Farm Maps, Landmen, Doddridge Library,
+  WV Curative Libraries, WV Tax Maps, Scans, WV Middle Team, DATA/
+
+Also reads DEED BOOK (208-324)324-325.pdf directly and logs its presence.
+
+Copies all hits to deed/output/server_docs/
 
 Usage: cd /Users/user/aegis_os && PYTHONPATH=. python3 deed/smb_search.py
 """
@@ -18,11 +24,10 @@ logging.basicConfig(
 )
 log = logging.getLogger("SMB_SEARCH")
 
-from deed.config import PARCEL_ID, DISTRICT, COUNTY, OUTPUT_DIR
+from deed.config import PARCEL_ID, DISTRICT, COUNTY, OUTPUT_DIR, SMB_MOUNT
 
 DEST_DIR = OUTPUT_DIR / "server_docs"
 
-# Search terms — any file whose name contains one of these (case-insensitive) is a hit
 SEARCH_TERMS = [
     "11-409-19",
     "11409-19",
@@ -33,163 +38,201 @@ SEARCH_TERMS = [
     "harrison",
     "elk",
     "strunk",
+    "118 acres",
+    "118acres",
 ]
 
-# Folder names to search inside the share root
+# All target folders — searched recursively
 TARGET_FOLDERS = [
     "DOC LIBRARY",
-    "DEED BOOK",
-    "Doddridge Library",
     "Old Farm Maps",
     "Landmen",
+    "Doddridge Library",
+    "WV Curative Libraries",
+    "WV Tax Maps",
+    "Scans",
+    "WV Middle Team",
+    "DATA",          # /Volumes/DATA/DATA/ subfolder
 ]
 
-# File extensions to collect (skip executables, system files)
+# DEED BOOK folder — may contain spaces/parens; handle separately
+DEED_BOOK_PREFIX = "DEED BOOK"
+
+# Known specific file to inspect
+SPECIFIC_FILE = "DEED BOOK (208-324)324-325.pdf"
+
 COLLECT_EXTS = {
     ".pdf", ".doc", ".docx", ".xls", ".xlsx",
     ".jpg", ".jpeg", ".png", ".tif", ".tiff",
-    ".txt", ".csv", ".xml", ".shp", ".kml",
-    ".msg", ".eml",
+    ".txt", ".csv", ".xml", ".shp", ".kml", ".kmz",
+    ".msg", ".eml", ".ppt", ".pptx",
 }
 
 
-def _find_mount() -> Path | None:
-    """Locate the WVDA / TEXHOMA_DATA volume under /Volumes/."""
-    volumes = Path("/Volumes")
-    if not volumes.exists():
+def _is_hit(path: Path, mount: Path) -> bool:
+    """True if file name or any relative path component matches a search term."""
+    try:
+        rel = str(path.relative_to(mount)).lower()
+    except ValueError:
+        rel = path.name.lower()
+    return any(t.lower() in rel for t in SEARCH_TERMS)
+
+
+def _copy(src: Path, dest_root: Path, label: str) -> Path | None:
+    if not src.is_file():
         return None
+    try:
+        rel = src.relative_to(SMB_MOUNT)
+    except ValueError:
+        rel = Path(label) / src.name
 
-    candidates = []
-    for vol in volumes.iterdir():
-        name = vol.name.upper()
-        if any(kw in name for kw in ["WVDA", "TEXHOMA", "DATA", "WVDATA"]):
-            candidates.append(vol)
+    dst = dest_root / rel
+    dst.parent.mkdir(parents=True, exist_ok=True)
 
-    if not candidates:
-        log.warning("No WVDA/TEXHOMA volume found under /Volumes/")
-        log.warning("Volumes present: %s", [v.name for v in volumes.iterdir()])
+    if dst.exists() and dst.stat().st_size == src.stat().st_size:
+        log.info("    SKIP (exists): %s", rel)
+        return dst
+
+    try:
+        shutil.copy2(str(src), str(dst))
+        log.info("    COPIED: %s", rel)
+        return dst
+    except Exception as e:
+        log.warning("    Copy failed %s: %s", src.name, e)
         return None
-
-    if len(candidates) == 1:
-        return candidates[0]
-
-    # Prefer most-specific match
-    for pref in ["WVDATA", "TEXHOMA_DATA", "WVDA"]:
-        for c in candidates:
-            if pref in c.name.upper():
-                return c
-    return candidates[0]
-
-
-def _is_hit(path: Path) -> bool:
-    """Return True if the file name or any parent folder name matches search terms."""
-    check = (path.name + " " + " ".join(p.name for p in path.parents)).lower()
-    return any(term.lower() in check for term in SEARCH_TERMS)
-
-
-def _collect_ext(path: Path) -> bool:
-    return path.suffix.lower() in COLLECT_EXTS or path.suffix == ""
 
 
 def search_folder(folder: Path, dest: Path) -> list[Path]:
-    """Recursively search folder for matching files, copy to dest."""
     if not folder.exists():
-        log.warning("  Folder not found: %s", folder)
+        log.warning("  Not found: %s", folder)
         return []
 
+    log.info("  Scanning: %s", folder)
     found = []
-    log.info("  Scanning %s ...", folder)
-
     try:
-        all_files = list(folder.rglob("*"))
+        all_files = [f for f in folder.rglob("*") if f.is_file()]
     except PermissionError as e:
         log.warning("  Permission denied: %s", e)
         return []
 
-    log.info("  %d total items in %s", len(all_files), folder.name)
-
+    log.info("  %d files in '%s'", len(all_files), folder.name)
     for f in all_files:
-        if not f.is_file():
+        if f.suffix.lower() not in COLLECT_EXTS and f.suffix != "":
             continue
-        if not _collect_ext(f):
-            continue
-        if _is_hit(f):
-            # Preserve subfolder structure under dest
-            try:
-                rel = f.relative_to(folder)
-            except ValueError:
-                rel = Path(f.name)
-
-            dst = dest / folder.name / rel
-            dst.parent.mkdir(parents=True, exist_ok=True)
-
-            if dst.exists() and dst.stat().st_size == f.stat().st_size:
-                log.info("    SKIP (exists): %s", rel)
-                found.append(dst)
-                continue
-
-            try:
-                shutil.copy2(str(f), str(dst))
-                log.info("    COPIED: %s", rel)
-                found.append(dst)
-            except Exception as e:
-                log.warning("    Copy failed %s: %s", f.name, e)
+        if _is_hit(f, SMB_MOUNT):
+            hit = _copy(f, dest, folder.name)
+            if hit:
+                found.append(hit)
 
     return found
 
 
-def main():
-    log.info("══════════════════════════════════════════════════")
-    log.info("  SMB Search — Parcel %s | %s District | %s County", PARCEL_ID, DISTRICT, COUNTY)
-    log.info("══════════════════════════════════════════════════")
+def find_deed_book_folders(mount: Path) -> list[Path]:
+    """Find all folders starting with 'DEED BOOK' (case-insensitive)."""
+    folders = []
+    try:
+        for p in mount.iterdir():
+            if p.is_dir() and p.name.upper().startswith(DEED_BOOK_PREFIX.upper()):
+                folders.append(p)
+    except Exception as e:
+        log.warning("Cannot list root: %s", e)
+    return folders
 
-    # 1. Find mount
-    mount = _find_mount()
-    if not mount:
-        log.error("Share not mounted. In Finder: Go → Connect to Server → smb://WVDATA.TEXHOMALP.COM/DATA")
+
+def inspect_specific_file(mount: Path, dest: Path) -> Path | None:
+    """Check for DEED BOOK (208-324)324-325.pdf and copy it regardless of search-term match."""
+    for folder in find_deed_book_folders(mount):
+        candidate = folder / SPECIFIC_FILE
+        if candidate.exists():
+            log.info("  SPECIFIC FILE FOUND: %s", candidate)
+            return _copy(candidate, dest, "DEED BOOK")
+        # Also try direct root
+    direct = mount / SPECIFIC_FILE
+    if direct.exists():
+        log.info("  SPECIFIC FILE FOUND (root): %s", direct)
+        return _copy(direct, dest, "DEED BOOK")
+    log.info("  Specific file not found at direct path — will catch via folder scan")
+    return None
+
+
+def main():
+    mount = SMB_MOUNT
+    log.info("══════════════════════════════════════════════════════")
+    log.info("  SMB Search  |  Parcel %s  |  %s District  |  %s Co", PARCEL_ID, DISTRICT, COUNTY)
+    log.info("  Mount:  %s", mount)
+    log.info("══════════════════════════════════════════════════════")
+
+    if not mount.exists():
+        log.error("Share not mounted at %s", mount)
+        log.error("Mount first: open 'smb://SSchufford@WVDATA.TEXHOMALP.COM/DATA'")
         sys.exit(1)
 
-    log.info("Share mounted at: %s", mount)
-
-    # Show top-level contents so we can confirm folder names
-    log.info("Top-level folders:")
+    # Show root contents
+    log.info("Root contents of %s:", mount)
     try:
-        tops = sorted(p.name for p in mount.iterdir() if p.is_dir())
+        tops = sorted(p.name for p in mount.iterdir())
         for t in tops:
             log.info("  %s", t)
     except Exception as e:
-        log.warning("  Could not list root: %s", e)
+        log.warning("Cannot list root: %s", e)
         tops = []
 
-    # 2. Search target folders
     DEST_DIR.mkdir(parents=True, exist_ok=True)
     all_found: list[Path] = []
 
+    # 1. Check specific deed book file first
+    log.info("")
+    log.info("── Specific file check ──")
+    sf = inspect_specific_file(mount, DEST_DIR)
+    if sf:
+        all_found.append(sf)
+
+    # 2. Search all DEED BOOK folders
+    log.info("")
+    log.info("── DEED BOOK folders ──")
+    for db_folder in find_deed_book_folders(mount):
+        hits = search_folder(db_folder, DEST_DIR)
+        all_found.extend(hits)
+        log.info("  → %d hits from '%s'", len(hits), db_folder.name)
+
+    # 3. Search remaining target folders
+    log.info("")
+    log.info("── Target folders ──")
     for folder_name in TARGET_FOLDERS:
-        # Try exact name first, then case-insensitive match
         folder = mount / folder_name
         if not folder.exists():
-            match = next((mount / t for t in tops if t.lower() == folder_name.lower()), None)
+            # Case-insensitive match
+            match = next(
+                (mount / t for t in tops if t.lower() == folder_name.lower()),
+                None,
+            )
             if match:
                 folder = match
                 log.info("Matched '%s' → '%s'", folder_name, folder.name)
             else:
-                log.warning("Folder not found on share: '%s'", folder_name)
+                log.warning("Not found on share: '%s'", folder_name)
                 continue
 
         hits = search_folder(folder, DEST_DIR)
         all_found.extend(hits)
-        log.info("  → %d files from '%s'", len(hits), folder_name)
+        log.info("  → %d hits from '%s'", len(hits), folder_name)
 
-    # 3. Summary
+    # Deduplicate by resolved path
+    seen = set()
+    unique = []
+    for f in all_found:
+        key = str(f.resolve())
+        if key not in seen:
+            seen.add(key)
+            unique.append(f)
+    all_found = unique
+
+    # Summary
     log.info("")
-    log.info("══════════════════════════════════════════════════")
-    log.info("  TOTAL FOUND: %d files", len(all_found))
-    log.info("  Destination: %s", DEST_DIR)
-    log.info("══════════════════════════════════════════════════")
-
+    log.info("══════════════════════════════════════════════════════")
+    log.info("  TOTAL: %d files copied → %s", len(all_found), DEST_DIR)
+    log.info("══════════════════════════════════════════════════════")
     if all_found:
-        log.info("Files copied:")
         for f in all_found:
             try:
                 rel = f.relative_to(DEST_DIR)
@@ -197,10 +240,8 @@ def main():
                 rel = f
             log.info("  %s", rel)
     else:
-        log.info("No matching documents found.")
-        log.info("Search terms used: %s", SEARCH_TERMS)
-        log.info("Tip: if share folders have different names, check the list above and")
-        log.info("     edit TARGET_FOLDERS in %s", __file__)
+        log.info("  No matching documents found.")
+        log.info("  Search terms: %s", SEARCH_TERMS)
 
     return all_found
 

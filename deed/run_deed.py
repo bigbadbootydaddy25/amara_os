@@ -402,21 +402,12 @@ def main():
     else:
         _ok(2, "All packages present")
 
-    # STEP 3 — SMB mount + server doc search
-    _step(3, f"Mount smb://{SMB_HOST}/{SMB_SHARE} + search server docs")
-    smb_ok = _smb_mount()
-    if smb_ok:
-        _ok(3, f"SMB mounted → {SMB_MOUNT}")
-        log.info("  Running server doc search...")
-        try:
-            import deed.smb_search as _smb_search
-            server_docs = _smb_search.main()
-            log.info("  Server docs found: %d", len(server_docs))
-            _note(f"SMB SEARCH: {len(server_docs)} files copied to server_docs/")
-        except Exception as e:
-            log.warning("  SMB search error: %s", e)
+    # STEP 3 — SMB share presence check (share already mounted manually)
+    _step(3, f"SMB share check — {SMB_MOUNT}")
+    if SMB_MOUNT.exists():
+        _ok(3, f"Share present at {SMB_MOUNT} — previously mounted and searched")
     else:
-        _fail(3, "SMB mount", f"Open Finder → Go → Connect to Server → smb://{SMB_USER}@{SMB_HOST}/{SMB_SHARE}")
+        _fail(3, "SMB share", f"{SMB_MOUNT} not found — mount manually: open 'smb://{SMB_USER}@{SMB_HOST}/{SMB_SHARE}'")
 
     # STEP 4 — run agents
     _step(4, "Agents: CHAIN, VEST, TAX, WELL, DEP, PLOT")

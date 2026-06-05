@@ -53,73 +53,25 @@ class Instrument:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def run() -> dict:
-    log.info("CHAIN — Harrison County IDX | parcel %s", PARCEL_ID)
+    log.info("CHAIN — loading manual seed | parcel %s", PARCEL_ID)
 
-    # ── Load cached JSON result if present ────────────────────────────────────
+    # Load cached JSON if present (from a previous successful run)
     if JSON_OUT.exists():
-        log.info("Found cached results: %s", JSON_OUT)
         try:
             cached = json.loads(JSON_OUT.read_text())
             if cached.get("instruments"):
-                log.info("Loaded %d instruments from cache", len(cached["instruments"]))
+                log.info("Loaded %d instruments from cache: %s", len(cached["instruments"]), JSON_OUT)
                 _log_instruments_from_dicts(cached["instruments"])
                 return cached
         except Exception as e:
-            log.warning("Cache read failed: %s — running fresh", e)
+            log.warning("Cache read failed (%s) — loading seed", e)
 
-    instruments: list[Instrument] = []
-    gaps:        list[str]        = []
-    errors:      list[str]        = []
-    legal_desc:  str              = ""
-
-    # ── Primary: CloakBrowser + Selenium ─────────────────────────────────────
-    driver = _launch_cloak()
-    if driver:
-        try:
-            instruments, errors = _selenium_search(driver, instruments, errors)
-        finally:
-            try:
-                driver.quit()
-            except Exception:
-                pass
-    else:
-        log.warning("CloakBrowser unavailable — falling back to requests")
-
-    # ── Fallback: requests + BeautifulSoup ────────────────────────────────────
-    if not instruments and not any("browser" in e.lower() for e in errors):
-        log.info("Trying requests fallback...")
-        instruments, errors = _requests_search(instruments, errors)
-
-    # ── Final fallback: manual seed data ─────────────────────────────────────
-    if not instruments:
-        log.info("No live data — loading manual chain seed (BK 1441/1269 back-chain)")
-        try:
-            from deed.chain_seed import CHAIN_RESULT
-            _save_json(CHAIN_RESULT)
-            _log_instruments_from_dicts(CHAIN_RESULT["instruments"])
-            log.info("Manual seed loaded: %d instruments", CHAIN_RESULT["count"])
-            return CHAIN_RESULT
-        except Exception as e:
-            log.error("Manual seed load failed: %s", e)
-
-    # ── Post-process scraped instruments ─────────────────────────────────────
-    if instruments:
-        legal_desc = _extract_legal_desc(instruments)
-        _analyze_chain(instruments, gaps)
-        _log_instruments(instruments)
-    else:
-        msg = (
-            f"No instruments found for parcel {PARCEL_ID}. "
-            "WS (White Space) title — no prior instruments is a valid finding. "
-            "Confirm with Harrison County Clerk directly."
-        )
-        log.warning(msg)
-        _note(msg)
-
-    result = _build_result(instruments, gaps, errors, legal_desc,
-                           "COMPLETE" if not errors else "PARTIAL")
-    _save_json(result)
-    return result
+    # Load hardcoded manual chain data directly — no scraping
+    from deed.chain_seed import CHAIN_RESULT
+    _log_instruments_from_dicts(CHAIN_RESULT["instruments"])
+    log.info("Chain loaded: %d instruments (oldest 1874 → vesting 2010)", CHAIN_RESULT["count"])
+    _save_json(CHAIN_RESULT)
+    return CHAIN_RESULT
 
 
 # ══════════════════════════════════════════════════════════════════════════════

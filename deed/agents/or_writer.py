@@ -2,7 +2,7 @@
 OR_WRITER agent — builds the Opinion of Record (OR) Excel workbook.
 Output: WS_11-409-19_OR_2026-06-04.xlsx
 Sheets: Summary, Chain Index, Vesting, Tax, Wells, DEP, Title Analysis, Map
-Prepared by: Scott Schufford | Aces N 8s Acquisitions
+Prepared by: Scott Schufford | Aces N 8s
 """
 import logging
 from datetime import datetime

@@ -334,7 +334,7 @@ def _package(results: dict, pdf_ok: bool) -> Path:
     copied = []
 
     def _cp(src: Path, dst: Path):
-        if src.exists():
+        if src.exists() and str(src) != str(dst):
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(str(src), str(dst))
             copied.append(dst.name)

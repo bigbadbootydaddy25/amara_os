@@ -479,8 +479,8 @@ def main():
     _step(10, "Telegram completion report")
     pct = _pct()
     agent_block = "\n".join(
-        f"  {'✓' if s not in ('FAILED','?') else '✗'} {a}: {s}"
-        for a, s in agent_statuses.items()
+        f"  {'✓' if r.get('status') not in ('FAILED','?') else '✗'} {a}: {r.get('status','?')}"
+        for a, r in results.items()
     )
     report = (
         f"[AMARA DEED] Pipeline complete — {pct}%\n"

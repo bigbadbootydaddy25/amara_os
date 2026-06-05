@@ -55,13 +55,14 @@ class Instrument:
 def run() -> dict:
     log.info("CHAIN — Harrison County IDX | parcel %s", PARCEL_ID)
 
-    # Check if a previously saved JSON result exists — use it immediately
+    # ── Load cached JSON result if present ────────────────────────────────────
     if JSON_OUT.exists():
         log.info("Found cached results: %s", JSON_OUT)
         try:
             cached = json.loads(JSON_OUT.read_text())
             if cached.get("instruments"):
                 log.info("Loaded %d instruments from cache", len(cached["instruments"]))
+                _log_instruments_from_dicts(cached["instruments"])
                 return cached
         except Exception as e:
             log.warning("Cache read failed: %s — running fresh", e)
@@ -89,7 +90,19 @@ def run() -> dict:
         log.info("Trying requests fallback...")
         instruments, errors = _requests_search(instruments, errors)
 
-    # ── Post-process ─────────────────────────────────────────────────────────
+    # ── Final fallback: manual seed data ─────────────────────────────────────
+    if not instruments:
+        log.info("No live data — loading manual chain seed (BK 1441/1269 back-chain)")
+        try:
+            from deed.chain_seed import CHAIN_RESULT
+            _save_json(CHAIN_RESULT)
+            _log_instruments_from_dicts(CHAIN_RESULT["instruments"])
+            log.info("Manual seed loaded: %d instruments", CHAIN_RESULT["count"])
+            return CHAIN_RESULT
+        except Exception as e:
+            log.error("Manual seed load failed: %s", e)
+
+    # ── Post-process scraped instruments ─────────────────────────────────────
     if instruments:
         legal_desc = _extract_legal_desc(instruments)
         _analyze_chain(instruments, gaps)
@@ -105,8 +118,6 @@ def run() -> dict:
 
     result = _build_result(instruments, gaps, errors, legal_desc,
                            "COMPLETE" if not errors else "PARTIAL")
-
-    # Save JSON
     _save_json(result)
     return result
 
@@ -544,6 +555,22 @@ def _analyze_chain(instruments: list, gaps: list) -> None:
                 gaps.append(gap)
                 _note(f"⚠ GAP: {gap}")
                 log.warning("GAP: %s", gap)
+
+
+def _log_instruments_from_dicts(dicts: list) -> None:
+    log.info("Chain of title — %d instruments:", len(dicts))
+    for i in dicts:
+        log.info("  [%03d] %-18s | %-35s → %-35s | BK %-8s PG %-6s | %s",
+                 i.get("seq", 0), i.get("type", "UNKNOWN")[:18],
+                 i.get("grantor", "—")[:35], i.get("grantee", "—")[:35],
+                 i.get("book", "—"), i.get("page", "—"),
+                 i.get("date_recorded", i.get("date_instr", "—")))
+        _note(f"[{i.get('seq',0):03d}] {i.get('type','UNKNOWN'):<18} | "
+              f"{i.get('grantor','—')} → {i.get('grantee','—')} | "
+              f"BK {i.get('book','—')} PG {i.get('page','—')} | "
+              f"{i.get('date_recorded', i.get('date_instr','—'))}")
+        if i.get("notes"):
+            log.info("        NOTE: %s", i["notes"])
 
 
 def _log_instruments(instruments: list) -> None:

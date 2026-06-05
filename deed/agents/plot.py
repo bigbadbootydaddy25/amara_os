@@ -326,14 +326,14 @@ def launch_viewer(plot_result: dict) -> None:
 
     HTML = """
     <!DOCTYPE html><html>
-    <head><title>AMARA PLOT — {{parcel}}</title>
+    <head><title>Metes & Bounds Plot — {{parcel}}</title>
     <style>body{background:#1a1a1a;color:#e0d5b5;font-family:monospace;padding:20px}
     img{max-width:100%;border:1px solid #555;margin:10px 0}
     .stats{background:#2a2a2a;padding:15px;margin:10px 0;border-left:4px solid #c8a855}
     .GREEN{color:#4caf50} .AMBER{color:#ff9800} .RED{color:#f44336}</style>
     </head>
     <body>
-    <h1>AMARA DEED — Metes & Bounds Plot</h1>
+    <h1>Metes & Bounds Plot</h1>
     <h2>Parcel: {{parcel}}</h2>
     <div class="stats">
       <p><b>Area:</b> {{area}} acres</p>

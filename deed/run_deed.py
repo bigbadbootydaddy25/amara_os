@@ -112,6 +112,7 @@ def _pct() -> int:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _smb_mount() -> bool:
+    # Already mounted?
     if SMB_MOUNT.exists():
         try:
             if any(SMB_MOUNT.iterdir()):
@@ -121,34 +122,24 @@ def _smb_mount() -> bool:
             log.info("  SMB appears mounted (permission check skipped)")
             return True
 
-    password = keychain("Texhoma-SMB", SMB_USER) or keychain("TEXHOMA_SMB", SMB_USER)
-    if not password:
-        log.warning("  No SMB password in Keychain for service 'Texhoma-SMB' / account '%s'", SMB_USER)
-        log.warning("  Add: security add-generic-password -s Texhoma-SMB -a %s -w <password>", SMB_USER)
-        return False
+    smb_url = f"smb://{SMB_USER}@{SMB_HOST}/{SMB_SHARE}"
+    log.info("  Opening %s via Finder (uses Keychain credentials)", smb_url)
+    os.system(f"open '{smb_url}'")
 
-    SMB_MOUNT.mkdir(parents=True, exist_ok=True)
-    from urllib.parse import quote
-    smb_url  = f"smb://{SMB_USER}:{quote(password, safe='')}@{SMB_HOST}/{SMB_SHARE}"
-    safe_url = f"smb://{SMB_USER}:***@{SMB_HOST}/{SMB_SHARE}"
-    log.info("  Mounting %s → %s", safe_url, SMB_MOUNT)
+    # Wait for Finder to mount — poll up to 15s
+    for _ in range(15):
+        time.sleep(1)
+        if SMB_MOUNT.exists():
+            try:
+                if any(SMB_MOUNT.iterdir()):
+                    log.info("  SMB mounted → %s", SMB_MOUNT)
+                    return True
+            except PermissionError:
+                log.info("  SMB appears mounted (permission check skipped)")
+                return True
 
-    try:
-        r = subprocess.run(
-            ["mount_smbfs", smb_url, str(SMB_MOUNT)],
-            capture_output=True, text=True, timeout=30,
-        )
-        if r.returncode == 0:
-            log.info("  SMB mounted OK")
-            return True
-        log.warning("  mount_smbfs exit %d: %s", r.returncode, r.stderr.strip())
-        return False
-    except FileNotFoundError:
-        log.warning("  mount_smbfs not found — not on Mac")
-        return False
-    except Exception as e:
-        log.error("  SMB mount error: %s", e)
-        return False
+    log.warning("  SMB mount timed out — share may still be mounting or credentials missing")
+    return False
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -493,6 +493,18 @@ def main():
     _telegram(report)
     _ok(10, f"Report sent — {pct}% complete")
 
+    # BRAIN STORE — write all memory layers (non-blocking, always runs)
+    log.info("")
+    log.info("┌─ BRAIN STORE — writing knowledge to all memory layers")
+    try:
+        from deed.brain_store import run as brain_run
+        brain_result = brain_run(results, elapsed_s=elapsed)
+        ok  = brain_result.get("layers_ok", [])
+        bad = brain_result.get("layers_skipped", [])
+        log.info("└─ ✓  BRAIN STORE: layers OK=%s | skipped=%s", ok, bad)
+    except Exception as e:
+        log.warning("└─ ✗  BRAIN STORE failed: %s", e)
+
     # ── Final summary ─────────────────────────────────────────────────────────
     log.info("")
     log.info("╔══════════════════════════════════════════════════════════════╗")

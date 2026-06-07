@@ -1,398 +1,296 @@
 """
-Builds the corrected OR for parcel 11-409-19 in Marcus Strunk's exact format.
-Three sheets: 11-409-19 (full OR) | Index (chain) | Map (placeholder)
-Output: WS_11-409-19_OR_2026-06-04_CORRECTED.xlsx
+Builds the OR for parcel 11-409-19 in Marcus Strunk's canonical format.
+Three sheets: 11-409-19 (full OR) | Index (16-instrument chain) | Map
 
 Usage: cd /Users/user/aegis_os && PYTHONPATH=. python3 deed/build_marcus_or.py
+Output: deed/output/WS_11-409-19_OR_2026-06-04_CORRECTED.xlsx
 """
 import logging
 import os
 import sys
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s  %(message)s",
-                    datefmt="%H:%M:%S", handlers=[logging.StreamHandler(sys.stdout)])
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s  %(levelname)-7s  %(message)s",
+                    datefmt="%H:%M:%S",
+                    handlers=[logging.StreamHandler(sys.stdout)])
 log = logging.getLogger("MARCUS_OR")
 
 _BASE      = Path(os.getenv("DEED_BASE", "/Users/user/aegis_os/deed"))
 OUTPUT_DIR = _BASE / "output"
 OUT_FILE   = OUTPUT_DIR / "WS_11-409-19_OR_2026-06-04_CORRECTED.xlsx"
 
-# ── Color palette (matches Marcus's dark OR style) ────────────────────────────
-C_DARK   = "1A1A1A"   # near-black section headers
-C_NAVY   = "1F3864"   # deep navy table headers
-C_GOLD   = "C8A855"   # gold text
-C_WHITE  = "FFFFFF"
-C_LITE   = "F5F0E0"   # warm cream alternating rows
-C_AMBER  = "FFF2CC"   # research-required flag
-C_GREEN  = "CCFFCC"   # ok / vesting
-C_RED    = "FFCCCC"   # error
-C_GRAY   = "F2F2F2"   # light alternating
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  Parcel data — Harrison County WV — 11-409-19
+#  Confirmed June 4-7, 2026 | Examiner: Scott Schufford | Aces N 8s
+# ══════════════════════════════════════════════════════════════════════════════
 
-def build():
-    try:
-        import openpyxl
-        from openpyxl.styles import (Font, PatternFill, Alignment,
-                                     Border, Side, numbers)
-    except ImportError:
-        log.error("openpyxl not installed — pip install openpyxl")
-        sys.exit(1)
+DATA = {
+    # ── Identity ────────────────────────────────────────────────────────────
+    "parcel_id":     "11-409-19",
+    "full_parcel":   "17-11-0409-0019-0000  (sub-parcels: -0001, -0002, -0003)",
+    "prospect":      "Elk",
+    "trid":          "WS",
+    "unit":          "None",
+    "county":        "Harrison",
+    "state":         "WV",
+    "district":      "Elk-Outside",
+    "gross_acres":   121.072,
+    "examiner":      "Scott Schufford",
+    "company":       "Aces N 8s",
+    "date_examined": "06/04/2026",
+    "last_bk_pg":    "DB 1441/1269  dated  01/19/2010  rec.  02/10/2010",
 
-    wb = openpyxl.Workbook()
+    # ── Surface owner ────────────────────────────────────────────────────────
+    "surface_owner":   "Burns, L. Craig & Sue B.",
+    "surface_address": "458 Knoll View Road, Mount Clare WV 26408",
+    "surface_deed":    (
+        "DB 1197/1258  |  Instr. Date: 07/11/1989  |  Rec. 09/21/1989  |  "
+        "Grantor: Abner Stout, Executor, Estate of Mary L. Lawson  |  "
+        "Consideration: $34,500.00  |  Acres: 129.63 surface"
+    ),
+    "surface_tenure":  "Joint tenants with right of survivorship (WROS)",
 
-    def _fill(hex_color):
-        return PatternFill("solid", fgColor=hex_color)
+    # ── Sections 3-4 ────────────────────────────────────────────────────────
+    "legal_description": (
+        "Gnatty Creek watershed, Elk Creek tributary, Elk-Outside District, "
+        "Harrison County WV.  121.072 acres per DB 1441/1269 page 5.  "
+        "Tax description: 118 AC Stout Run.  Property Class F — Farm."
+    ),
+    "vesting_instrument": (
+        "MINERAL — DB 1441/1269  (01/19/2010 / rec. 02/10/2010)  "
+        "Burns, A. Dean, Executor Estate of Helen S. Kramer → Master Mineral Holdings Inc.  "
+        "1/6 undivided O&G + CBM | 121.072 acres | $10.00 consideration\n\n"
+        "SURFACE — DB 1197/1258  (07/11/1989 / rec. 09/21/1989)  "
+        "Abner Stout, Executor Estate of Mary L. Lawson → Burns, L. Craig & Sue B.  "
+        "129.63 acres surface | $34,500.00"
+    ),
 
-    thin   = Side(style="thin",   color="AAAAAA")
-    thick  = Side(style="medium", color="555555")
-    BORD   = Border(left=thin, right=thin, top=thin, bottom=thin)
-    TBORD  = Border(left=thick, right=thick, top=thick, bottom=thick)
-    CTR    = Alignment(horizontal="center", vertical="center",  wrap_text=True)
-    LEFT   = Alignment(horizontal="left",   vertical="center",  wrap_text=True)
-    WRAP   = Alignment(horizontal="left",   vertical="top",     wrap_text=True)
+    # ── Mineral owners ───────────────────────────────────────────────────────
+    "mineral_owners": [
+        {
+            "fraction":   "1/6",
+            "name":       "Master Mineral Holdings Inc. (Texas corporation)",
+            "instrument": (
+                "DB 1441/1269  |  01/19/2010  |  rec. 02/10/2010  |  $10.00  |  "
+                "⚠ Tax records: Master Mineral Holdings III LP — same PO Box 10886 Midland TX 79702 "
+                "— no transfer deed found of record — OPEN CHAIN ITEM"
+            ),
+            "decimal":    1 / 6,
+            "status":     "Unleased",
+            "highlight":  "green",
+        },
+        {
+            "fraction":   "5/6",
+            "name":       "Shuttleworth Maynard Heirs",
+            "instrument": (
+                "DB 136/259 (1903) reservation — Fid Bk 10/247 (1919) estate  |  "
+                "Heirs: Lillie A., Helen (→Kramer), Lorene, Mary, Samuel, Betty Jane  |  "
+                "WB 108/137 (1980): Lorene → Helen Kramer, Betty Evans, Samuel  |  "
+                "WB 142/359 (1993): Helen Kramer died — Burns Executor  |  "
+                "RESEARCH REQUIRED — 5 heir interests not yet conveyed"
+            ),
+            "decimal":    5 / 6,
+            "status":     "Unleased — research required",
+            "highlight":  "amber",
+        },
+    ],
 
-    def _font(bold=False, color=C_DARK, size=10, italic=False, name="Calibri"):
-        return Font(name=name, bold=bold, color=color, size=size, italic=italic)
+    # ── Working interest ────────────────────────────────────────────────────
+    "working_interest": {
+        "status":      "UNLEASED",
+        "decimal":     1.0,
+        "description": (
+            "White Space tract — no active oil and gas lease of record.  "
+            "Parcel is undrilled as to deeper formations.  "
+            "Three Devonian wells found via coordinate-radius search on adjacent parcels."
+        ),
+    },
 
-    NUM_COLS = 6  # A B C D E F
+    # ── Assignments — 9 canonical fields ─────────────────────────────────────
+    "assignments": {
+        "GROSS ACRES":   "121.072 ac  (17-11-0409-0019-0000 + sub-parcels -0001/-0002/-0003)",
+        "NRI":           "N/A — Unleased",
+        "ORRI":          "None",
+        "ASSIGNOR":      "N/A — no lease to assign",
+        "ASSIGNEE":      "N/A",
+        "DATE ASSIGNED": "N/A",
+        "RECORDED":      "N/A",
+        "BOOK / PAGE":   "N/A",
+        "NOTES":         (
+            "No assignments of record.  White Space (WS) tract — TRID confirms no prior OR.  "
+            "Prospect: Elk — Client: Texhoma Land Partners / Marcus Strunk RPL."
+        ),
+    },
 
-    def _merge_row(ws, row, col_start, col_end, value, bg, fg, sz=10,
-                   bold=False, align=LEFT, border=BORD, height=None):
-        ws.merge_cells(start_row=row, start_column=col_start,
-                       end_row=row,   end_column=col_end)
-        c = ws.cell(row=row, column=col_start, value=value)
-        c.font      = Font(name="Calibri", bold=bold, color=fg, size=sz)
-        c.fill      = _fill(bg)
-        c.alignment = align
-        c.border    = border
-        if height:
-            ws.row_dimensions[row].height = height
-        return c
+    # ── Leasehold subsections ────────────────────────────────────────────────
+    "orri":          "None",
+    "ogls_on_file":  "None",
+    "unreleased_ogls": (
+        "1.  DB 183/260 (May 4, 1909) — Hope Natural Gas Company OGL — "
+        "Lessor: Martin A. Props & wife — UNRELEASED — pre-digital — no release of record.\n"
+        "2.  DB 136/88 (Feb 9, 1903) — Bijou Coal Company — Pittsburgh seam of coal — "
+        "UNRELEASED — pre-digital — specifically excepted in Burns deed DB 1197/1258 p.4."
+    ),
 
-    def _section(ws, row, text, height=18):
-        _merge_row(ws, row, 1, NUM_COLS, text, C_DARK, C_GOLD,
-                   sz=11, bold=True, align=LEFT, border=TBORD, height=height)
+    # ── Production data — 3 wells, vertical format ───────────────────────────
+    "wells": [
+        {
+            "api":       "47-033-01920",
+            "operator":  "Diversified Production LLC",
+            "spud":      "1978",
+            "status":    "Active",
+            "last_prod": "1,221 MCF — 2024",
+            "dep_status":"Active — no plugging date",
+        },
+        {
+            "api":       "47-033-04093",
+            "operator":  "Diversified Production LLC",
+            "spud":      "1995",
+            "status":    "Active — adjacent parcel",
+            "last_prod": "759 MCF — 2024",
+            "dep_status":"Active",
+        },
+        {
+            "api":       "47-033-05416",
+            "operator":  "Key Oil Company",
+            "spud":      "07/26/2010",
+            "status":    "Active — north adjacent (Simpson District)",
+            "last_prod": "2,254 MCF — 2024",
+            "dep_status":"Active — no plugging date",
+        },
+    ],
 
-    def _lv(ws, row, label, value, label_fill=C_LITE, val_fill=C_WHITE,
-            val_bold=False, val_color=C_DARK, val_col_span=5, height=15):
-        """Label in col A, value merged across remaining cols."""
-        c_lbl = ws.cell(row=row, column=1, value=label)
-        c_lbl.font      = _font(bold=True, size=10)
-        c_lbl.fill      = _fill(label_fill)
-        c_lbl.alignment = LEFT
-        c_lbl.border    = BORD
+    # ── Notes ────────────────────────────────────────────────────────────────
+    "notes": [
+        (
+            "NOTE 1 — SOURCE DEED:  DB 1441/1269 — January 19, 2010 — "
+            "Burns, A. Dean, Executor Estate of Helen S. Kramer → "
+            "Master Mineral Holdings Inc. (Texas corporation) — "
+            "Undivided 1/6 oil, gas, and coalbed methane — "
+            "Elk-Outside District, Harrison County WV — 121.072 acres — "
+            "Gnatty Creek watershed.  Consideration: $10.00.  "
+            "Recorded February 10, 2010.  6 pages."
+        ),
+        (
+            "NOTE 2 — EXAMINER NOTES:  White Space tract — chain built from scratch.  "
+            "Key finding: DB 136/259 (1903) Shuttleworth to Stewart reserved ONE-HALF of all "
+            "oil and gas — SPLIT ESTATE established 1903.  Master Mineral Holdings holds 1/6 "
+            "undivided O&G (Helen Kramer's 1/6 of the Shuttleworth reserved 1/2).  "
+            "Remaining 5/6 Shuttleworth heirs — further research required.  "
+            "TAGIS parcel-ID search returned zero wells — confirmed system limitation in "
+            "Elk-Outside District — wells found via coordinate-radius search.  "
+            "Entity discrepancy: deed = Master Mineral Holdings Inc.; "
+            "tax records = Master Mineral Holdings III LP — same PO Box Midland TX — "
+            "no transfer deed found — flag for examiner review."
+        ),
+    ],
 
-        ws.merge_cells(start_row=row, start_column=2,
-                       end_row=row,   end_column=val_col_span + 1)
-        c_val = ws.cell(row=row, column=2, value=value)
-        c_val.font      = Font(name="Calibri", bold=val_bold,
-                               color=val_color, size=10)
-        c_val.fill      = _fill(val_fill)
-        c_val.alignment = WRAP
-        c_val.border    = BORD
-        ws.row_dimensions[row].height = height
-        return c_lbl, c_val
-
-    def _blank(ws, row, height=6):
-        ws.row_dimensions[row].height = height
-
-    def _tbl_hdr(ws, row, cols_labels, col_start=1):
-        for i, lbl in enumerate(cols_labels):
-            c = ws.cell(row=row, column=col_start + i, value=lbl)
-            c.font      = Font(name="Calibri", bold=True, color=C_WHITE, size=9)
-            c.fill      = _fill(C_NAVY)
-            c.alignment = CTR
-            c.border    = BORD
-        ws.row_dimensions[row].height = 16
-
-    def _tbl_row(ws, row, values, col_start=1, alt=False, fill_override=None):
-        bg = fill_override or (C_LITE if alt else C_WHITE)
-        for i, v in enumerate(values):
-            c = ws.cell(row=row, column=col_start + i, value=v)
-            c.font      = Font(name="Calibri", size=9)
-            c.fill      = _fill(bg)
-            c.alignment = WRAP
-            c.border    = BORD
-        ws.row_dimensions[row].height = max(14, min(40,
-            max((len(str(v)) // 20 for v in values if v), default=1) * 14))
-
-    # ══════════════════════════════════════════════════════════════════════════
-    #  SHEET 1 — 11-409-19  (Main OR in Marcus format)
-    # ══════════════════════════════════════════════════════════════════════════
-    ws1 = wb.active
-    ws1.title = "11-409-19"
-    ws1.sheet_view.showGridLines = False
-    ws1.page_setup.orientation   = "landscape"
-
-    # Column widths
-    for col, w in zip("ABCDEF", [24, 32, 16, 13, 16, 34]):
-        ws1.column_dimensions[col].width = w
-
-    r = 1
-
-    # ── Title banner ──────────────────────────────────────────────────────────
-    _merge_row(ws1, r, 1, NUM_COLS, "OPINION OF RECORD",
-               C_DARK, C_GOLD, sz=16, bold=True, align=CTR, height=32); r += 1
-    _merge_row(ws1, r, 1, NUM_COLS, "Scott Schufford  |  Aces N 8s",
-               C_DARK, C_WHITE, sz=10, bold=False, align=CTR, height=16); r += 1
-    _blank(ws1, r); r += 1
-
-    # ── Parcel identification ─────────────────────────────────────────────────
-    _section(ws1, r, "PARCEL IDENTIFICATION"); r += 1
-    fields = [
-        ("PROSPECT",        "Elk"),
-        ("TRID",            "WS"),
-        ("UNIT",            "None"),
-        ("TAX PARCEL ID",   "11-409-19"),
-        ("GROSS ACRES",     "121.072"),
-        ("DISTRICT",        "Elk-Outside"),
-        ("COUNTY",          "Harrison"),
-        ("STATE",           "WV"),
-        ("PREPARED BY",     "Scott Schufford"),
-        ("DATE",            "06/04/2026"),
-        ("LAST BK/PG",      "DB 1441/1269  dated  01/19/2010"),
-    ]
-    for lbl, val in fields:
-        _lv(ws1, r, lbl, val); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Surface owner ─────────────────────────────────────────────────────────
-    _section(ws1, r, "SURFACE OWNER"); r += 1
-    for line in ["Burns family", "Knoll View Road", "Mount Clare WV 26408", "TMP 11-409-19"]:
-        _lv(ws1, r, "", line, label_fill=C_WHITE); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Acquired title ────────────────────────────────────────────────────────
-    _section(ws1, r, "TITLE"); r += 1
-    _lv(ws1, r, "ACQUIRED TITLE", "DB 1441/1269"); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Mineral owners ────────────────────────────────────────────────────────
-    _section(ws1, r, "MINERAL OWNERS"); r += 1
-    _tbl_hdr(ws1, r, ["OWNER", "INTEREST", "NET ACRES", "STATUS", "INSTRUMENT", "NOTES"]); r += 1
-    _tbl_row(ws1, r, ["Master Mineral Holdings Inc. (Texas corporation)",
-                       "1/6", "20.179", "UNLEASED", "DB 1441/1269", ""],
-             fill_override=C_GREEN); r += 1
-    _tbl_row(ws1, r, ["Shuttleworth heirs (5 of 6 — Lillie A., Lorene, Mary, Samuel, Betty Jane)",
-                       "5/6", "100.893", "UNLEASED", "RESEARCH REQUIRED", "Heir chain incomplete"],
-             fill_override=C_AMBER); r += 1
-    # Total row
-    _tbl_row(ws1, r, ["TOTAL", "1.0", "121.072", "", "", ""]); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Working interest owners ───────────────────────────────────────────────
-    _section(ws1, r, "WORKING INTEREST OWNERS"); r += 1
-    _tbl_hdr(ws1, r, ["STATUS", "DECIMAL", "GROSS ACRES", "DESCRIPTION", "", ""]); r += 1
-    _tbl_row(ws1, r, ["UNLEASED", "1.0", "121.072", "White Space — no active OGL of record", "", ""]); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Leasehold block ───────────────────────────────────────────────────────
-    _section(ws1, r, "LEASEHOLD / ASSIGNMENTS"); r += 1
-    _lv(ws1, r, "ORRI",               "Subject to None"); r += 1
-    _lv(ws1, r, "LEASEHOLD",
-        "No active OGL of record — White Space tract — UNLEASED",
-        val_fill=C_AMBER); r += 1
-    _lv(ws1, r, "ASSIGNMENTS",        "None"); r += 1
-    _lv(ws1, r, "UNRELEASED OGLs",    "None"); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Production data ───────────────────────────────────────────────────────
-    _section(ws1, r, "PRODUCTION DATA"); r += 1
-    _tbl_hdr(ws1, r, ["API#", "DRILLING OPERATOR", "SPUD DATE",
-                       "STATUS", "LAST REPORTED PROD", "DEP STATUS"]); r += 1
-    wells = [
-        ("47-033-01920", "Diversified Production LLC", "1978",
-         "Active", "1,221 MCF — 2024", "Active — no plugging date"),
-        ("47-033-04093", "Diversified Production LLC", "1995",
-         "Active — adjacent parcel", "759 MCF — 2024", "Active"),
-        ("47-033-05416", "Key Oil Company",            "07/26/2010",
-         "Active — north adjacent (Simpson District)", "2,254 MCF — 2024",
-         "Active — no plugging date"),
-    ]
-    for i, w in enumerate(wells):
-        _tbl_row(ws1, r, list(w), alt=(i % 2 == 1)); r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Notes ─────────────────────────────────────────────────────────────────
-    _section(ws1, r, "NOTES"); r += 1
-    note1 = ("NOTE 1 — SOURCE DEED:  DB 1441/1269 — January 19, 2010 — Burns, A. Dean, "
-             "Executor Estate of Helen S. Kramer → Master Mineral Holdings Inc. — "
-             "Undivided 1/6 oil, gas, and coalbed methane — Elk-Outside District — "
-             "Harrison County WV — 121.072 acres — Gnatty Creek watershed.")
-    note2 = ("NOTE 2 — EXAMINER NOTES:  White Space tract — chain built from scratch. "
-             "Key finding: DB 136/259 (1903) Shuttleworth to Stewart reserved 1/2 minerals — "
-             "SPLIT ESTATE. Master Mineral Holdings holds 1/6 undivided O&G. "
-             "Remaining 5/6 Shuttleworth heirs research required. "
-             "Well data corrected via coordinate radius search — initial parcel ID search "
-             "returned zero which is a known TAGIS limitation.")
-    for note in [note1, note2]:
-        ws1.merge_cells(start_row=r, start_column=1, end_row=r, end_column=NUM_COLS)
-        c = ws1.cell(row=r, column=1, value=note)
-        c.font      = Font(name="Calibri", size=9, italic=True, color=C_DARK)
-        c.fill      = _fill(C_LITE)
-        c.alignment = WRAP
-        c.border    = BORD
-        ws1.row_dimensions[r].height = 40; r += 1
-
-    _blank(ws1, r); r += 1
-
-    # ── Easements / mortgages ─────────────────────────────────────────────────
-    _section(ws1, r, "EASEMENTS / MORTGAGES"); r += 1
-    _lv(ws1, r, "EASEMENTS",           "Not examined"); r += 1
-    _lv(ws1, r, "UNRELEASED MORTGAGES","Only if they apply to minerals"); r += 1
-
-    _blank(ws1, r); r += 1
+    # ── Sections 15-17 ───────────────────────────────────────────────────────
+    "environmental": "Not examined",
+    "easements":     "Not examined",
+    "mortgages":     "None of record",
 
     # ── Tax assessment — surface ──────────────────────────────────────────────
-    _section(ws1, r, "TAX ASSESSMENT DATA — SURFACE"); r += 1
-    tax_surface = [
-        ("ACCT NO",       "pending"),
-        ("TICKET NO",     "pending"),
-        ("NAME",          "Burns family"),
-        ("DESCRIPTION",   "Elk-Outside District parcel 11-409-19"),
-        ("MAP/PARCEL",    "409-0019-0000-000"),
-        ("LAND VALUE",    "pending — pull from Harrison County Sheriff"),
-        ("MINERAL VALUE", "pending"),
-        ("CLASS",         "pending"),
-        ("TAXES",         "pending"),
-    ]
-    for lbl, val in tax_surface:
-        _lv(ws1, r, lbl, val); r += 1
+    "tax_surface": {
+        "acct_no":    "06056171",
+        "ticket_no":  "0000037542",
+        "name":       "Burns, L. Craig & Sue B.",
+        "description":"118 AC Stout Run — Elk-Outside District — Harrison County WV",
+        "map_parcel": "409-0019  (sub-parcels 0000 through 0003)",
+        "land_value": "$4,860",
+        "annual_tax": "$56.62",
+        "tax_year":   "2025",
+        "status":     "PAID  08/22/2025  |  Confirmed via harrison.softwaresystems.com (http only)",
+    },
 
-    _blank(ws1, r); r += 1
+    # ── Tax assessment — O&G ─────────────────────────────────────────────────
+    "tax_og": {
+        "name":          "Shuttleworth Maynard Heirs",
+        "description":   ".50 INT  121.072 AC O&G  Gnatty Creek  Elk-Outside",
+        "acct_no":       (
+            "Not separately assessed in Harrison County Sheriff system.  "
+            "Mineral accounts held by Assessor — search: harrisoncountyassessor.com/ownershipsearch.aspx"
+        ),
+        "assessor_url":  "harrisoncountyassessor.com/ownershipsearch.aspx",
+        "assessor_phone":"(304) 624-8510",
+    },
 
-    # ── Tax assessment — O&G ──────────────────────────────────────────────────
-    _section(ws1, r, "TAX ASSESSMENT DATA — OIL AND GAS"); r += 1
-    tax_og = [
-        ("NAME",          "Shuttleworth Maynard Heirs"),
-        ("DESCRIPTION",   ".50 INT  121.072 AC O&G  Gnatty Creek  Elk-Outside"),
-        ("ACCT NO",       "pending — pull from Harrison County Sheriff"),
-        ("TICKET NO",     "pending"),
-        ("MINERAL VALUE", "pending"),
-        ("CLASS",         "pending"),
-        ("TAXES",         "pending"),
-    ]
-    for lbl, val in tax_og:
-        _lv(ws1, r, lbl, val); r += 1
+    # ── Certification ────────────────────────────────────────────────────────
+    "certification": (
+        "This Opinion of Record was prepared by Scott Schufford, Aces N 8s, "
+        "for Texhoma Land Partners (Marcus Strunk RPL) based on public records "
+        "available in Harrison County WV as of June 7, 2026.  "
+        "Chain examined 1874–2010 (16 instruments).  "
+        "White Space tract — no prior OR existed.  "
+        "Open items: Shuttleworth heir chain (5/6), mineral tax account, entity discrepancy (Inc. vs III LP)."
+    ),
 
-    _blank(ws1, r); r += 1
-
-    # Footer
-    _merge_row(ws1, r, 1, NUM_COLS,
-               "Prepared by Scott Schufford  |  Aces N 8s  |  06/04/2026",
-               C_DARK, C_GOLD, sz=9, bold=False, align=CTR, height=14)
-
-    # ══════════════════════════════════════════════════════════════════════════
-    #  SHEET 2 — Index (chain of title)
-    # ══════════════════════════════════════════════════════════════════════════
-    ws2 = wb.create_sheet("Index")
-    ws2.sheet_view.showGridLines = False
-    ws2.page_setup.orientation   = "landscape"
-
-    for col, w in zip("ABCDEFG", [14, 12, 12, 28, 28, 8, 55]):
-        ws2.column_dimensions[col].width = w
-
-    r2 = 1
-    _merge_row(ws2, r2, 1, 7, "CHAIN OF TITLE INDEX — Parcel 11-409-19 | Elk-Outside District | Harrison County WV",
-               C_DARK, C_GOLD, sz=12, bold=True, align=CTR, height=24); r2 += 1
-    _merge_row(ws2, r2, 1, 7, "Prepared by Scott Schufford  |  Aces N 8s  |  06/04/2026",
-               C_DARK, C_WHITE, sz=9, align=CTR, height=14); r2 += 1
-    _blank(ws2, r2); r2 += 1
-
-    hdrs2 = ["TYPE", "BOOK/PAGE", "INSTR DATE", "GRANTOR", "GRANTEE", "ACRES", "DESCRIPTION / NOTES"]
-    for i, h in enumerate(hdrs2):
-        c = ws2.cell(row=r2, column=i + 1, value=h)
-        c.font      = Font(name="Calibri", bold=True, color=C_WHITE, size=10)
-        c.fill      = _fill(C_NAVY)
-        c.alignment = CTR
-        c.border    = BORD
-    ws2.row_dimensions[r2].height = 18; r2 += 1
-
-    CHAIN = [
+    # ── Index chain — 16 instruments ─────────────────────────────────────────
+    "chain": [
         ("Deed",         "DB 57/238",    "1874",       "Davisson, Edgar M.",
-         "Monroe, Benjamin T.",          "51",
-         "51 acres near Gnatty Creek"),
+         "Monroe, Benjamin T.",           "51",
+         "51 acres Gnatty Creek  [recital in DB 1441/1269]"),
         ("Deed",         "DB 61/434",    "1879",       "Shuttleworth, S.A.",
-         "Monroe, B.T.",                 "",
-         "Romines Mills tract"),
+         "Monroe, B.T.",                  "—",
+         "Romines Mills tract  [recital]"),
         ("Deed",         "DB 68/329",    "1884",       "Bumgardner, Adam",
-         "Monroe, B.T.",                 "60",
-         "60 acres fraction"),
+         "Monroe, B.T.",                  "60",
+         "60 acres fraction  [recital]"),
         ("Deed",         "DB 75/97",     "1888",       "Bumgardner, Adam",
-         "Monroe, B.T.",                 "10",
-         "10 acres fraction"),
+         "Monroe, B.T.",                  "10",
+         "10 acres fraction  [recital]"),
         ("Deed",         "DB 109/403",   "1899",       "Thompson, M.M., Commissioner",
-         "Shuttleworth, M.N.",           "",
-         "Circuit Court order"),
-        ("Deed",         "DB 136/259",   "1903",       "Shuttleworth, Maynard N. & Lillie",
-         "Stewart, William A.",          "121.5",
-         "121.5 ac Elk Creek — ⚠ RESERVED 1/2 MINERALS — KEY INSTRUMENT — SPLIT ESTATE"),
-        ("Estate",       "Fid Bk 10/247","1919",       "Shuttleworth, Maynard N. — DIED",
-         "Heirs: Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane Shuttleworth", "",
-         "Estate settlement — reserved mineral interest distributed to 6 heirs"),
-        ("Mineral Deed", "DB 1441/1269", "01/19/2010", "Burns, A. Dean, Exec. Estate of Helen S. Kramer",
-         "Master Mineral Holdings Inc. (Texas corporation)", "121.072",
-         "1/6 undivided O&G + coalbed methane — $11,137.50 — rec. 02/10/2010 — VESTING INSTRUMENT"),
-    ]
+         "Shuttleworth, M.N.",            "122",
+         "Circuit Court order  [recital]"),
+        ("Deed",         "DB 136/259",   "1903-03-23", "Shuttleworth, Maynard N. & Lillie",
+         "Stewart, William A.",           "121.5",
+         "⚠ RESERVED ONE-HALF OF ALL OIL AND GAS — SPLIT ESTATE KEY INSTRUMENT  [recital p.3]"),
+        ("Coal Deed",    "DB 136/88",    "1903-02-09", "Props, M.A. & wife",
+         "Bijou Coal Company",            "—",
+         "Pittsburgh seam — UNRELEASED — pre-digital  [excepted in DB 1197/1258 p.4]"),
+        ("OGL",          "DB 183/260",   "1909-05-04", "Props, M.A. & wife",
+         "Hope Natural Gas Company",      "—",
+         "OGL — UNRELEASED — pre-digital  [excepted in DB 1197/1258 p.4]"),
+        ("Estate",       "Fid Bk 10/247","1919",       "Shuttleworth, M.N. — died",
+         "6 Heirs: Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane", "—",
+         "Reserved mineral interest distributed to 6 heirs  [recital]"),
+        ("Will / Probate","WB 54/291",   "1960",       "Lawson, T. Minter — died",
+         "Lawson, Guy & Mary",            "—",
+         "Surface chain — Lawson estate  [DB 1197/1258 pp.2-3]"),
+        ("Will / Probate","WB 79/320",   "1971",       "Lawson, Guy — died",
+         "Lawson, Mary",                  "—",
+         "Surface chain  [DB 1197/1258 pp.2-3]"),
+        ("Will / Probate","WB 102/1040", "1983",       "Lawson, Mary — died",
+         "Stout, Abner — Executor",       "—",
+         "Surface chain  [DB 1197/1258 pp.2-3]"),
+        ("Will / Probate","WB 108/137",  "1980",       "Shuttleworth, Lorene — died",
+         "Kramer, Helen; Evans, Betty; Samuel Shuttleworth", "—",
+         "Lorene's share distributed  [recital pp.3-4]"),
+        ("Will / Probate","WB 142/359",  "1993",       "Kramer, Helen S. — died",
+         "Burns, A. Dean — Executor",     "—",
+         "Burns named Executor — leads to DB 1441/1269  [recital p.4]"),
+        ("Deed",         "DB 1197/1258", "1989-07-11", "Stout, Abner, Executor (Lawson Estate)",
+         "Burns, L. Craig & Sue B.",      "129.63",
+         "SURFACE VESTING — rec. 09/21/1989 — $34,500 — exceptions: DB 136/88, DB 183/260  [IDX — 5 pp.]"),
+        ("Mineral Deed", "DB 1441/1269", "2010-01-19", "Burns, A. Dean, Executor (Helen S. Kramer Estate)",
+         "Master Mineral Holdings Inc.",  "121.072",
+         "MINERAL VESTING — 1/6 O&G+CBM — rec. 02/10/2010 — $10.00  [IDX — 6 pp.]"),
+    ],
 
-    for i, row_data in enumerate(CHAIN):
-        bk = row_data[1]
-        if "1441" in bk:
-            fill_color = C_GREEN
-        elif "136" in bk:
-            fill_color = C_AMBER
-        else:
-            fill_color = C_LITE if i % 2 == 0 else C_WHITE
+    "output_file": str(OUT_FILE),
+}
 
-        for j, val in enumerate(row_data):
-            c = ws2.cell(row=r2, column=j + 1, value=val)
-            c.font      = Font(name="Calibri", size=9)
-            c.fill      = _fill(fill_color)
-            c.alignment = WRAP
-            c.border    = BORD
-        ws2.row_dimensions[r2].height = max(16, min(50, len(row_data[-1]) // 3)); r2 += 1
 
-    # Legend
-    r2 += 1
-    for txt, color in [
-        ("Green = Vesting instrument (BK 1441/1269)",        C_GREEN),
-        ("Amber = Key reservation / split estate instrument", C_AMBER),
-    ]:
-        ws2.merge_cells(start_row=r2, start_column=1, end_row=r2, end_column=7)
-        c = ws2.cell(row=r2, column=1, value=txt)
-        c.font  = Font(name="Calibri", size=9, italic=True)
-        c.fill  = _fill(color)
-        c.border = BORD
-        ws2.row_dimensions[r2].height = 14; r2 += 1
+# ══════════════════════════════════════════════════════════════════════════════
+#  Build
+# ══════════════════════════════════════════════════════════════════════════════
 
-    # ══════════════════════════════════════════════════════════════════════════
-    #  SHEET 3 — Map (placeholder)
-    # ══════════════════════════════════════════════════════════════════════════
-    ws3 = wb.create_sheet("Map")
-    ws3.sheet_view.showGridLines = False
-
-    _merge_row(ws3, 1, 1, 6,
-               f"Maps — Parcel 11-409-19 | Elk-Outside District | Harrison County WV",
-               C_DARK, C_GOLD, sz=13, bold=True, align=CTR, height=28)
-    _merge_row(ws3, 2, 1, 6,
-               "Prepared by Scott Schufford  |  Aces N 8s  |  06/04/2026",
-               C_DARK, C_WHITE, sz=9, align=CTR, height=14)
-    c = ws3.cell(row=4, column=1,
-                 value="Map images — Keller Farm Map | Selection Map | Well Spot Map")
-    c.font = Font(name="Calibri", italic=True, color="888888", size=10)
-    for col, w in zip("ABCDEF", [24, 30, 20, 15, 15, 30]):
-        ws3.column_dimensions[col].width = w
-
-    # ── Save ──────────────────────────────────────────────────────────────────
+def build() -> Path:
+    from deed.templates.marcus_or_template import build_workbook
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    wb = build_workbook(DATA)
     wb.save(str(OUT_FILE))
     log.info("Saved → %s", OUT_FILE)
     return OUT_FILE

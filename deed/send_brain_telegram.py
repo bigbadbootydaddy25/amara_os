@@ -14,15 +14,21 @@ Neural brain updated — Harrison County WV title playbook locked in
 Prepared by: Scott Schufford | Aces N 8s
 
 Layers written:
-✓ Neo4j   — 8 nodes + 10 relationships (parcel, owners, instruments, prospect)
-✓ Mem0    — 9 persistent facts (IDX URL, VPN, SMB, TAGIS, branding, Dropbox)
-✓ Qdrant  — 5 searchable chunks (chain, split estate, workflow, instrument, heirs)
+✓ Neo4j   — 16 nodes + 17 relationships (parcel, owners, 5 instruments, 3 wells, prospect, county)
+✓ Mem0    — 13 persistent facts (IDX URL, VPN, SMB, TAGIS bug, Sheriff http-only, branding, Dropbox, entity discrepancy, encumbrances)
+✓ Qdrant  — 6 searchable chunks (16-instrument chain, split estate + encumbrances, research systems, vesting instruments, Shuttleworth heirs, production + tax)
 ✓ Outcomes — DEED run logged (9/10 steps, CORRECT)
-✓ Obsidian — Harrison_County_11-409-19.md case study written
+✓ Obsidian — Harrison_County_11-409-19.md case study written (confirmed data)
 ✓ Wiki    — WV_Title_Examination_Playbook.md locked in
 ✓ Langfuse — run trace logged
 
 Parcel: 11-409-19 | Elk-Outside | Harrison County WV
+Full parcel: 17-11-0409-0019-0000 + sub-parcels 0001-0003
+Surface: Burns L. Craig & Sue B. — DB 1197/1258 (1989)
+Mineral: Master Mineral Holdings Inc. 1/6 — DB 1441/1269 (2010) ⚠ entity discrepancy
+         Shuttleworth Maynard Heirs 5/6 — research required
+Wells: 47-033-01920, 47-033-04093, 47-033-05416 (coordinate-radius find)
+Tax: Ticket 0000037542 — $56.62 PAID 08/22/2025 (surface only)
 Client: Texhoma Land Partners — Marcus Strunk RPL
 OR: WS_11-409-19_OR_2026-06-04_CORRECTED.xlsx — Marcus format — 3 wells added
 

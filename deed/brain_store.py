@@ -536,135 +536,32 @@ def _outcomes_store(results: dict, elapsed_s: float) -> dict:
 #  Layer 5 — Obsidian case study
 # ══════════════════════════════════════════════════════════════════════════════
 
-_OBSIDIAN_MD = """\
----
-tags: [WV-title, Harrison-County, split-estate, mineral-deed, Texhoma]
-parcel: 11-409-19
-county: Harrison
-state: WV
-district: Elk-Outside
-client: Texhoma Land Partners
-preparer: Scott Schufford | Aces N 8s
-run_date: 2026-06-05
-status: COMPLETE
----
-
-# Harrison County WV — Parcel 11-409-19 — Title Case Study
-
-**Prepared by:** Scott Schufford | Aces N 8s
-**Client:** Texhoma Land Partners — Marcus Strunk RPL
-**Run date:** 2026-06-05
-
----
-
-## Parcel Details
-
-| Field | Value |
-|---|---|
-| Parcel ID | 11-409-19 |
-| District | Elk-Outside |
-| County | Harrison |
-| State | WV |
-| Acres (deed) | 121.072 |
-| Acres (config) | 118.00 |
-| Parcel Numbers | 17-11-0409-0019-0000 through -0003 |
-| Description | Gnatty Creek watershed |
-
----
-
-## Full Chain of Title
-
-| # | Year | Book/Page | Type | Grantor | Grantee | Acres | Notes |
-|---|---|---|---|---|---|---|---|
-| 1 | 1874 | DB 57/238 | DEED | Davisson, Edgar M. | Monroe, Benjamin T. | 51 | Gnatty Creek |
-| 2 | 1879 | DB 61/434 | DEED | Shuttleworth, S.A. | Monroe, B.T. | — | Romines Mills |
-| 3 | 1884 | DB 68/329 | DEED | Bumgardner, Adam | Monroe, B.T. | 60 | |
-| 4 | 1888 | DB 75/97  | DEED | Bumgardner, Adam | Monroe, B.T. | 10 | |
-| 5 | 1899 | DB 109/403 | DEED | Thompson M.M. Commissioner | Shuttleworth, M.N. | — | Circuit Court |
-| 6 | 1903 | DB 136/259 | DEED | Shuttleworth, M.N. & Lillie | Stewart, William A. | 121.5 | **⚠ RESERVED 1/2 MINERALS** |
-| 7 | 1919 | Fid Bk 10/247 | ESTATE | Shuttleworth Estate | 6 Heirs | — | Split among heirs |
-| 8 | 2010 | BK 1441/1269 | MINERAL DEED | Burns, A. Dean (Exec. Kramer Estate) | Master Mineral Holdings Inc. | 121.072 | **VESTING — $11,137.50** |
-
----
-
-## Key Findings
-
-### Split Estate — DB 136/259 (1903)
-- Shuttleworth conveyed surface to Stewart but **RESERVED 1/2 mineral interest**
-- Creates split estate as of 1903 — surface and mineral estates legally separate
-- Antero WV mineral reservation analysis required
-- *Toothman v. Courtney (1907 WV)*: minerals reserved in place, not merely royalty
-
-### Vesting Instrument — BK 1441/1269 (2010)
-- **Master Mineral Holdings Inc. (Texas corp)** holds undivided **1/6 O&G + CBM**
-- Grantor: A. Dean Burns, Executor Estate of **Helen S. Kramer**
-- Helen S. Kramer = Helen Shuttleworth (1 of 6 heirs from Fid Bk 10/247)
-- Consideration: $11,137.50
-
-### Outstanding Research
-- 5/6 remaining Shuttleworth heir shares (Lillie A., Lorene, Mary, Samuel, Betty Jane) — **NOT YET DOCUMENTED**
-- Full language of DB 136/259 reservation needed — does "minerals" include CBM?
-- Monroe → Shuttleworth conveyance path not yet documented
-
----
-
-## Lessons Learned
-
-1. **IDX URL**: `lookup.harrisoncountywv.com` — search by Individual name, NOT parcel number
-2. **Property viewer**: `mapwv.gov/parcel` → Parcel Attributes → Harrison County → get owner name first
-3. **VPN required**: WVGES site `wvgs.wvnet.edu` only resolves via Texhoma VPN DNS
-4. **SMB auto-mounts**: `/Volumes/DATA/` is available as soon as TLC VPN connects
-5. **Zero wells is valid**: WS (White Space) tracts may be undrilled — not an error
-6. **Split estate flag**: Always check every deed for mineral reservation language before 1970
-
----
-
-## Search Workflow That Worked
-
-```
-1. Connect TLC VPN (System Preferences → Network → Texhoma-VPN)
-2. /Volumes/DATA/ auto-mounts
-3. mapwv.gov/parcel → Parcel Attributes → Harrison County → find owner name
-4. lookup.harrisoncountywv.com → Individual → "Shuttleworth" or "Burns"
-5. Filter to DEED type → pull all instruments by date
-6. Build chain 1874→2010 — flag DB 136/259 reservation
-7. Run WELL search: tagis.dep.wv.gov/oog/ (county+district, not parcel)
-8. Populate OR Excel (8 sheets)
-9. Upload to Elk Turn-in folder (mntstrunk@gmail.com Dropbox)
-10. Email Marcus at mntstrunk@gmail.com
-```
-
----
-
-## Output Files
-
-- `WS_11-409-19_OR_2026-06-04.xlsx` — Opinion of Record
-- `WS_11-409-19_OR_2026-06-04/` — Package folder
-- `DEED_NOTES_11-409-19.txt` — Run notes
-
----
-
-## Related
-
-- [[WV_Title_Examination_Playbook]]
-- [[Harrison_County_WV_IDX_Guide]]
-- [[Split_Estate_WV_Analysis]]
-"""
-
-
 def _obsidian_store() -> dict:
+    """
+    Copies the canonical case study from the repo Brain dir to the Obsidian vault.
+    Source of truth is amara-brain/Brain/WV_Title/Harrison_County_11-409-19.md —
+    never overwrite it here; that file is maintained in git.
+    """
     status = {"layer": "obsidian", "ok": False, "paths": [], "error": ""}
     try:
-        # Write to both Obsidian vault and repo Brain dir
-        targets = [
-            _OBS_VAULT / "amara" / "WV_Title" / "Harrison_County_11-409-19.md",
-            _BRAIN_DIR / "WV_Title" / "Harrison_County_11-409-19.md",
-        ]
-        for target in targets:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(_OBSIDIAN_MD)
-            status["paths"].append(str(target))
-            log.info("Obsidian: wrote %s", target)
+        source = _BRAIN_DIR / "WV_Title" / "Harrison_County_11-409-19.md"
+        if not source.exists():
+            status["error"] = f"Source not found: {source}"
+            log.warning("Obsidian: %s", status["error"])
+            return status
+
+        content = source.read_text()
+
+        # Copy to Obsidian vault — gracefully skips if vault not mounted on Mac
+        vault_target = _OBS_VAULT / "amara" / "WV_Title" / "Harrison_County_11-409-19.md"
+        try:
+            vault_target.parent.mkdir(parents=True, exist_ok=True)
+            vault_target.write_text(content)
+            status["paths"].append(str(vault_target))
+            log.info("Obsidian vault: wrote %s", vault_target)
+        except Exception as vault_err:
+            log.warning("Obsidian vault: write failed (%s) — vault not mounted?", vault_err)
+
         status["ok"] = True
     except Exception as e:
         status["error"] = str(e)

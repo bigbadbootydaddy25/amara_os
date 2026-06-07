@@ -47,138 +47,267 @@ CLIENT    = "Texhoma Land Partners"
 
 GRAPH_NODES = [
     # (label, props)
-    ("Parcel",       {"id": "11-409-19", "county": "Harrison", "state": "WV",
-                      "district": "Elk-Outside", "acres": 121.072,
-                      "parcel_numbers": "17-11-0409-0019-0000 through -0003"}),
-    ("SurfaceOwner", {"id": "Burns-family", "name": "Burns family",
-                      "address": "Knoll View Road, Mount Clare WV 26408"}),
+    ("Parcel",       {"id": "11-409-19", "full_id": "17-11-0409-0019-0000",
+                      "sub_parcels": "0001,0002,0003",
+                      "county": "Harrison", "state": "WV",
+                      "district": "Elk-Outside", "district_num": "11",
+                      "acres": 121.072, "tax_desc": "118 AC Stout Run",
+                      "legal_desc": "Gnatty Creek watershed, Elk Creek tributary",
+                      "property_class": "F - Farm"}),
+    ("SurfaceOwner", {"id": "Burns-Craig-Sue", "name": "Burns, L. Craig & Sue B.",
+                      "address": "458 Knoll View Road, Mount Clare WV 26408",
+                      "deed": "DB 1197/1258", "dated": "1989-07-11",
+                      "recorded": "1989-09-21", "consideration": "$34,500.00",
+                      "acres": 129.63, "tenure": "Joint tenants WROS"}),
     ("MineralOwner", {"id": "MasterMineralHoldings",
-                      "name": "Master Mineral Holdings Inc.",
-                      "state": "Texas", "interest": "1/6 undivided O&G + CBM",
-                      "book": "1441", "page": "1269"}),
+                      "name_deed": "Master Mineral Holdings Inc.",
+                      "name_tax":  "Master Mineral Holdings III LP",
+                      "state": "Texas", "address": "PO Box 10886, Midland TX 79702",
+                      "interest": "1/6 undivided O&G + CBM",
+                      "net_acres": 20.179, "status": "Unleased",
+                      "book": "1441", "page": "1269",
+                      "flag": "Inc vs III LP entity discrepancy — no transfer deed found"}),
+    ("MineralOwner", {"id": "ShuttleworthHeirs",
+                      "name": "Shuttleworth Maynard Heirs",
+                      "interest": "5/6 undivided O&G",
+                      "net_acres": 100.893, "status": "Unleased — research required",
+                      "source_deed": "DB 136/259 (1903)",
+                      "estate_book": "Fid 10/247 (1919)",
+                      "heirs": "Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane"}),
     ("Person",       {"id": "ADeanBurns", "name": "A. Dean Burns",
-                      "role": "Executor, Estate of Helen S. Kramer"}),
+                      "role": "Executor, Estate of Helen S. Kramer",
+                      "will_book": "WB 142/359 (1993)"}),
+    ("Person",       {"id": "HelenKramer", "name": "Helen S. Kramer",
+                      "nee": "Helen Shuttleworth",
+                      "will_book": "WB 142/359 (1993)"}),
+    ("Instrument",   {"id": "DB-136-88", "book": "136", "page": "88",
+                      "year": 1903, "type": "COAL DEED",
+                      "grantor": "M.A. Props", "grantee": "Bijou Coal Company",
+                      "note": "Pittsburgh seam — UNRELEASED — pre-digital"}),
+    ("Instrument",   {"id": "DB-183-260", "book": "183", "page": "260",
+                      "year": 1909, "type": "OGL",
+                      "grantor": "M.A. Props", "grantee": "Hope Natural Gas Company",
+                      "note": "OGL — UNRELEASED — pre-digital"}),
     ("Instrument",   {"id": "DB-136-259", "book": "136", "page": "259",
                       "year": 1903, "type": "DEED",
-                      "note": "Shuttleworth to Stewart — RESERVED 1/2 minerals"}),
+                      "date": "1903-03-23",
+                      "grantor": "Shuttleworth, Maynard N. & Lillie",
+                      "grantee": "Stewart, William A.",
+                      "acres": 121.5,
+                      "note": "RESERVED ONE-HALF of all oil and gas — SPLIT ESTATE KEY INSTRUMENT"}),
+    ("Instrument",   {"id": "DB-1197-1258", "book": "1197", "page": "1258",
+                      "year": 1989, "type": "DEED",
+                      "date_instr": "1989-07-11", "date_rec": "1989-09-21",
+                      "grantor": "Abner Stout, Executor, Estate of Mary L. Lawson",
+                      "grantee": "Burns, L. Craig & Sue B.",
+                      "acres": 129.63, "consideration": "$34,500.00",
+                      "note": "SURFACE VESTING — exceptions: DB 136/88, DB 183/260"}),
     ("Instrument",   {"id": "BK-1441-1269", "book": "1441", "page": "1269",
                       "year": 2010, "type": "MINERAL DEED",
-                      "note": "Vesting instrument — Burns to Master Mineral Holdings"}),
+                      "date_instr": "2010-01-19", "date_rec": "2010-02-10",
+                      "grantor": "Burns, A. Dean, Executor Estate of Helen S. Kramer",
+                      "grantee": "Master Mineral Holdings Inc.",
+                      "interest": "1/6 undivided O&G + CBM",
+                      "acres": 121.072, "consideration": "$10.00",
+                      "note": "MINERAL VESTING INSTRUMENT"}),
+    ("Well",         {"id": "API-47-033-01920", "api": "47-033-01920",
+                      "operator": "Diversified Production LLC", "spud": "1978",
+                      "status": "Active", "last_prod": "1,221 MCF 2024",
+                      "dep_status": "Active — no plugging date"}),
+    ("Well",         {"id": "API-47-033-04093", "api": "47-033-04093",
+                      "operator": "Diversified Production LLC", "spud": "1995",
+                      "status": "Active — adjacent", "last_prod": "759 MCF 2024",
+                      "dep_status": "Active"}),
+    ("Well",         {"id": "API-47-033-05416", "api": "47-033-05416",
+                      "operator": "Key Oil Company", "spud": "2010-07-26",
+                      "status": "Active — N adjacent Simpson District",
+                      "last_prod": "2,254 MCF 2024",
+                      "dep_status": "Active — no plugging date"}),
     ("Prospect",     {"id": "Elk-Harrison-WV", "name": "Elk District",
                       "county": "Harrison", "state": "WV",
-                      "operator": "Antero Resources",
                       "client": "Texhoma Land Partners"}),
     ("County",       {"id": "Harrison-WV", "name": "Harrison County", "state": "WV",
                       "idx_url": "lookup.harrisoncountywv.com",
-                      "parcel_viewer": "mapwv.gov/parcel"}),
+                      "parcel_viewer": "mapwv.gov/parcel",
+                      "sheriff_tax": "harrison.softwaresystems.com",
+                      "sheriff_protocol": "http only — NOT https",
+                      "assessor_minerals": "harrisoncountyassessor.com/ownershipsearch.aspx",
+                      "assessor_phone": "(304) 624-8510",
+                      "tagis_wells": "tagis.dep.wv.gov/oog/",
+                      "tagis_note": "parcel-ID search fails in Elk-Outside — use coordinate-radius"}),
 ]
 
 GRAPH_RELS = [
     # (from_id, rel_type, to_id, props)
-    ("11-409-19",         "IN_DISTRICT",      "Elk-Harrison-WV",      {"district": "Elk-Outside"}),
-    ("11-409-19",         "IN_COUNTY",        "Harrison-WV",          {}),
-    ("Burns-family",      "SURFACE_OWNER_OF", "11-409-19",            {}),
-    ("MasterMineralHoldings", "MINERAL_OWNER_OF", "11-409-19",        {"interest": "1/6", "recorded": "2010-02-10"}),
-    ("ADeanBurns",        "GRANTOR_ON",       "BK-1441-1269",         {"capacity": "Executor"}),
-    ("MasterMineralHoldings", "GRANTEE_ON",   "BK-1441-1269",         {}),
-    ("DB-136-259",        "CREATES_SPLIT_ESTATE_ON", "11-409-19",     {"year": 1903, "reservation": "1/2 minerals"}),
-    ("BK-1441-1269",      "VESTS_INTEREST_IN", "11-409-19",           {"interest": "1/6 O&G + CBM"}),
-    ("Elk-Harrison-WV",   "OPERATED_BY",      "Antero Resources",     {}),
-    ("Elk-Harrison-WV",   "ACQUIRED_BY",      "Texhoma Land Partners", {}),
+    ("11-409-19",         "IN_DISTRICT",           "Elk-Harrison-WV",      {"district": "Elk-Outside"}),
+    ("11-409-19",         "IN_COUNTY",             "Harrison-WV",          {}),
+    ("Burns-Craig-Sue",   "SURFACE_OWNER_OF",      "11-409-19",            {"since": 1989, "deed": "DB 1197/1258"}),
+    ("MasterMineralHoldings", "MINERAL_OWNER_OF",  "11-409-19",            {"interest": "1/6", "since": 2010}),
+    ("ShuttleworthHeirs", "MINERAL_OWNER_OF",      "11-409-19",            {"interest": "5/6", "since": 1903, "status": "research required"}),
+    ("ADeanBurns",        "GRANTOR_ON",            "BK-1441-1269",         {"capacity": "Executor"}),
+    ("MasterMineralHoldings", "GRANTEE_ON",        "BK-1441-1269",         {}),
+    ("HelenKramer",       "TESTATE_PREDECESSOR_OF","ADeanBurns",           {"will": "WB 142/359"}),
+    ("DB-136-259",        "CREATES_SPLIT_ESTATE_ON","11-409-19",           {"year": 1903, "reservation": "1/2 O&G"}),
+    ("DB-136-88",         "UNRELEASED_ENCUMBRANCE_ON","11-409-19",         {"type": "coal", "grantee": "Bijou Coal"}),
+    ("DB-183-260",        "UNRELEASED_ENCUMBRANCE_ON","11-409-19",         {"type": "OGL", "grantee": "Hope Natural Gas"}),
+    ("BK-1441-1269",      "VESTS_INTEREST_IN",     "11-409-19",            {"interest": "1/6 O&G + CBM"}),
+    ("DB-1197-1258",      "VESTS_SURFACE_IN",      "11-409-19",            {"grantee": "Burns Craig & Sue"}),
+    ("API-47-033-01920",  "NEAR_PARCEL",           "11-409-19",            {"relation": "coordinate radius"}),
+    ("API-47-033-04093",  "NEAR_PARCEL",           "11-409-19",            {"relation": "adjacent parcel"}),
+    ("API-47-033-05416",  "NEAR_PARCEL",           "11-409-19",            {"relation": "N adjacent Simpson District"}),
+    ("Elk-Harrison-WV",   "ACQUIRED_BY",           "Texhoma Land Partners", {}),
 ]
 
 MEM0_FACTS = [
-    "Harrison County WV deed index URL is lookup.harrisoncountywv.com — search by Individual name NOT parcel number. The old URL harrison.countyclerk.us is WRONG.",
+    "Harrison County WV deed index URL is lookup.harrisoncountywv.com — search by Individual name OR Book & Page. The old URL harrison.countyclerk.us is WRONG and returns no results.",
     "WV Property Viewer is mapwv.gov/parcel — use Parcel Attributes search, select Harrison County to get owner name from parcel number.",
-    "Texhoma SMB server mounts at /Volumes/DATA/ when TLC VPN is connected. TLC VPN is via System Preferences Network — credentials in Mac Keychain as Texhoma-VPN.",
-    "WVGES site wvgs.wvnet.edu requires Texhoma VPN DNS to resolve. Use tagis.dep.wv.gov/oog/ as fallback for oil and gas well searches.",
-    "All output is branded as: Prepared by Scott Schufford | Aces N 8s. Never reference AMARA or any internal system name in external output.",
+    "Texhoma SMB server mounts at /Volumes/DATA/ when TLC VPN is connected. TLC VPN via System Preferences Network — credentials in Mac Keychain as Texhoma-VPN.",
+    "WVGES site wvgs.wvnet.edu requires Texhoma VPN DNS to resolve. Use tagis.dep.wv.gov/oog/ as fallback for well searches.",
+    "TAGIS parcel-ID search fails silently in Elk-Outside District — returns zero wells even when wells exist. Always use coordinate-radius search for well data in Harrison County Elk-Outside.",
+    "Harrison County Sheriff tax system URL is harrison.softwaresystems.com — use http:// NOT https:// — https fails. Surface real property only — no mineral accounts. Mineral accounts are held separately by the Assessor at harrisoncountyassessor.com/ownershipsearch.aspx or call (304) 624-8510.",
+    "All output branded as: Prepared by Scott Schufford | Aces N 8s. Never reference internal system names in external output.",
     "Dropbox delivery folder for Texhoma is the Elk Turn-in folder shared by mntstrunk@gmail.com.",
-    ".DS_Store files are harmless — exclude from all future uploads and deliveries.",
-    "Parcel 11-409-19 Harrison County WV: split estate since 1903 (DB 136/259). Master Mineral Holdings Inc. holds 1/6 O&G per BK 1441/1269. Five remaining Shuttleworth heir shares (5/6 interest) are unresolved and require further research.",
-    "Harrison County WV IDX requires searching by Individual name (owner last name) then filtering to DEED type. Do not search by parcel number — it returns no results.",
+    ".DS_Store files are harmless — exclude from all future uploads.",
+    "Parcel 11-409-19 Harrison County WV Elk-Outside: split estate since 1903 (DB 136/259 — Shuttleworth reserved 1/2 O&G). Surface vested Burns Craig & Sue (DB 1197/1258 — 1989). Minerals: Master Mineral Holdings Inc. 1/6 (DB 1441/1269 — 2010) + Shuttleworth heirs 5/6 (research required). Three adjacent wells found via coordinate radius — TAGIS parcel search returns zero.",
+    "Master Mineral Holdings Inc. (deed entity) and Master Mineral Holdings III LP (tax records) are the same Midland TX operation — PO Box 10886 Midland TX 79702 — but no transfer deed found in Harrison County records. Flag as open chain item on all examinations.",
+    "White Space WV title examination workflow: read vesting deed recitals completely — the full chain back to the 1800s is embedded in the deed body. Burns deed DB 1197/1258 and mineral deed DB 1441/1269 both contain complete chain recitals in Harrison County.",
+    "Hope Natural Gas OGL DB 183/260 (1909) and Bijou Coal reservation DB 136/88 (1903) are UNRELEASED encumbrances on parcel 11-409-19 Harrison County WV — both pre-digital — no releases of record found.",
 ]
 
 QDRANT_CHUNKS = [
     {
-        "id":   "harrison-11-409-19-chain",
+        "id":   "harrison-11-409-19-chain-16",
         "text": (
-            "Chain of Title — Parcel 11-409-19, Elk-Outside District, Harrison County WV\n"
-            "1. 1874 — DB 57/238  — Davisson, Edgar M. → Monroe, Benjamin T. — 51 acres Gnatty Creek\n"
-            "2. 1879 — DB 61/434  — Shuttleworth, S.A. → Monroe, B.T. — Romines Mills tract\n"
-            "3. 1884 — DB 68/329  — Bumgardner, Adam   → Monroe, B.T. — 60 acres\n"
-            "4. 1888 — DB 75/97   — Bumgardner, Adam   → Monroe, B.T. — 10 acres\n"
-            "5. 1899 — DB 109/403 — Thompson M.M. Commissioner → Shuttleworth, M.N. — Circuit Court order\n"
-            "6. 1903 — DB 136/259 — Shuttleworth, Maynard N. & Lillie → Stewart, William A. — 121.5 acres — KEY: RESERVED 1/2 minerals\n"
-            "7. 1919 — Fid Bk 10/247 — Estate of Shuttleworth, Maynard N. — Heirs: Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane\n"
-            "8. 2010 — BK 1441/1269 — Burns, A. Dean (Exec. Estate of Helen S. Kramer) → Master Mineral Holdings Inc. — 1/6 O&G — $11,137.50 — rec. Feb 10 2010"
+            "Full Chain of Title — 16 Instruments — Parcel 11-409-19, Elk-Outside District, Harrison County WV\n"
+            "1.  DB 57/238    1874 — Davisson → Monroe — 51 acres Gnatty Creek  [recital in DB 1441/1269]\n"
+            "2.  DB 61/434    1879 — Shuttleworth S.A. → Monroe B.T. — Romines Mills  [recital]\n"
+            "3.  DB 68/329    1884 — Bumgardner → Monroe — 60 acres  [recital]\n"
+            "4.  DB 75/97     1888 — Bumgardner → Monroe — 10 acres  [recital]\n"
+            "5.  DB 109/403   1899 — Thompson Commissioner → Shuttleworth M.N. — 122 acres  [recital]\n"
+            "6.  DB 136/259   1903-03-23 — Shuttleworth M.N. & Lillie → Stewart William A. — 121.5 acres — RESERVED ONE-HALF oil and gas — KEY SPLIT ESTATE  [recital p.3]\n"
+            "7.  DB 136/88    1903 — M.A. Props → Bijou Coal Co. — Pittsburgh seam — UNRELEASED  [excepted in DB 1197/1258 p.4]\n"
+            "8.  DB 183/260   1909 — M.A. Props → Hope Natural Gas Co. — OGL — UNRELEASED  [excepted in DB 1197/1258 p.4]\n"
+            "9.  Fid 10/247   1919 — Shuttleworth Estate — heirs: Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane  [recital]\n"
+            "10. WB 54/291    1960 — T. Minter Lawson died → Guy & Mary Lawson  [DB 1197/1258 pp.2-3]\n"
+            "11. WB 79/320    1971 — Guy Lawson died → Mary Lawson  [DB 1197/1258 pp.2-3]\n"
+            "12. WB 102/1040  1983 — Mary Lawson died — Abner Stout Executor  [DB 1197/1258 pp.2-3]\n"
+            "13. WB 108/137   1980 — Lorene Shuttleworth died → Helen Kramer, Betty Evans, Samuel  [recital pp.3-4]\n"
+            "14. WB 142/359   1993 — Helen Kramer died — Burns named Executor  [recital p.4]\n"
+            "15. DB 1197/1258  1989-07-11 / rec. 1989-09-21 — Abner Stout Exec. (Lawson Estate) → Burns L. Craig & Sue B. — 129.63 ac — $34,500 — SURFACE VESTING  [pulled direct from IDX — read all 5 pp.]\n"
+            "16. DB 1441/1269  2010-01-19 / rec. 2010-02-10 — Burns A. Dean Exec. (Helen S. Kramer Estate) → Master Mineral Holdings Inc. — 1/6 O&G+CBM — 121.072 ac — $10.00 — MINERAL VESTING  [pulled direct from IDX — read all 6 pp.]"
         ),
-        "metadata": {"type": "chain_of_title", "parcel": "11-409-19", "county": "Harrison", "state": "WV"},
+        "metadata": {"type": "chain_of_title", "parcel": "11-409-19", "county": "Harrison", "state": "WV",
+                     "instrument_count": 16},
     },
     {
-        "id":   "harrison-split-estate-antero",
+        "id":   "harrison-split-estate-encumbrances",
         "text": (
-            "Split Estate & Antero Analysis — Harrison County WV\n"
-            "DB 136/259 (1903): Shuttleworth conveyed surface to Stewart but RESERVED 1/2 mineral interest.\n"
-            "WV split estate: surface and mineral estates are legally separate after a reservation.\n"
-            "Toothman v. Courtney (1907 WV): minerals reserved in a deed conveyance are severed from surface and held as a separate estate in place.\n"
-            "Pure royalty vs. in place: In WV a mineral deed or reservation conveys minerals in place, not merely a royalty right.\n"
-            "Master Mineral Holdings 1/6 interest is 1/6 of the RESERVED 1/2 mineral estate — held by one of six Shuttleworth heirs (Helen S. Kramer).\n"
-            "Antero Resources operates in Elk District Harrison County WV. Texhoma Land Partners is acquiring mineral interests here.\n"
-            "CBM (coalbed methane) inclusion: BK 1441/1269 explicitly conveys 'oil, gas, and coalbed methane'."
+            "Split Estate & Unreleased Encumbrances — Parcel 11-409-19 — Harrison County WV\n\n"
+            "SPLIT ESTATE — DB 136/259 (March 23, 1903):\n"
+            "Shuttleworth conveyed surface to Stewart but RESERVED ONE-HALF of all oil and gas.\n"
+            "WV split estate: minerals reserved in a deed are severed from surface as separate estate in place.\n"
+            "Toothman v. Courtney (1907 WV): minerals in WV held in place — not merely a royalty right.\n"
+            "Master Mineral Holdings 1/6 = 1/6 of the reserved 1/2 — derives from Helen S. Kramer (1 of 6 heirs).\n\n"
+            "UNRELEASED ENCUMBRANCE 1 — DB 183/260 (May 4, 1909):\n"
+            "Hope Natural Gas Company OGL — lessor M.A. Props — UNRELEASED — pre-digital — no release of record.\n"
+            "Specifically excepted in Burns surface deed DB 1197/1258 page 4.\n\n"
+            "UNRELEASED ENCUMBRANCE 2 — DB 136/88 (February 9, 1903):\n"
+            "Bijou Coal Company — Pittsburgh seam of coal — UNRELEASED — pre-digital.\n"
+            "Specifically excepted in Burns surface deed DB 1197/1258 page 4.\n\n"
+            "Both encumbrances pre-date IDX digital records — confirm via deed recitals and document images only."
         ),
-        "metadata": {"type": "legal_analysis", "topic": "split_estate", "county": "Harrison", "state": "WV"},
+        "metadata": {"type": "legal_analysis", "topic": "split_estate_encumbrances",
+                     "county": "Harrison", "state": "WV"},
     },
     {
-        "id":   "harrison-county-search-workflow",
+        "id":   "harrison-county-research-systems",
         "text": (
-            "Harrison County WV Title Search Workflow (proven workflow — 2026-06-05)\n"
-            "1. Connect TLC VPN via System Preferences → Network (creds in Mac Keychain: Texhoma-VPN)\n"
-            "2. /Volumes/DATA/ SMB server auto-mounts when VPN is connected\n"
-            "3. Search DOC Library on SMB for existing docs on parcel\n"
-            "4. mapwv.gov/parcel → Parcel Attributes → Harrison County → find owner name\n"
-            "5. lookup.harrisoncountywv.com → Individual search → enter owner last name\n"
-            "6. Filter to DEED type → pull all instruments oldest to newest\n"
-            "7. harrisoncountyassessor.com → tax data\n"
-            "8. tagis.dep.wv.gov/oog/ → oil and gas well search by county+district\n"
-            "9. Build chain — flag mineral reservations and split estates\n"
-            "10. Populate OR Excel template → 8 sheets\n"
-            "11. Upload to Elk Turn-in folder on Dropbox (mntstrunk@gmail.com)\n"
-            "12. Email Marcus Strunk at mntstrunk@gmail.com\n"
-            "CRITICAL: IDX searches by Individual name NOT parcel number."
+            "Harrison County WV Research Systems — CONFIRMED WORKING 2026-06-07\n\n"
+            "DEED INDEX: lookup.harrisoncountywv.com\n"
+            "  Best method: Book & Page search | Individual name also works for modern records\n"
+            "  Pre-1909 deeds not in digital system — find via recitals in later deeds\n\n"
+            "SHERIFF TAX: harrison.softwaresystems.com\n"
+            "  CRITICAL: Use http:// NOT https:// — https fails silently\n"
+            "  Surface real property only — no mineral accounts\n"
+            "  Search by Map/Parcel (format 409-0019) most precise\n"
+            "  Frequent SQL server outages — retry on error\n\n"
+            "ASSESSOR MINERALS: harrisoncountyassessor.com/ownershipsearch.aspx\n"
+            "  Phone: (304) 624-8510\n"
+            "  Required for O&G mineral tax accounts — separate from Sheriff system\n\n"
+            "PARCEL VIEWER: mapwv.gov/parcel/\n"
+            "  Parcel ID format: 17-11-0409-0019-0000\n\n"
+            "TAGIS WELLS: tagis.dep.wv.gov/oog/\n"
+            "  CRITICAL: Parcel-ID search FAILS in Elk-Outside District — returns zero even when wells exist\n"
+            "  Use coordinate-radius search — Well Spot Map overlay also works\n\n"
+            "WVGES: wvgs.wvnet.edu — requires Texhoma VPN DNS\n"
+            "  Fallback: wvgs.wvu.edu"
         ),
-        "metadata": {"type": "workflow", "county": "Harrison", "state": "WV"},
+        "metadata": {"type": "workflow", "county": "Harrison", "state": "WV", "confirmed": "2026-06-07"},
     },
     {
-        "id":   "master-mineral-holdings-instrument",
+        "id":   "harrison-11-409-19-vesting-instruments",
         "text": (
-            "Vesting Instrument — BK 1441 / PG 1269 — Harrison County WV\n"
-            "Grantor:  A. Dean Burns, Executor Estate of Helen S. Kramer\n"
-            "Grantee:  Master Mineral Holdings Inc. (Texas corporation)\n"
-            "Interest: Undivided 1/6 interest in oil, gas, and coalbed methane\n"
-            "Instrument Date: January 19, 2010 | Recorded: February 10, 2010\n"
-            "Consideration: $11,137.50 | Acreage: 121.072 acres\n"
-            "District: Elk-Outside | County: Harrison, WV\n"
-            "Tax: Shuttleworth Maynard Heirs .50 INT 121.072 AC O&G Gnatty Creek Elk-Outside\n"
-            "Parcels: 17-11-0409-0019-0000, -0001, -0002, -0003\n"
-            "Surface: Burns family, Knoll View Road, Mount Clare WV 26408\n"
-            "Back-chain: DB 57/238, 61/434, 68/329, 75/97, 109/403, 136/259, Fid Bk 10/247"
+            "Vesting Instruments — Parcel 11-409-19 — Harrison County WV\n\n"
+            "SURFACE VESTING — DB 1197/1258\n"
+            "Grantor:  Abner Stout, Executor, Estate of Mary L. Lawson\n"
+            "Grantee:  Burns, L. Craig & Sue B. — 458 Knoll View Road, Mount Clare WV 26408\n"
+            "Date:     July 11, 1989 | Recorded: September 21, 1989\n"
+            "Acres:    129.63 surface | Consideration: $34,500.00\n"
+            "Tenure:   Joint tenants with right of survivorship\n"
+            "Exceptions: Bijou Coal DB 136/88 (Pittsburgh seam); Hope Natural Gas DB 183/260 (OGL)\n"
+            "Surface chain: T. Minter Lawson WB 54/291 → Guy & Mary Lawson WB 79/320 → Mary Lawson WB 102/1040 → Abner Stout Exec.\n\n"
+            "MINERAL VESTING — DB 1441/1269\n"
+            "Grantor:  A. Dean Burns, Executor, Estate of Helen S. Kramer\n"
+            "Grantee:  Master Mineral Holdings Inc. (Texas corp) — PO Box 10886, Midland TX 79702\n"
+            "Date:     January 19, 2010 | Recorded: February 10, 2010\n"
+            "Interest: Undivided 1/6 oil, gas, and coalbed methane\n"
+            "Acres:    121.072 | Consideration: $10.00\n"
+            "District: Elk-Outside | County: Harrison WV\n"
+            "Parcels:  17-11-0409-0019-0000, -0001, -0002, -0003\n"
+            "Tax:      Shuttleworth Maynard Heirs .50 INT 121.072 AC O&G Gnatty Creek Elk-Outside\n"
+            "Pages:    6 pages — chain recitals pages 3-5 — 121.072 acres confirmed page 5\n"
+            "Entity flag: Tax records show Master Mineral Holdings III LP — same PO Box — no transfer deed found"
         ),
-        "metadata": {"type": "instrument", "book": "1441", "page": "1269", "parcel": "11-409-19"},
+        "metadata": {"type": "instrument", "parcel": "11-409-19", "county": "Harrison"},
     },
     {
-        "id":   "shuttleworth-heirs-analysis",
+        "id":   "harrison-shuttleworth-heirs-will-chain",
         "text": (
-            "Shuttleworth Heirs — Fid Book 10 / Page 247 — 1919 — Harrison County WV\n"
-            "Maynard N. Shuttleworth died. Estate settled 1919.\n"
-            "Six heirs identified: Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane Shuttleworth.\n"
-            "Reserved 1/2 mineral interest from DB 136/259 distributed among 6 heirs → each holds 1/6 of the reserved 1/2.\n"
-            "Helen Shuttleworth = Helen S. Kramer — confirmed per BK 1441/1269.\n"
-            "A. Dean Burns served as Executor of Helen S. Kramer estate and conveyed her 1/6 interest to Master Mineral Holdings in 2010.\n"
-            "OUTSTANDING: 5 remaining heir shares (Lillie A., Lorene, Mary, Samuel, Betty Jane) — chains not yet documented.\n"
-            "Research required: run name searches for all 5 remaining heirs in Harrison County IDX."
+            "Shuttleworth Heirs Chain — Harrison County WV — Parcel 11-409-19\n\n"
+            "Maynard N. Shuttleworth died — Estate 1919 — Fid Book 10 / Page 247\n"
+            "6 heirs: Lillie A., Helen, Lorene, Mary, Samuel, Betty Jane Shuttleworth\n"
+            "Each heir = 1/6 of the reserved 1/2 mineral interest (DB 136/259, 1903)\n\n"
+            "HELEN = Helen S. Kramer — confirmed in DB 1441/1269 recitals\n"
+            "Helen died 1993 — Will Book 142/359 — Burns A. Dean named Executor\n"
+            "Burns conveyed Helen's 1/6 → Master Mineral Holdings Inc. — DB 1441/1269 (2010) — $10.00\n\n"
+            "LORENE — Will Book 108/137 (1980) — died — interest to Helen Kramer, Betty Evans, Samuel\n\n"
+            "OUTSTANDING — 5 heir interests not yet conveyed to Master Mineral:\n"
+            "- Lillie A. Shuttleworth — no conveyance found of record\n"
+            "- Mary Shuttleworth — no conveyance found\n"
+            "- Samuel Shuttleworth — received partial from Lorene — not yet conveyed\n"
+            "- Betty Evans (nee Betty Jane Shuttleworth) — received partial from Lorene — not yet conveyed\n"
+            "- Lorene share distributed via WB 108/137 (see above)\n"
+            "Research: run all 5 names in Harrison County IDX to find subsequent conveyances"
         ),
         "metadata": {"type": "heir_analysis", "parcel": "11-409-19", "county": "Harrison"},
+    },
+    {
+        "id":   "harrison-11-409-19-production-tax",
+        "text": (
+            "Production Wells & Tax Data — Parcel 11-409-19 — Harrison County WV\n\n"
+            "TAGIS LIMITATION: Parcel-ID search in Elk-Outside returns ZERO — known system bug.\n"
+            "Correct method: coordinate-radius search or Well Spot Map overlay.\n\n"
+            "Well 1: API 47-033-01920 | Diversified Production LLC | Spud 1978 | Active | 1,221 MCF 2024\n"
+            "Well 2: API 47-033-04093 | Diversified Production LLC | Spud 1995 | Active (adjacent) | 759 MCF 2024\n"
+            "Well 3: API 47-033-05416 | Key Oil Company | Spud 07/26/2010 | Active N adjacent (Simpson) | 2,254 MCF 2024\n\n"
+            "SURFACE TAX (harrison.softwaresystems.com — http only):\n"
+            "Owner: Burns L. Craig & Sue B. | Ticket: 0000037542 | Account: 06056171\n"
+            "Land Value: $4,860 | Annual Tax: $56.62 | Status: PAID 08/22/2025\n\n"
+            "MINERAL TAX: Not separately assessed in Sheriff system.\n"
+            "Search by name and Map/Parcel returned Burns surface only.\n"
+            "Next step: harrisoncountyassessor.com/ownershipsearch.aspx or (304) 624-8510"
+        ),
+        "metadata": {"type": "production_tax", "parcel": "11-409-19", "county": "Harrison", "confirmed": "2026-06-07"},
     },
 ]
 

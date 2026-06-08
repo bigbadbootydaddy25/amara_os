@@ -1,10 +1,23 @@
 """
-Clark County NV – New Residential Building Permit Scraper
-Pulls permits from the Accela public portal using raw HTTP only (no browser/Playwright).
-Groups by ZIP, flags activity level, pushes results to Airtable.
+Clark County NV – Residential Building Permit Intelligence
+==========================================================
+SOURCE 1  Census Bureau Building Permits Survey (BPS)
+          https://api.census.gov/data/timeseries/eits/bps
+          Metro-level aggregate counts for Las Vegas CBSA 29820.
+          No auth required.
 
-Requirements: pip install httpx
-Usage:        python clark_county_permits.py
+SOURCE 2  Clark County NV Open Data (Socrata)
+          https://opendata.clarkcountynv.gov
+          Individual permit records with addresses/ZIPs.
+          No auth required.
+
+Results are grouped by ZIP, flagged Hot/Warm/Cold, and pushed
+to Airtable base appGtDvO4grC0iv4V → "Permit Activity" table.
+
+Requirements:  pip3 install httpx
+Usage:
+    export AIRTABLE_API_KEY=pat05vgLOgpayULeQ...
+    python3 scripts/clark_county_permits.py
 """
 
 import httpx
@@ -16,346 +29,449 @@ from collections import defaultdict
 from datetime import date, timedelta, datetime
 
 # ── Config ────────────────────────────────────────────────────────────────────
-# Set these env vars before running:
-#   export AIRTABLE_API_KEY=pat05vgLOgpayULeQ...
-#   export AIRTABLE_BASE_ID=appGtDvO4grC0iv4V
-AIRTABLE_API_KEY = os.environ.get("AIRTABLE_API_KEY", "")
-AIRTABLE_BASE_ID = os.environ.get("AIRTABLE_BASE_ID", "appGtDvO4grC0iv4V")
+
+AIRTABLE_API_KEY  = os.environ.get("AIRTABLE_API_KEY", "")
+AIRTABLE_BASE_ID  = "appGtDvO4grC0iv4V"
+AIRTABLE_TABLE    = "Permit Activity"
+MARKET            = "Las Vegas NV"
+PERIOD            = "Last 90 Days"
+TODAY             = date.today().isoformat()
+LOOKBACK_DAYS     = 90
+HOT_THRESHOLD     = 10
+WARM_THRESHOLD    = 5
+
+# Census BPS – Las Vegas-Henderson-Paradise CBSA code
+LV_CBSA           = "29820"
+
+# Clark County Socrata base URL
+SOCRATA_BASE      = "https://opendata.clarkcountynv.gov"
 
 if not AIRTABLE_API_KEY:
-    sys.exit("ERROR: Set the AIRTABLE_API_KEY environment variable before running.")
-TABLE_NAME       = "Permit Activity"
-MARKET           = "Las Vegas NV"
-PERIOD           = "Last 90 Days"
-TODAY            = date.today().isoformat()
+    sys.exit("ERROR: set AIRTABLE_API_KEY env var before running.")
 
-# Accela public portal for Clark County NV
-# Endpoint: Citizen Access / Open Data API (no auth required)
-ACCELA_BASE      = "https://aca3.accela.com/clarkcountynv"
-ACCELA_SEARCH    = f"{ACCELA_BASE}/Cap/CapHome.aspx"
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-LOOKBACK_DAYS    = 90
-HOT_THRESHOLD    = 10
-WARM_THRESHOLD   = 5
+def _cutoff_str() -> str:
+    """ISO date string 90 days ago, for SoQL $where clauses."""
+    return (date.today() - timedelta(days=LOOKBACK_DAYS)).isoformat()
 
-# ── Step 1: Verify Airtable connection ────────────────────────────────────────
 
-def verify_airtable(client: httpx.Client) -> dict:
-    """Verify base exists and return table name → table-id mapping."""
+def _flag(count: int) -> str:
+    if count >= HOT_THRESHOLD:
+        return "Hot"
+    if count >= WARM_THRESHOLD:
+        return "Warm"
+    return "Cold"
+
+
+RESIDENTIAL_RE = re.compile(
+    r"(new\s*res|single.?family|sfr|duplex|townhome|townhouse|"
+    r"residential|nsfr|row\s*home|single\s*unit|1.unit|one.unit)",
+    re.I,
+)
+
+
+def _looks_residential(text: str) -> bool:
+    return bool(RESIDENTIAL_RE.search(text or ""))
+
+
+def _extract_zip(text: str) -> str:
+    """Pull first 89xxx ZIP from an address string."""
+    m = re.search(r"\b(89\d{3})\b", text or "")
+    return m.group(1) if m else ""
+
+
+# ── Step 1: Verify Airtable connection ───────────────────────────────────────
+
+def verify_airtable(client: httpx.Client) -> tuple[str, dict]:
+    """
+    Return (table_id, {field_name: field_id}) for the Permit Activity table.
+    Confirms all 3 expected tables exist.
+    """
     print("\n[Step 1] Verifying Airtable connection…")
     headers = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
-
     r = client.get(
         f"https://api.airtable.com/v0/meta/bases/{AIRTABLE_BASE_ID}/tables",
         headers=headers,
         timeout=30,
     )
-    r.raise_for_status()
+    if r.status_code != 200:
+        sys.exit(f"Airtable auth failed {r.status_code}: {r.text[:300]}")
 
-    tables = {t["name"]: t["id"] for t in r.json().get("tables", [])}
-    expected = {"Permit Feeds", "Permit Activity", "Acquisition Targets"}
-    found    = set(tables.keys())
-    missing  = expected - found
+    all_tables  = r.json().get("tables", [])
+    table_names = {t["name"] for t in all_tables}
+    expected    = {"Permit Feeds", "Permit Activity", "Acquisition Targets"}
+    missing     = expected - table_names
 
     print(f"  Base:   AMARA Permit Intelligence ({AIRTABLE_BASE_ID})")
-    print(f"  Tables: {sorted(found)}")
-
+    print(f"  Tables: {sorted(table_names)}")
     if missing:
-        print(f"  WARNING – missing tables: {missing}")
+        print(f"  WARNING – tables not found: {missing}")
     else:
-        print("  All 3 required tables confirmed.")
+        print("  All 3 required tables confirmed ✓")
 
-    return tables
+    target = next((t for t in all_tables if t["name"] == AIRTABLE_TABLE), None)
+    if not target:
+        sys.exit(f"ERROR: '{AIRTABLE_TABLE}' table not found. Existing: {sorted(table_names)}")
+
+    fields = {f["name"]: f["id"] for f in target.get("fields", [])}
+    print(f"  '{AIRTABLE_TABLE}' fields: {sorted(fields.keys())}")
+    return target["id"], fields
 
 
-# ── Step 2: Pull permits from Accela (raw HTTP) ───────────────────────────────
+# ── Step 2a: Census BPS – metro-level aggregate ───────────────────────────────
 
-def _get_session_tokens(client: httpx.Client) -> dict:
+def fetch_census_bps(client: httpx.Client) -> dict:
     """
-    Fetch the Accela search page and extract ASP.NET session tokens
-    (__VIEWSTATE, __EVENTVALIDATION, etc.) needed for the POST.
+    Pull last 6 months of new residential housing unit counts for
+    Las Vegas CBSA 29820 from the Census BPS timeseries API.
+
+    Returns {YYYY-MM: unit_count} for informational / validation use.
+    NOTE: This API is aggregate (metro-wide) — no ZIP breakdown.
+    """
+    print("\n[Step 2a] Census BPS – Las Vegas metro (CBSA 29820)…")
+
+    # Build list of YYYY-MM strings for the last 6 months
+    months = []
+    d = date.today().replace(day=1)
+    for _ in range(6):
+        months.append(d.strftime("%Y-%m"))
+        d = (d - timedelta(days=1)).replace(day=1)
+    months.sort()
+
+    results = {}
+
+    for month in months:
+        try:
+            r = client.get(
+                "https://api.census.gov/data/timeseries/eits/bps",
+                params={
+                    "get":           "cell_value,time_slot_name,category_code,geo_level_code",
+                    "for":           f"metropolitan statistical area/micropolitan statistical area:{LV_CBSA}",
+                    "time":          month,
+                    "category_code": "101",          # 1-unit structures (single family)
+                    "seasonally_adj": "no",
+                },
+                timeout=20,
+            )
+            if r.status_code == 200:
+                rows = r.json()
+                # rows[0] = header, rows[1:] = data
+                if len(rows) > 1:
+                    header = rows[0]
+                    val_idx = header.index("cell_value") if "cell_value" in header else 0
+                    for row in rows[1:]:
+                        try:
+                            results[month] = int(row[val_idx])
+                        except (ValueError, IndexError):
+                            pass
+            elif r.status_code == 204:
+                results[month] = 0
+            else:
+                print(f"  {month}: HTTP {r.status_code} – skipping")
+        except Exception as e:
+            print(f"  {month}: error ({e}) – skipping")
+
+    if results:
+        total = sum(results.values())
+        print(f"  Months retrieved: {sorted(results.keys())}")
+        print(f"  Metro single-family permits (6-month total): {total:,}")
+    else:
+        print("  Census BPS returned no data for this CBSA/period.")
+        print("  (API may not support CBSA-level for this dataset — Socrata is primary source)")
+
+    return results
+
+
+# ── Step 2b: Clark County Socrata – permit-level with ZIPs ────────────────────
+
+def _discover_dataset(client: httpx.Client) -> tuple[str, list[str]]:
+    """
+    Query the Socrata catalog API to find the building permits dataset.
+    Returns (dataset_id, [column_names]).
     """
     r = client.get(
-        ACCELA_SEARCH,
-        params={"module": "Building", "TabName": "BuildingPermits"},
-        timeout=30,
-        follow_redirects=True,
+        f"{SOCRATA_BASE}/api/catalog/v1",
+        params={"q": "building permit", "limit": 10},
+        timeout=20,
     )
     r.raise_for_status()
-    html = r.text
+    results = r.json().get("results", [])
 
-    tokens = {}
-    for field in ("__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTVALIDATION",
-                  "__RequestVerificationToken"):
-        m = re.search(
-            rf'<input[^>]+name="{re.escape(field)}"[^>]+value="([^"]*)"',
-            html,
-        )
-        if m:
-            tokens[field] = m.group(1)
-    return tokens
+    for item in results:
+        res = item.get("resource", {})
+        name = res.get("name", "").lower()
+        if "permit" in name and "building" in name:
+            ds_id = res.get("id", "")
+            cols  = res.get("columns_name", [])
+            print(f"  Dataset found: '{res['name']}' (id: {ds_id})")
+            print(f"  Columns: {cols}")
+            return ds_id, cols
 
-
-def _build_date_range() -> tuple[str, str]:
-    end   = date.today()
-    start = end - timedelta(days=LOOKBACK_DAYS)
-    fmt   = lambda d: d.strftime("%m/%d/%Y")
-    return fmt(start), fmt(end)
-
-
-def fetch_permits(client: httpx.Client) -> list[dict]:
-    """
-    Query the Accela Citizen Access portal for NEW RESIDENTIAL building
-    permits filed in Clark County NV in the last 90 days.
-
-    Accela exposes two interfaces we can try without login:
-      1. The HTML form search (ASP.NET postback) – primary
-      2. The Accela Open Data / REST endpoint (if enabled) – fallback
-
-    Returns a list of permit dicts with keys:
-        permit_number, filed_date, description, builder, address, zip_code
-    """
-    print("\n[Step 2] Pulling permits from Accela public portal…")
-    start_date, end_date = _build_date_range()
-    print(f"  Date range: {start_date} → {end_date}")
-
-    permits = []
-
-    # ── Attempt A: Accela REST / Open Data API (no auth, if available) ────────
-    # Some Accela deployments expose /api/v4/records
-    try:
-        permits = _fetch_via_rest(client, start_date, end_date)
-        if permits:
-            print(f"  REST API returned {len(permits)} permits.")
-            return permits
-    except Exception as exc:
-        print(f"  REST API unavailable ({exc}), falling back to form search…")
-
-    # ── Attempt B: ASP.NET form POST ──────────────────────────────────────────
-    try:
-        permits = _fetch_via_form(client, start_date, end_date)
-        if permits:
-            print(f"  Form search returned {len(permits)} permits.")
-            return permits
-    except Exception as exc:
-        print(f"  Form search failed ({exc}).")
-
-    print("  WARNING: No permits retrieved. Returning empty list.")
-    return permits
-
-
-def _fetch_via_rest(client: httpx.Client, start_date: str, end_date: str) -> list[dict]:
-    """
-    Accela Open Data REST API pattern used by many county deployments.
-    Endpoint: GET /api/v4/records
-    """
-    base_url = "https://apis.accela.com/v4/records"
-    params = {
-        "agency":      "CLARKCOUNTYNV",
-        "type":        "Building/Building Permit/NA/NA",
-        "status":      "Issued",
-        "openedDateFrom": start_date,
-        "openedDateTo":   end_date,
-        "limit":       1000,
-        "offset":      0,
-        "lang":        "en",
-    }
-    permits = []
-    while True:
-        r = client.get(base_url, params=params, timeout=30)
-        if r.status_code != 200:
-            raise RuntimeError(f"HTTP {r.status_code}")
-        data = r.json()
-        records = data.get("result", [])
-        for rec in records:
-            permits.append(_normalize_rest_record(rec))
-        if len(records) < params["limit"]:
-            break
-        params["offset"] += params["limit"]
-    return permits
-
-
-def _normalize_rest_record(rec: dict) -> dict:
-    addr   = rec.get("addresses", [{}])[0]
-    zip_   = addr.get("postalCode", "").strip()[:5]
-    desc   = rec.get("type", {}).get("text", "")
-    return {
-        "permit_number": rec.get("id", ""),
-        "filed_date":    rec.get("openedDate", "")[:10],
-        "description":   desc,
-        "builder":       rec.get("applicant", {}).get("fullName", ""),
-        "address":       f"{addr.get('streetStart','')} {addr.get('streetName','')}".strip(),
-        "zip_code":      zip_,
-    }
-
-
-def _fetch_via_form(client: httpx.Client, start_date: str, end_date: str) -> list[dict]:
-    """
-    POST to the Accela Citizen Access ASP.NET search form.
-    Parses the HTML results table.
-    """
-    tokens = _get_session_tokens(client)
-
-    # Build the search POST payload
-    payload = {
-        "__EVENTTARGET":   "ctl00$PlaceHolderMain$btnNewSearch",
-        "__EVENTARGUMENT": "",
-        "ctl00$PlaceHolderMain$generalSearchForm$ddlGSPermitType": "Building Permit",
-        "ctl00$PlaceHolderMain$generalSearchForm$txtGSStartDate":  start_date,
-        "ctl00$PlaceHolderMain$generalSearchForm$txtGSEndDate":    end_date,
-        "ctl00$PlaceHolderMain$generalSearchForm$txtGSPermitNumber": "",
-        "ctl00$PlaceHolderMain$generalSearchForm$txtGSProjectName":  "",
-        **tokens,
-    }
-
-    r = client.post(
-        ACCELA_SEARCH,
-        data=payload,
-        timeout=60,
-        follow_redirects=True,
-    )
-    r.raise_for_status()
-    return _parse_results_table(r.text)
-
-
-def _parse_results_table(html: str) -> list[dict]:
-    """Extract permit rows from the Accela search results HTML table."""
-    permits = []
-    # Find all rows in the results grid
-    row_pattern = re.compile(
-        r'<tr[^>]*class="[^"]*ACA_TabRow[^"]*"[^>]*>(.*?)</tr>',
-        re.DOTALL | re.IGNORECASE,
-    )
-    cell_pattern = re.compile(r'<td[^>]*>(.*?)</td>', re.DOTALL | re.IGNORECASE)
-    tag_pattern  = re.compile(r'<[^>]+>')
-
-    for row_m in row_pattern.finditer(html):
-        cells = [
-            tag_pattern.sub("", c.group(1)).strip()
-            for c in cell_pattern.finditer(row_m.group(1))
-        ]
-        if len(cells) < 4:
+    # Fallback: try known Clark County dataset IDs
+    # (pulled from data.clarkcountynv.gov historical catalog)
+    for candidate_id in ["umsv-bh2e", "mhh6-69yb", "e8vz-7xrw", "yvtm-qbxn"]:
+        try:
+            probe = client.get(
+                f"{SOCRATA_BASE}/resource/{candidate_id}.json",
+                params={"$limit": 1},
+                timeout=15,
+            )
+            if probe.status_code == 200 and probe.json():
+                cols = list(probe.json()[0].keys())
+                print(f"  Dataset found via fallback ID: {candidate_id}")
+                print(f"  Columns: {cols}")
+                return candidate_id, cols
+        except Exception:
             continue
-        # Typical columns: Permit #, Type, Project Name, Address, Filed Date, Status
-        permit = {
-            "permit_number": cells[0] if len(cells) > 0 else "",
-            "description":   cells[1] if len(cells) > 1 else "",
-            "address":       cells[3] if len(cells) > 3 else "",
-            "filed_date":    cells[4] if len(cells) > 4 else "",
-            "builder":       "",
-            "zip_code":      _extract_zip(cells[3] if len(cells) > 3 else ""),
+
+    return "", []
+
+
+def _pick_columns(cols: list[str]) -> dict:
+    """
+    Map logical field names to actual column names by fuzzy match.
+    Returns {role: actual_column_name}.
+    """
+    col_lower = {c.lower(): c for c in cols}
+
+    def find(patterns):
+        for p in patterns:
+            for k, v in col_lower.items():
+                if p in k:
+                    return v
+        return None
+
+    return {
+        "permit_type":   find(["permit_type", "type", "work_type", "category"]),
+        "description":   find(["description", "desc", "work_desc", "scope"]),
+        "issued_date":   find(["issued", "issue_date", "open_date", "filed", "created"]),
+        "address":       find(["address", "location", "street"]),
+        "zip":           find(["zip", "postal"]),
+        "contractor":    find(["contractor", "builder", "applicant", "owner"]),
+        "status":        find(["status", "permit_status"]),
+    }
+
+
+def fetch_socrata_permits(client: httpx.Client) -> list[dict]:
+    """
+    Pull individual building permit records from Clark County open data.
+    Filters to residential permits in the last 90 days.
+    Returns list of normalized dicts with zip_code, builder, description, etc.
+    """
+    print("\n[Step 2b] Clark County Open Data (Socrata) – individual permits…")
+
+    dataset_id, cols = _discover_dataset(client)
+    if not dataset_id:
+        print("  ERROR: Could not discover building permits dataset.")
+        return []
+
+    col_map   = _pick_columns(cols)
+    cutoff    = _cutoff_str()
+    date_col  = col_map.get("issued_date") or "issued_date"
+    limit     = 5000
+    offset    = 0
+    all_recs  = []
+
+    # Prefer ZIP column from dataset; fall back to parsing address
+    zip_col  = col_map.get("zip")
+    addr_col = col_map.get("address")
+    desc_col = col_map.get("description") or col_map.get("permit_type") or ""
+    cont_col = col_map.get("contractor")
+
+    print(f"  Querying /{dataset_id}.json  (cutoff: {cutoff})")
+
+    while True:
+        params: dict = {
+            "$limit":  limit,
+            "$offset": offset,
+            "$order":  f"{date_col} DESC",
         }
-        permits.append(permit)
+        # SoQL date filter — handle both ISO string and floating timestamp columns
+        params["$where"] = f"{date_col} >= '{cutoff}T00:00:00.000'"
 
-    return permits
+        try:
+            r = client.get(
+                f"{SOCRATA_BASE}/resource/{dataset_id}.json",
+                params=params,
+                timeout=30,
+            )
+            r.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            # Retry without time filter if column type mismatch
+            if e.response.status_code == 400 and offset == 0:
+                print(f"  Date filter failed, retrying without it…")
+                params.pop("$where", None)
+                r = client.get(
+                    f"{SOCRATA_BASE}/resource/{dataset_id}.json",
+                    params=params,
+                    timeout=30,
+                )
+                r.raise_for_status()
+            else:
+                raise
+
+        batch = r.json()
+        if not batch:
+            break
+
+        for rec in batch:
+            # Date filter (manual if SoQL failed or column is a string)
+            raw_date = rec.get(date_col, "")
+            if raw_date:
+                try:
+                    rec_date = raw_date[:10]  # YYYY-MM-DD
+                    if rec_date < cutoff:
+                        continue
+                except Exception:
+                    pass
+
+            desc = str(rec.get(desc_col, "") or "")
+
+            # ZIP: prefer dedicated column, else parse address
+            if zip_col and rec.get(zip_col):
+                zip_code = str(rec[zip_col]).strip()[:5]
+            elif addr_col:
+                zip_code = _extract_zip(str(rec.get(addr_col, "")))
+            else:
+                # Last resort: search all string values
+                zip_code = ""
+                for v in rec.values():
+                    z = _extract_zip(str(v))
+                    if z:
+                        zip_code = z
+                        break
+
+            builder = str(rec.get(cont_col, "") or "") if cont_col else ""
+
+            all_recs.append({
+                "description": desc,
+                "zip_code":    zip_code,
+                "builder":     builder.strip(),
+                "issued_date": raw_date[:10] if raw_date else "",
+            })
+
+        print(f"  Fetched {len(all_recs)} records so far…", end="\r")
+        if len(batch) < limit:
+            break
+        offset += limit
+
+    print(f"\n  Total records from Socrata: {len(all_recs)}")
+    return all_recs
 
 
-def _extract_zip(address: str) -> str:
-    m = re.search(r'\b(8[89]\d{3}|89\d{3})\b', address)
-    return m.group(1) if m else ""
-
-
-# ── Step 3: Filter NEW RESIDENTIAL, group by ZIP ──────────────────────────────
-
-def filter_residential(permits: list[dict]) -> list[dict]:
-    """Keep only permits that look like new residential construction."""
-    keywords = re.compile(
-        r'(new\s+res|single.?family|sfr|duplex|townhome|townhouse|residential|nsfr)',
-        re.IGNORECASE,
-    )
-    if not permits:
-        return permits
-    filtered = [p for p in permits if keywords.search(p.get("description", ""))]
-    print(f"\n[Step 3] {len(permits)} total → {len(filtered)} residential after filter")
-    return filtered
-
+# ── Step 3: Filter residential + group by ZIP ─────────────────────────────────
 
 def group_by_zip(permits: list[dict]) -> list[dict]:
-    """
-    Group permits by ZIP code.
-    Returns list of dicts ready for Airtable insertion.
-    """
-    zip_map: dict[str, dict] = defaultdict(lambda: {
-        "count": 0, "builders": set()
-    })
-    for p in permits:
-        z = p.get("zip_code", "").strip()
-        if not z:
-            z = "UNKNOWN"
+    """Filter to residential, group by ZIP, return sorted result rows."""
+    residential = [p for p in permits if _looks_residential(p.get("description", ""))]
+
+    # If filter yields nothing (dataset may already be pre-filtered to residential),
+    # use all records rather than returning empty.
+    if not residential and permits:
+        print("  Residential keyword filter matched 0 — using all records (dataset may be pre-filtered)")
+        residential = permits
+
+    print(f"\n[Step 3] {len(permits)} total → {len(residential)} residential")
+
+    zip_map: dict[str, dict] = defaultdict(lambda: {"count": 0, "builders": set()})
+    for p in residential:
+        z = p.get("zip_code", "").strip() or "UNKNOWN"
         zip_map[z]["count"] += 1
-        if p.get("builder"):
-            zip_map[z]["builders"].add(p["builder"])
+        b = p.get("builder", "").strip()
+        if b:
+            zip_map[z]["builders"].add(b)
 
-    results = []
-    for zip_code, info in sorted(zip_map.items(), key=lambda x: -x[1]["count"]):
+    rows = []
+    for z, info in sorted(zip_map.items(), key=lambda x: -x[1]["count"]):
         count = info["count"]
-        if count >= HOT_THRESHOLD:
-            flag = "Hot"
-        elif count >= WARM_THRESHOLD:
-            flag = "Warm"
-        else:
-            flag = "Cold"
-
-        results.append({
-            "zip_code":     zip_code,
+        rows.append({
+            "zip_code":     z,
             "permit_count": count,
             "builders":     ", ".join(sorted(info["builders"])) or "N/A",
-            "flag":         flag,
+            "flag":         _flag(count),
         })
 
-    print(f"  Grouped into {len(results)} ZIP codes")
-    return results
+    hot  = sum(1 for r in rows if r["flag"] == "Hot")
+    warm = sum(1 for r in rows if r["flag"] == "Warm")
+    cold = sum(1 for r in rows if r["flag"] == "Cold")
+    print(f"  Grouped → {len(rows)} ZIPs   Hot: {hot}  Warm: {warm}  Cold: {cold}")
+    return rows
 
 
 # ── Step 4: Push to Airtable ──────────────────────────────────────────────────
 
-def _get_table_fields(client: httpx.Client) -> dict:
-    """Return field name → field id mapping for Permit Activity table."""
-    headers = {"Authorization": f"Bearer {AIRTABLE_API_KEY}"}
-    r = client.get(
-        f"https://api.airtable.com/v0/meta/bases/{AIRTABLE_BASE_ID}/tables",
-        headers=headers,
-        timeout=30,
-    )
-    r.raise_for_status()
-    for t in r.json().get("tables", []):
-        if t["name"] == TABLE_NAME:
-            return {f["name"]: f["id"] for f in t.get("fields", [])}
-    return {}
+# Map our logical names → possible Airtable field names (first match wins)
+FIELD_ALIASES = {
+    "ZIP Code":      ["ZIP Code", "Zip Code", "ZIP", "Zip"],
+    "Market":        ["Market", "Market Name", "Region"],
+    "Permit Count":  ["Permit Count", "Count", "Number of Permits"],
+    "Period":        ["Period", "Time Period", "Date Range"],
+    "Builder Names": ["Builder Names", "Builders", "Builder", "Contractor"],
+    "Pull Date":     ["Pull Date", "Date Pulled", "Run Date", "Date"],
+    "Flag":          ["Flag", "Activity Flag", "Heat Flag", "Status"],
+}
 
 
-def push_to_airtable(client: httpx.Client, zip_results: list[dict], table_id: str) -> int:
-    """Batch-insert all ZIP records into Airtable. Returns count of records created."""
-    print(f"\n[Step 4] Pushing {len(zip_results)} records to Airtable…")
+def _resolve_fields(airtable_fields: dict) -> dict:
+    """
+    Map our logical field names to actual Airtable field IDs.
+    Returns {our_name: field_id_or_name_to_use}.
+    Uses field IDs when available; falls back to field names with typecast.
+    """
+    resolved = {}
+    lower_map = {k.lower(): v for k, v in airtable_fields.items()}
 
-    if not zip_results:
+    for logical, candidates in FIELD_ALIASES.items():
+        for candidate in candidates:
+            field_id = airtable_fields.get(candidate) or lower_map.get(candidate.lower())
+            if field_id:
+                resolved[logical] = field_id
+                break
+        if logical not in resolved:
+            # No match found — use the logical name and rely on typecast
+            resolved[logical] = logical
+
+    return resolved
+
+
+def push_to_airtable(
+    client: httpx.Client,
+    rows: list[dict],
+    table_id: str,
+    airtable_fields: dict,
+) -> int:
+    """Batch-insert ZIP rows into Airtable. Returns count of records created."""
+    print(f"\n[Step 4] Pushing {len(rows)} records → '{AIRTABLE_TABLE}'…")
+    if not rows:
         print("  Nothing to push.")
         return 0
+
+    field_map = _resolve_fields(airtable_fields)
+    print(f"  Field mapping: {field_map}")
 
     headers = {
         "Authorization": f"Bearer {AIRTABLE_API_KEY}",
         "Content-Type":  "application/json",
     }
 
-    # Airtable allows 10 records per request
-    BATCH = 10
+    def _make_fields(row: dict) -> dict:
+        return {
+            field_map["ZIP Code"]:      row["zip_code"],
+            field_map["Market"]:        MARKET,
+            field_map["Permit Count"]:  row["permit_count"],
+            field_map["Period"]:        PERIOD,
+            field_map["Builder Names"]: row["builders"],
+            field_map["Pull Date"]:     TODAY,
+            field_map["Flag"]:          row["flag"],
+        }
+
+    BATCH   = 10
     created = 0
 
-    for i in range(0, len(zip_results), BATCH):
-        batch = zip_results[i : i + BATCH]
-        records = []
-        for row in batch:
-            records.append({
-                "fields": {
-                    "ZIP Code":     row["zip_code"],
-                    "Market":       MARKET,
-                    "Permit Count": row["permit_count"],
-                    "Period":       PERIOD,
-                    "Builder Names": row["builders"],
-                    "Pull Date":    TODAY,
-                    "Flag":         row["flag"],
-                }
-            })
+    for i in range(0, len(rows), BATCH):
+        batch   = rows[i : i + BATCH]
+        records = [{"fields": _make_fields(r)} for r in batch]
         payload = {"records": records, "typecast": True}
 
         r = client.post(
@@ -365,74 +481,91 @@ def push_to_airtable(client: httpx.Client, zip_results: list[dict], table_id: st
             timeout=30,
         )
 
+        batch_num = i // BATCH + 1
         if r.status_code in (200, 201):
-            batch_created = len(r.json().get("records", []))
-            created += batch_created
-            print(f"  Batch {i // BATCH + 1}: {batch_created} records written")
+            n        = len(r.json().get("records", []))
+            created += n
+            print(f"  Batch {batch_num}: {n} records written ✓")
         else:
-            print(f"  Batch {i // BATCH + 1} ERROR {r.status_code}: {r.text[:200]}")
+            print(f"  Batch {batch_num} FAILED {r.status_code}: {r.text[:300]}")
 
     return created
 
 
-# ── Step 5: Print Hot ZIPs ────────────────────────────────────────────────────
+# ── Step 5: Terminal summary ──────────────────────────────────────────────────
 
-def print_hot_zips(zip_results: list[dict]) -> None:
-    hot = [z for z in zip_results if z["flag"] == "Hot"]
-    print(f"\n{'='*60}")
-    print(f"  HOT ZIP CODES — {MARKET} (Last 90 Days)")
-    print(f"{'='*60}")
-    if not hot:
-        print("  No Hot ZIPs found (< {HOT_THRESHOLD} permits threshold).")
+def print_summary(rows: list[dict], census_totals: dict, created: int) -> None:
+    hot_rows = [r for r in rows if r["flag"] == "Hot"]
+
+    print(f"\n{'='*62}")
+    print(f"  CLARK COUNTY NV — RESIDENTIAL PERMIT SUMMARY")
+    print(f"  Market: {MARKET} | Period: {PERIOD}")
+    print(f"{'='*62}")
+
+    if census_totals:
+        print(f"\n  Census BPS (metro aggregate, single-family):")
+        for month in sorted(census_totals):
+            print(f"    {month}:  {census_totals[month]:>6,} units")
+        print(f"    {'Total:':10}  {sum(census_totals.values()):>6,} units")
+
+    print(f"\n  Socrata (individual permits → {len(rows)} ZIPs pulled)")
+    print(f"  Airtable records written: {created}/{len(rows)}")
+
+    print(f"\n{'─'*62}")
+    print(f"  HOT ZIP CODES  (≥{HOT_THRESHOLD} permits)")
+    print(f"{'─'*62}")
+
+    if not hot_rows:
+        print(f"  None found at ≥{HOT_THRESHOLD} permit threshold.")
     else:
-        print(f"  {'ZIP Code':<12} {'Permits':>8}   Builders")
-        print(f"  {'-'*55}")
-        for z in sorted(hot, key=lambda x: -x["permit_count"]):
-            builders = z["builders"]
-            if len(builders) > 50:
-                builders = builders[:47] + "…"
-            print(f"  {z['zip_code']:<12} {z['permit_count']:>8}   {builders}")
-    print(f"{'='*60}\n")
+        print(f"  {'ZIP':<10} {'Permits':>8}   Top Builders")
+        print(f"  {'─'*55}")
+        for r in sorted(hot_rows, key=lambda x: -x["permit_count"]):
+            builders = r["builders"]
+            if len(builders) > 46:
+                builders = builders[:43] + "…"
+            print(f"  {r['zip_code']:<10} {r['permit_count']:>8}   {builders}")
+
+    print(f"{'='*62}\n")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def main():
+def main() -> None:
     print("Clark County NV Residential Permit Intelligence")
     print(f"Run date: {TODAY}")
+    print(f"Sources:  Census BPS (CBSA {LV_CBSA}) + Clark County Open Data (Socrata)")
 
     with httpx.Client(
-        headers={"User-Agent": "Mozilla/5.0 (AMARA Permit Intelligence)"},
+        headers={"User-Agent": "Mozilla/5.0 (AMARA Permit Intelligence/1.0)"},
         follow_redirects=True,
+        timeout=30,
     ) as client:
 
-        # Step 1 – Verify Airtable
-        tables = verify_airtable(client)
-        permit_activity_id = tables.get(TABLE_NAME)
-        if not permit_activity_id:
-            raise RuntimeError(f"Table '{TABLE_NAME}' not found in base.")
+        # Step 1 – Airtable verification
+        table_id, airtable_fields = verify_airtable(client)
 
-        # Step 2 – Fetch permits
-        raw_permits = fetch_permits(client)
+        # Step 2a – Census BPS (aggregate metro totals)
+        census_totals = fetch_census_bps(client)
 
-        # Step 3 – Filter residential, group by ZIP
-        residential = filter_residential(raw_permits)
-        zip_results  = group_by_zip(residential)
+        # Step 2b – Socrata (individual permits with ZIP codes)
+        raw_permits = fetch_socrata_permits(client)
 
-        # Print summary before push
-        warm = sum(1 for z in zip_results if z["flag"] == "Warm")
-        hot  = sum(1 for z in zip_results if z["flag"] == "Hot")
-        cold = sum(1 for z in zip_results if z["flag"] == "Cold")
-        print(f"\n  ZIP summary → Hot: {hot}  Warm: {warm}  Cold: {cold}")
+        if not raw_permits:
+            print("\nWARNING: No permit data retrieved from either source.")
+            print("Check network, dataset availability, or try again later.")
+            sys.exit(1)
+
+        # Step 3 – Group by ZIP
+        zip_rows = group_by_zip(raw_permits)
 
         # Step 4 – Push to Airtable
-        created = push_to_airtable(client, zip_results, permit_activity_id)
-        print(f"\n  Total records landed in Airtable: {created}")
+        created = push_to_airtable(client, zip_rows, table_id, airtable_fields)
 
-        # Step 5 – Print Hot ZIPs
-        print_hot_zips(zip_results)
+        # Step 5 – Print summary
+        print_summary(zip_rows, census_totals, created)
 
-        print(f"Done. {created}/{len(zip_results)} records confirmed in '{TABLE_NAME}'.")
+        print(f"Done. {created} records confirmed in Airtable '{AIRTABLE_TABLE}'.")
 
 
 if __name__ == "__main__":

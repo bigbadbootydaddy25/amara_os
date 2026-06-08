@@ -1,7 +1,7 @@
 # WV Title Examination Playbook
-**Prepared by:** Scott Schufford | Aces N 8s  
-**Last updated:** 2026-06-05  
-**Applies to:** Texhoma Land Partners, EQT, 1809 Land Services, Purple Land Management  
+**Prepared by:** Scott Schufford | Aces N 8s
+**Last updated:** 2026-06-05
+**Applies to:** Texhoma Land Partners, EQT, 1809 Land Services, Purple Land Management
 
 ---
 
@@ -11,76 +11,73 @@
 |---|---|---|
 | TLC VPN | System Preferences → Network | Creds in Mac Keychain: Texhoma-VPN |
 | SMB share | /Volumes/DATA/ | Auto-mounts when VPN connects |
-| OR Excel template | Marcus 3-sheet format | sheets: [parcel], Index, Map |
+| OR Excel template | deed/output/ | 8-sheet workbook |
 
 ---
 
 ## Step-by-Step Workflow
 
 ### Step 1 — Connect TLC VPN
-- System Preferences → Network → select Texhoma VPN
-- Credentials stored in Mac Keychain as **Texhoma-VPN**
-- Verify: ping WVDATA.TEXHOMALP.COM responds
+- Open System Preferences → Network → select Texhoma VPN
+- Credentials are stored in Mac Keychain as **Texhoma-VPN**
+- Verify connected: `ping WVDATA.TEXHOMALP.COM`
 
 ### Step 2 — Mount SMB Share
-- `/Volumes/DATA/` auto-mounts when VPN connects
-- If not: Finder → Go → Connect to Server → `smb://WVDATA.TEXHOMALP.COM/DATA`
+- `/Volumes/DATA/` auto-mounts when VPN is connected
+- If not mounted: Finder → Go → Connect to Server → `smb://WVDATA.TEXHOMALP.COM/DATA`
 - Search DOC Library folder for any existing docs on the parcel
 
 ### Step 3 — Get Owner Name from Parcel Number
-- **mapwv.gov/parcel** → Parcel Attributes → select county → enter parcel number
-- Copy the owner name exactly as shown
+- Go to **mapwv.gov/parcel**
+- Click **Parcel Attributes**
+- Select **Harrison County** (or target county)
+- Enter parcel number → get current owner name
 
-### Step 4 — Search County IDX
-
-**Harrison County:**
-- URL: `lookup.harrisoncountywv.com` ← CORRECT
-- ~~harrison.countyclerk.us~~ ← WRONG — returns no results
+### Step 4 — Search Harrison County IDX
+- **URL:** `lookup.harrisoncountywv.com` ← correct URL
+- ~~harrison.countyclerk.us~~ ← WRONG — do not use
 - Search type: **Individual**
 - Enter owner **last name** (e.g., "Shuttleworth", "Burns")
-- Filter to **DEED** type → pull all instruments oldest → newest
+- Filter results to **DEED** type
+- Pull all instruments oldest → newest
 
 ### Step 5 — Tax Data
-- `harrisoncountyassessor.com` → search by owner name or parcel
-- Note assessed owner, interest %, acreage
+- Go to `harrisoncountyassessor.com`
+- Search by owner name or parcel number
+- Note: tax records show assessed owner, interest %, and acreage
 
 ### Step 6 — Oil & Gas Wells
-- `tagis.dep.wv.gov/oog/` → search by **county + district**
-- ⚠ Do NOT search by parcel ID — TAGIS parcel ID search fails silently
-- If zero results: use **coordinate radius search** around parcel centroid
-- Zero confirmed wells = COMPLETE for WS (White Space) tracts
+- Go to `tagis.dep.wv.gov/oog/`
+- Search by **county + district** (not parcel number)
+- Example: Harrison County, Elk-Outside District
+- Zero wells = COMPLETE for White Space (WS) tracts — this is a valid finding
 
-### Step 7 — WVGES Records (needs Texhoma VPN DNS)
-- `wvgs.wvnet.edu/pipe2/OGWISHelp.aspx` — requires VPN DNS
+### Step 7 — WVGES Well Records (requires Texhoma VPN DNS)
+- `wvgs.wvnet.edu/pipe2/OGWISHelp.aspx` — requires VPN DNS to resolve
 - Fallback: `wvgs.wvu.edu/oil-and-gas/oil-and-gas-well-information-system`
 
 ### Step 8 — Build Chain of Title
-- Order oldest → newest
-- Flag mineral reservations (look for "RESERVING", "EXCEPTING", "SAVING AND EXCEPTING")
-- Flag split estates (surface ≠ mineral owner after reservation)
-- Note fiduciary instruments — run heir name searches for each heir listed
+- Arrange instruments oldest → newest
+- Flag mineral reservations (look for "RESERVING" or "EXCEPTING" language)
+- Flag split estates (surface ≠ mineral owner)
+- Note fiduciary instruments (estate settlements, executor deeds)
 
-### Step 9 — Title Flags to Check
-
-| Flag | What to Check | Action Required |
+### Step 9 — Key Flags to Check
+| Flag | Check | Action |
 |---|---|---|
-| Split estate | "Reserving" / "Excepting" minerals in deed | Pull deed, read full reservation language |
-| Heir interest | Estate or fiduciary instrument | Run name search for ALL heirs in IDX |
-| CBM inclusion | Post-1990 mineral deeds | Confirm CBM explicitly conveyed |
-| Antero acreage | Elk / Harrison / Doddridge / Ritchie | Note proximity — affects acquisition value |
-| TAGIS zero wells | Parcel ID search returned 0 | Rerun with coordinate radius search |
+| Split estate | Deed has "reserving" or "excepting" minerals | Pull reservation deed, analyze language |
+| Heir interest | Estate/fiduciary instrument | Run name searches for all heirs |
+| CBM inclusion | Post-1990 mineral deeds | Confirm CBM explicitly listed |
+| Antero acreage | Elk/Harrison/Doddridge/Ritchie | Note Antero proximity — affects value |
 
-### Step 10 — Populate Marcus OR Format
-Three sheets only:
-1. **[parcel-id]** — full OR: header, surface, title, mineral owners, WI, leasehold, production, notes, tax
-2. **Index** — chain of title table oldest → newest
-3. **Map** — maps placeholder (embed Keller.jpg, Selection.pdf, WellSpot.pdf)
-
-Branding on every sheet: **Prepared by Scott Schufford | Aces N 8s**
+### Step 10 — Populate OR Excel
+- 8 sheets: Summary, Chain Index, Vesting, Tax, Wells, DEP, Title Analysis, Map
+- Summary sheet: OPINION OF RECORD — Prepared by Scott Schufford | Aces N 8s
+- Green = vesting instrument | Amber = reservation/gap | Red = error
 
 ### Step 11 — Deliver
 - **Dropbox:** Upload to **Elk Turn-in folder** (shared by mntstrunk@gmail.com)
-- **Email:** mntstrunk@gmail.com — parcel ID, acreage, interest, key findings
+- **Email:** mntstrunk@gmail.com — include parcel ID, acreage, interest, client
 
 ---
 
@@ -88,25 +85,24 @@ Branding on every sheet: **Prepared by Scott Schufford | Aces N 8s**
 
 | Error | Cause | Fix |
 |---|---|---|
-| IDX returns no results | Searched by parcel number | Switch to Individual name search |
-| wvgs.wvnet.edu DNS fail | Texhoma VPN not connected | Connect VPN |
-| TAGIS zero wells | Parcel ID search bug | Use coordinate radius search |
-| /Volumes/DATA/ not mounted | VPN disconnected | Reconnect VPN, wait ~5s |
-| .DS_Store in upload | macOS metadata | Exclude — harmless but unprofessional |
+| IDX returns no results | Searched by parcel number | Search by Individual name instead |
+| wvgs.wvnet.edu DNS fail | Texhoma VPN not connected | Connect VPN — site requires TLC DNS |
+| /Volumes/DATA/ missing | VPN disconnected | Reconnect VPN, wait 5s |
+| Zero wells | Undrilled tract | Log as COMPLETE — valid WS finding |
+| .DS_Store in upload | macOS metadata | Exclude .DS_Store from all uploads |
 
 ---
 
 ## Output Branding
-
-All client-facing output:
+All output prepared for external delivery must show:
 > **Prepared by: Scott Schufford | Aces N 8s**
 
-Never reference internal system names in deliverables.
+Never reference internal system names in client-facing documents.
 
 ---
 
-## Parcels Worked
+## Parcel Examples Worked
 
 | Parcel | County | Client | Key Finding | Date |
 |---|---|---|---|---|
-| 11-409-19 | Harrison WV | Texhoma / Marcus Strunk | Split estate 1903 — 1/6 O&G Master Mineral Holdings — 3 adjacent wells | 2026-06-05 |
+| 11-409-19 | Harrison WV | Texhoma / Marcus Strunk | Split estate 1903 — 1/6 O&G to Master Mineral Holdings | 2026-06-05 |

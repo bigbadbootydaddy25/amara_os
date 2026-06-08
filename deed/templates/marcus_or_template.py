@@ -520,7 +520,7 @@ def _build_or_sheet(ws, data: dict):  # noqa: C901
     # ── NOTES (#14) ───────────────────────────────────────────────────────────
     b.section("NOTES")
     for note in data.get("notes", []):
-        b.merged(note, 1, MERGE_END, _C["1A2035"], "cream",
+        b.merged(note, 1, MERGE_END, _C["hdr"], "cream",
                  italic=True, sz=9, align=_WRAP, h=36)
 
     b.blank()
@@ -579,7 +579,7 @@ def _build_or_sheet(ws, data: dict):  # noqa: C901
     cert = data.get("certification",
                     f"Title examination prepared by {exam}, {company}. "
                     f"Information is based on public records available as of {dated}.")
-    b.merged(cert, 1, MERGE_END, _C["1A2035"], "cream",
+    b.merged(cert, 1, MERGE_END, _C["hdr"], "cream",
              sz=9, align=_WRAP, h=30)
 
     b.blank()
@@ -651,7 +651,7 @@ def _build_index_sheet(ws, data: dict):
         ("Green = Vesting instrument", "green"),
         ("Amber = Key reservation / split estate / encumbrance", "amber"),
     ]:
-        b.merged(txt, 1, 7, _C["1A2035"], color, italic=True, sz=9, h=ROW_H)
+        b.merged(txt, 1, 7, _C["hdr"], color, italic=True, sz=9, h=ROW_H)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

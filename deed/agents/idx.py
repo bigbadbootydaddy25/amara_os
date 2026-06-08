@@ -83,7 +83,14 @@ def run(state: TitleState) -> dict:
         live_ok = False
 
     # ── Merge seed data ───────────────────────────────────────────────────────
-    seed = _load_seed(parcel_id)
+    if not live_ok:
+        # IDX fully unreachable — load complete confirmed chain (all 16 instruments)
+        seed = _load_full_seed(parcel_id)
+        log.info("IDX: unreachable — loading full chain seed (%d instruments)", len(seed))
+    else:
+        # IDX live — only supplement with pre-digital instruments not yet in system
+        seed = _load_seed(parcel_id)
+
     seed_added = 0
     for inst in seed:
         if not _dup(inst, instruments):
@@ -92,7 +99,7 @@ def run(state: TitleState) -> dict:
             seed_added += 1
 
     if seed_added:
-        log.info("IDX seed: merged %d pre-digital instruments", seed_added)
+        log.info("IDX seed: merged %d instruments", seed_added)
 
     status = ("COMPLETE" if (live_ok and instruments) else
               "SEED_ONLY" if instruments else
@@ -303,6 +310,21 @@ def _load_seed(parcel_id: str) -> list[dict]:
             for i in INSTRUMENTS
             if int(i.get("date_instr", "9999")[:4] or 9999) < 1970
         ]
+    except ImportError:
+        return []
+
+
+def _load_full_seed(parcel_id: str) -> list[dict]:
+    """Load all confirmed instruments when IDX is unreachable (403 from cloud)."""
+    try:
+        from deed.agents.chain_builder import _full_seed
+        return [{**i, "_source": "chain_seed"} for i in _full_seed()]
+    except Exception:
+        pass
+    # Fallback: chain_seed.py without date filter
+    try:
+        from deed.chain_seed import INSTRUMENTS
+        return [{**i, "_source": "chain_seed"} for i in INSTRUMENTS]
     except ImportError:
         return []
 

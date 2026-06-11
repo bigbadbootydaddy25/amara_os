@@ -1,0 +1,545 @@
+================================================================================
+HEIR RESEARCH — OSINT PASS
+Parcel 11-409-19, Harrison County WV
+Mineral Reservation: DB 136/259, Elk District / Gnatty Creek area
+Research Date: 2026-06-11
+================================================================================
+
+SUBJECTS:
+  1. Samuel M. Shuttleworth
+  2. Betty Jane Evans (maiden name possibly Shuttleworth)
+
+RESEARCH OBJECTIVE: For each decedent — (a) date of death, (b) place of
+death, (c) obituary survivors (spouse, children), (d) will/estate/probate
+reference — sufficient to target a single will-book volume at the
+Harrison County Clerk.
+
+METHODOLOGY NOTE: The WebFetch tool returned HTTP 403 Forbidden for
+approximately 48 of 50 targeted URLs (see Dead Ends log). All factual
+statements are sourced exclusively from verified search-result snippets
+or search-engine metadata; nothing is inferred or guessed. Candidate
+records are clearly labeled with match reasoning.
+
+================================================================================
+SECTION I — GEOGRAPHIC & HISTORICAL CONTEXT
+================================================================================
+
+Confirmed by multiple search results:
+
+• Elk District is one of ten magisterial districts of Harrison County WV
+  (Clark, Clay, Coal, Eagle, ELK, Grant, Sardis, Simpson, Tenmile, Union).
+  Source: search snippets from Harrison County history, wvencyclopedia.org.
+
+• "Gnatty Creek is a branch of the Elk [Creek]" — confirms the deed
+  description is geographically coherent within the Elk District.
+  Source: genealogytrails.com/wva/harrison/county_history.html (snippet).
+
+• First settler of Elk District: Thomas Cottrail (cabin, 1778); first
+  permanent settlement at Quiet Dell, 1800.
+  Source: same snippet.
+
+• Gnatty Creek Cemetery, Romines Mills, Harrison County WV — EXISTS.
+  FindAGrave cemetery ID 78466; 74 memorials recorded, 28% photographed.
+  GPS: approx. 39.167°N, 80.262°W (Mount Clare area).
+  FamilySearch holds Gnatty Creek Presbyterian Church cemetery inscriptions.
+  Source: findagrave.com search snippets; roadsidethoughts.com snippet.
+
+================================================================================
+SECTION II — SAMUEL M. SHUTTLEWORTH
+================================================================================
+
+──────────────────────────────────────────────────────────────────────────────
+A. CONFIRMED FACTS
+──────────────────────────────────────────────────────────────────────────────
+
+CONFIRMED — Shuttleworth family had documented presence in Harrison County WV
+from at least the 1850s through 1951:
+
+  1. J.H. Shuttleworth (dates unknown) — resided Harrison County WV; named as
+     father of J.E. Shuttleworth. Wife: Jane Shuttlesworth.
+     Source: Ancestry.com search snippet for "J-E-Shuttleworth-24-1bktsrw"
+     https://www.ancestry.com/genealogy/records/j-e-shuttleworth-24-1bktsrw
+
+  2. J.E. Shuttleworth — born 1852 in Harrison County WV; son of J.H.
+     Shuttleworth and Jane Shuttlesworth. Appears in 1880 US Federal Census.
+     Source: same Ancestry.com snippet.
+
+  3. Robert M. Shuttleworth (1875–1951) — buried at Odd Fellows Cemetery
+     (also called IOOF Cemetery), Clarksburg, Harrison County, West Virginia.
+     FindAGrave memorial #125523571, created 2014, maintained by J. Colin Clark.
+     Source: https://www.findagrave.com/memorial/125523571/robert-m-shuttleworth
+     (confirmed by multiple independent search results; page itself blocked 403)
+
+     NOTE: Robert M. and Samuel M. share the middle-initial "M." Robert's
+     birth year (1875) places him as a plausible son or younger brother of
+     Samuel M. if Samuel was born ~1840–1860.
+
+CONFIRMED — Samuel M. Shuttleworth was alive in 1903 (party to DB 136/259).
+No independent document confirming this was retrieved; the deed reference
+is per the research brief and is taken as the anchor fact.
+
+CONFIRMED — Harrison County Will Book index 1788–1924 exists and is digitized
+on FamilySearch (catalog #736540). Accessible at a FamilySearch Family History
+Center (free) or FamilySearch.org (requires login).
+
+CONFIRMED — WV statewide death registration began 1917; general compliance
+by 1925. Harrison County death certificates from 1917 are searchable at
+archive.wvculture.org/vrr (BLOCKED during this session; see Dead Ends).
+
+CONFIRMED — FamilySearch holds a collection titled "Obituaries from
+newspapers; Clarksburg Exponent, Clarksburg Telegram and other papers of
+Northern West Virginia" (catalog #312503). This is the primary printed
+obituary archive for the region.
+
+──────────────────────────────────────────────────────────────────────────────
+B. CANDIDATE RECORDS
+──────────────────────────────────────────────────────────────────────────────
+
+CANDIDATE #1 — Robert M. Shuttleworth (1875–1951)
+  Why it might match: Same county (Harrison County WV). Middle initial "M"
+    identical to Samuel M. Birth year 1875 is consistent with Robert being
+    Samuel's son (if Samuel was born ~1845–1858).
+  Why it might not: This is Robert, not Samuel. No direct evidence of a
+    father-son link found. Could be a cousin or unrelated Shuttleworth.
+  FindAGrave #125523571; Odd Fellows Cemetery, Clarksburg.
+  ACTION: Check his FindAGrave memorial for listed parents/family connections.
+
+CANDIDATE #2 — J.E. Shuttleworth (born 1852, Harrison County WV)
+  Why it might match: Same county. Same generation as someone who could be
+    a sibling or cousin of Samuel M. His father J.H. Shuttleworth is the
+    only identified Harrison County Shuttleworth patriarch.
+  Why it might not: First initial "J" not "S." Different person.
+  ACTION: Pull J.H. Shuttleworth's estate in Harrison County will books to
+    identify all heirs — Samuel M. may appear as a co-heir.
+
+CANDIDATE #3 — Samuel T. Shuttleworth (born ~1831/1832, died 1908)
+  Buried: Pisgah Church Cemetery, Monongalia County WV.
+  Married: Mary Ann Griffith (married May 24, 1864, Monongalia County WV).
+  Why it might match: First name Samuel; same approximate birth era; died
+    1908, just 5 years after the 1903 deed. Monongalia County is adjacent
+    to Harrison County; families often held land across county lines.
+  Why it might not: Middle initial "T" not "M." Monongalia County, not
+    Harrison County. Different person.
+  Source: WikiTree snippet (Samuel T. Shuttleworth married Mary Ann Griffith
+    in Monongalia County); USGenWeb Pisgah Cemetery search snippet listing
+    Samuel T. Shuttleworth (1831-1908) and Mary Ann Shuttleworth (1845-1926).
+
+──────────────────────────────────────────────────────────────────────────────
+C. DEAD ENDS — Sources Checked, Nothing Found
+──────────────────────────────────────────────────────────────────────────────
+
+The following sources were targeted; all returned HTTP 403 Forbidden or
+produced no result for Samuel M. Shuttleworth specifically:
+
+  • FindAGrave.com site: search — no "Samuel Shuttleworth" memorial in WV
+    found via site-restricted Google search. Only Robert M. (1875-1951)
+    returned for Harrison County WV Shuttleworths.
+    URL: https://www.findagrave.com/memorial
+    STATUS: BLOCKED (403)
+
+  • Legacy.com Shuttleworth obituaries page
+    URL: https://www.legacy.com/obituaries/name/shuttleworth
+    STATUS: BLOCKED (403)
+
+  • WV Culture & History death index (archive.wvculture.org/vrr)
+    This is the primary free WV death index (1917–1970, Harrison County).
+    URL: https://archive.wvculture.org/vrr/va_dcsearch.aspx
+    STATUS: BLOCKED (403) — MUST CHECK MANUALLY
+
+  • WVCulture.org vital records interactive search
+    URL: https://wvculture.org/vital-records-interactive/
+    STATUS: BLOCKED (403)
+
+  • Chronicling America — Clarksburg Telegram (1893–1912) and Clarksburg
+    Exponent (1910+) full text search for "Shuttleworth"
+    URL: https://chroniclingamerica.loc.gov/search/pages/results/
+    STATUS: BLOCKED (403) — MUST CHECK MANUALLY
+
+  • Archive.org — History of Harrison County WV (Haymond, 1910)
+    Full text URL: https://archive.org/stream/historyofharriso00inhaym/
+    STATUS: BLOCKED (403) — NOTE: Google Books/HathiTrust may provide
+    alternate access at catalog.hathitrust.org/Record/008651656
+
+  • WVU Archives, Shuttleworth family collection
+    URL: https://archives.lib.wvu.edu/agents/families/1538
+    STATUS: BLOCKED (403) — compiled by Mrs. Louise Morris, covers Marion
+    and Monongalia counties 1817-1957. Contact WVU WVRHC for access.
+
+  • genealogytrails.com Harrison County biographies (bios_s.html, bios_h.html)
+    STATUS: BLOCKED (403)
+
+  • Harrison County IDX Search (online deed/record index)
+    URL: http://lookup.harrisoncountywv.com/
+    STATUS: BLOCKED (403) — try directly in a browser; covers deed books
+    and may include post-1903 Shuttleworth conveyances of the mineral interest.
+
+  • USGenWeb Archives Harrison County obituaries
+    URL: http://www.usgwarchives.net/wv/harrison/obituaries.html
+    STATUS: BLOCKED (403)
+
+  • Pisgah Church Cemetery transcription (Monongalia County WV)
+    URL: http://files.usgwarchives.net/wv/monongalia/cemetery/piscemt.txt
+    STATUS: BLOCKED (403) — search snippet confirms Samuel T. Shuttleworth
+    (1831–1908) buried here; see Candidate #3 above.
+
+  • Gnatty Creek Cemetery, FindAGrave #78466 — site:findagrave.com search
+    for "Gnatty Creek Cemetery" + "Shuttleworth" returned NO match.
+    Site:findagrave.com search for "Gnatty Creek Cemetery" + "Evans" also
+    returned NO Shuttleworth match.
+
+  • SSDI (Social Security Death Index) — no Samuel M. Shuttleworth in WV
+    found via search snippets from stevemorse.org / socialsecuritydeathindex-
+    search.com. Note: SSDI only covers deaths with SS numbers (primarily
+    post-WWII); earlier deaths would not appear.
+
+  • WikiTree Shuttleworth-407 — RULED OUT. This profile (Samuel Shuttleworth,
+    abt.1854–1921) is a Lancashire England / New Zealand Shuttleworth with no
+    WV connection. Source: search snippet confirmed.
+
+  • Harrison County Assessor ownership search
+    URL: https://www.harrisoncountyassessor.com/ownershipsearch.aspx
+    STATUS: BLOCKED (403)
+
+================================================================================
+SECTION III — BETTY JANE EVANS (maiden name possibly Shuttleworth)
+================================================================================
+
+──────────────────────────────────────────────────────────────────────────────
+A. CONFIRMED FACTS
+──────────────────────────────────────────────────────────────────────────────
+
+CONFIRMED — Betty Jane Evans was named in DB 136/259 (per research brief).
+No independent document confirming this was retrieved.
+
+CONFIRMED — FamilySearch holds Harrison County marriage records from 1784;
+WV statewide marriage registration complete by 1921. A Shuttleworth woman
+who married an Evans would appear in county marriage records 1865–1920 (est.).
+
+──────────────────────────────────────────────────────────────────────────────
+B. CANDIDATE RECORDS
+──────────────────────────────────────────────────────────────────────────────
+
+CANDIDATE #1 — "Betty Jane Evans" obituary, Anthony Chapels Funeral Home
+  URL: https://www.anthonychapels.com/obituaries/Betty-Jane-Evans?obId=33619570
+  STATUS: BLOCKED (403). Cannot read the full text.
+  Search snippet retrieved: She was born July 10, 1926, in Inwood, West
+  Virginia (Berkeley County, eastern panhandle — approx. 250 miles from
+  Harrison County); died February 18, 2008. Parents: Harland W. Barbour and
+  Emma Louise Hansucker. Predeceased by husband: Lt. Col. James E. Shuttleworth,
+  USMC (Ret.). Survivors: daughter Sharon Fox (Virginia Beach VA), sons Bruce
+  (Irmo SC) and Eric (Columbia SC), six grandchildren, one great-grandchild.
+  ASSESSMENT: DOES NOT MATCH. (1) Born 1926 — far too late to be a party to a
+  1903 mineral deed. (2) Maiden name Barbour, not Shuttleworth. (3) From
+  Berkeley County WV, not Harrison County. (4) She married into the Shuttleworth
+  family (husband James E. Shuttleworth); she is not a Shuttleworth by birth.
+  RULING: NOT THE SUBJECT. Set aside entirely.
+
+CANDIDATE #2 — Elizabeth Shuttleworth obituary (2008), Columbia SC / The State
+  URL: https://www.legacy.com/us/obituaries/thestate/name/elizabeth-shuttleworth-obituary?id=15549802
+  STATUS: BLOCKED (403).
+  This appears to be the SAME PERSON as Candidate #1 (same death year, same
+  South Carolina survivors). Elizabeth = Betty; married name Shuttleworth.
+  RULING: NOT THE SUBJECT for the same reasons as Candidate #1.
+
+NO CONFIRMED CANDIDATE FOUND for Betty Jane Evans (née Shuttleworth), Harrison
+County WV. Searches across FindAGrave, Legacy.com, SSDI snippets, and
+WV genealogy resources produced no match for:
+  — A woman born Shuttleworth who married an Evans
+  — Connected to Harrison County WV / Elk District / Gnatty Creek area
+  — Born approximately 1840–1885 (plausible for a 1903 deed party)
+
+──────────────────────────────────────────────────────────────────────────────
+C. DEAD ENDS — Sources Checked, Nothing Found
+──────────────────────────────────────────────────────────────────────────────
+
+  • FindAGrave site: search for "Betty Jane Evans" + Harrison County WV — NO
+    RESULT RETURNED.
+
+  • Legacy.com search for Betty Jane Evans + West Virginia — NO HARRISON COUNTY
+    MATCH found in snippets.
+
+  • WV vital records death index (archive.wvculture.org) — BLOCKED (403).
+
+  • Chronicling America — BLOCKED (403).
+
+  • USGenWeb Harrison County obituaries — BLOCKED (403).
+
+  • Harrison County marriage records (for Shuttleworth women marrying Evans) —
+    not accessible online during this session. FamilySearch holds WV marriage
+    records 1853–1970; Harrison County marriages 1784–current at the Clerk.
+
+  • Search query ["Evans" married "Shuttleworth" "West Virginia" OR "Harrison
+    County"] returned no specific family link in any accessible snippet.
+
+================================================================================
+SECTION IV — RELATED SHUTTLEWORTH FAMILY MEMBERS IN WV (context only)
+================================================================================
+
+The following persons appear in WV genealogy records and help place the
+family geographically. None are confirmed as Samuel M. or Betty Jane.
+
+• Rebecca (Sapp) Shuttleworth, born March 13, 1821, Marion County WV.
+  (Marion County is adjacent to Harrison County.) Source: WikiTree snippet.
+
+• Joshua Shuttleworth (1812–1898), died in Marion County WV, buried Mount
+  Nebo Cemetery, Winfield, Marion County. Married Mary Jane (Moran).
+  Source: search snippet from geni.com.
+
+• Joshua Milton Shuttleworth (1847–1895), born Monongalia County WV, died
+  Weston, Lewis County WV (Lewis County is adjacent to Harrison County).
+  Source: Ancestry.com search snippet.
+
+• Phebe Ellen (Shuttlesworth) Steele (1838–1917), born Grafton, Taylor County
+  WV (Taylor County is adjacent to Harrison County). Source: search snippet.
+
+• Cornelius L. Shuttleworth (1837–1905), buried Keener Cemetery, Grafton,
+  Taylor County WV. Source: search snippet.
+
+• Alfred Shuttleworth (1848–1926), buried Pisgah Church Cemetery, Monongalia
+  County WV. Source: USGenWeb/search snippet.
+
+SYNTHESIS: The Shuttleworth family was broadly distributed across north-central
+WV (Monongalia, Marion, Taylor, Lewis, Harrison counties) throughout the 1800s.
+The Harrison County branch (J.H., J.E., Robert M.) is geographically closest
+to the Elk District / Gnatty Creek deed. Samuel M. most likely belongs to this
+Harrison County branch.
+
+================================================================================
+SECTION V — DELIVERABLE: COURTHOUSE PULL TARGETS
+================================================================================
+
+Based on all information gathered, the following is the recommended courthouse
+pull to identify Samuel M. Shuttleworth's and Betty Jane Evans's deaths and
+any will or estate proceeding:
+
+──────────────────────────────────────────────────────────────────────────────
+PRIMARY TARGET — Harrison County Circuit Court Clerk
+301 W. Main St., Clarksburg, WV 26301
+Phone: 304-624-8635
+Hours: 8:30 AM – 4:30 PM
+──────────────────────────────────────────────────────────────────────────────
+
+REQUEST 1 — Will Book / Estate Index
+  Surname: SHUTTLEWORTH (all given names)
+  Year range: 1903 – 1965
+  Rationale: Samuel M. was alive in 1903; if born 1840–1875, he most likely
+  died 1910–1955. WV Will Book Index 1788–1924 is on FamilySearch (catalog
+  #736540); the Circuit Court holds post-1924 records. Request the index for
+  BOTH periods. If a will is found, order the full will and any inventory/
+  appraisement — the inventory will list heirs including any daughters who
+  married Evans.
+
+REQUEST 2 — Will Book / Estate Index
+  Surname: EVANS, given name Betty Jane (or Elizabeth Jane, or B.J.)
+  Year range: 1903 – 1975
+  Rationale: Betty Jane Evans (née Shuttleworth?) would have died after 1903;
+  if born 1845–1885, she likely died 1915–1965.
+
+REQUEST 3 — Deed Index Post-1903
+  Search grantor/grantee index for SHUTTLEWORTH and EVANS in Harrison County
+  deed books from 1903 forward. Any subsequent conveyance of the 1/3 mineral
+  interest will show who inherited it and when — this gives an implied death
+  date for Samuel M. even if no will was filed.
+  Harrison County IDX Search: http://lookup.harrisoncountywv.com/
+  (online index — try in browser; unknown date coverage)
+
+──────────────────────────────────────────────────────────────────────────────
+SECONDARY TARGET — WV Vital Records (Death Certificates 1917–1970)
+archive.wvculture.org/vrr/va_dcsearch.aspx
+(Blocked during this session; access via browser or VPN)
+──────────────────────────────────────────────────────────────────────────────
+
+  Search 1: Last Name = SHUTTLEWORTH, County = Harrison, Years = 1917–1970
+  Search 2: Last Name = EVANS, First Name = Betty or Elizabeth, County = Harrison
+
+  Note: Any death before 1917 will NOT appear here. For pre-1917 deaths,
+  the will book index and newspaper obituaries are the primary source.
+
+──────────────────────────────────────────────────────────────────────────────
+TERTIARY TARGET — Clarksburg-Harrison Public Library
+700 Meadowbrook Dr., Clarksburg, WV 26301
+Phone: 304-627-2236 x 4 (newspaper/obituary requests)
+──────────────────────────────────────────────────────────────────────────────
+
+  Microfilm holdings: Clarksburg Exponent, Clarksburg Telegram, Clarksburg
+  Exponent-Telegram, 1967–2010. Covers the most likely death period.
+  Request: obituary search for surname SHUTTLEWORTH and for BETTY JANE EVANS.
+
+  For pre-1967 obituaries, use:
+  • FamilySearch catalog #312503 — "Obituaries from newspapers; Clarksburg
+    Exponent, Clarksburg Telegram and other papers of Northern West Virginia"
+    (requires FamilySearch login or Family History Center visit)
+  • Chronicling America — Clarksburg Telegram 1893–1912, Clarksburg Exponent
+    1910+: https://chroniclingamerica.loc.gov/newspapers/west_virginia/
+    (search "Shuttleworth" in WV newspapers, 1900–1960)
+
+──────────────────────────────────────────────────────────────────────────────
+QUATERNARY — FamilySearch Online (Free with Login)
+──────────────────────────────────────────────────────────────────────────────
+
+  • Harrison County, WV Will Book Index 1788–1924
+    FamilySearch catalog: https://www.familysearch.org/en/search/catalog/736540
+    Search for SHUTTLEWORTH and EVANS.
+
+  • Gnatty Creek Presbyterian Church Cemetery Inscriptions (Harrison County)
+    Available at FamilySearch Library; request a lookup for SHUTTLEWORTH and
+    EVANS surnames. This cemetery is in the Elk District on Gnatty Creek —
+    the Shuttleworth family members named in the 1903 deed may be buried here.
+
+  • WV Deaths 1804–1999 (FamilySearch Historical Records) — search SHUTTLEWORTH
+    and EVANS in Harrison County.
+
+──────────────────────────────────────────────────────────────────────────────
+QUINARY — WVU West Virginia and Regional History Center (WVRHC)
+──────────────────────────────────────────────────────────────────────────────
+
+  • Shuttleworth family collection (compiled by Mrs. Louise Morris):
+    https://archives.lib.wvu.edu/agents/families/1538
+    This collection covers Marion and Monongalia counties 1817–1957 and may
+    include Harrison County Shuttleworths. Contact WVRHC for access.
+
+  • Harrison County Land Records (WVU Archives):
+    https://archives.lib.wvu.edu/subjects/4204
+    May include deed abstracts referencing Samuel M. Shuttleworth.
+
+================================================================================
+SECTION VI — POTENTIAL CURRENT HEIRS
+================================================================================
+
+Based on the research, NO obituary naming survivors of Samuel M. Shuttleworth
+or Betty Jane Evans (née Shuttleworth) was retrieved from any accessible source.
+
+The closest confirmed Harrison County Shuttleworth survivor chain identified:
+
+  Robert M. Shuttleworth (1875–1951), Odd Fellows Cemetery, Clarksburg, Harrison
+  County WV. His survivors (if any) are unknown from this research pass.
+  ACTION: Check FindAGrave memorial #125523571 for linked family members.
+  ACTION: Request Robert M. Shuttleworth's estate from Harrison County probate
+  (death year ~1951; estate would be in the 1951 Harrison County probate index).
+
+If Robert M. is Samuel M.'s son, Robert's 1951 estate would name Samuel's
+grandchildren (Robert's children) — these would be the surviving mineral heirs
+for the Shuttleworth 1/3 interest as of ~1951. The interest would then pass
+through those heirs' estates to the present.
+
+================================================================================
+SECTION VII — PAYWALLED SOURCES (for manual follow-up)
+================================================================================
+
+  1. Ancestry.com — West Virginia, U.S., Wills and Probate Records, 1724–1985
+     https://www.ancestry.com/search/collections/9087/
+     STATUS: PAYWALLED. Search "Shuttleworth" and "Evans" for Harrison County.
+
+  2. Ancestry.com — History of Harrison County WV (biographies collection)
+     https://www.ancestry.com/search/collections/30048/
+     STATUS: PAYWALLED.
+
+  3. Newspapers.com — Harrison County / Clarksburg historical newspapers
+     STATUS: PAYWALLED.
+
+  4. MyHeritage — West Virginia Death Index & Certificates (1853–1964)
+     STATUS: PAYWALLED.
+
+  5. GenealogyBank — West Virginia Newspaper Obituaries (1999–current)
+     https://www.genealogybank.com/explore/obituaries/all/usa/west-virginia
+     STATUS: PAYWALLED.
+
+================================================================================
+SECTION VIII — COMPLETE URL LOG
+================================================================================
+
+All URLs targeted during this research session:
+
+STATUS KEY: BLOCKED = HTTP 403; NONE = no relevant result in snippets;
+            PAYWALLED = subscription required; CONFIRMED = data retrieved
+            from search snippet; REFUSED = connection refused
+
+01. https://www.legacy.com/obituaries/name/shuttleworth — BLOCKED
+02. https://archive.wvculture.org/vrr/va_dcsearch.aspx — BLOCKED
+03. http://genealogytrails.com/wva/harrison/obits.html — BLOCKED
+04. https://www.findagrave.com/cemetery-browse/USA/West-Virginia/Harrison-County — BLOCKED
+05. https://www.anthonychapels.com/obituaries/Betty-Jane-Evans?obId=33619570 — BLOCKED
+06. https://sites.rootsweb.com/~obitsindex/obits_wv_harri_01.htm — BLOCKED
+07. https://www.legacy.com/us/obituaries/thestate/name/elizabeth-shuttleworth-obituary?id=15549802 — BLOCKED (snippet confirms: Elizabeth Shuttleworth, 1926-2008, SC; NOT subject)
+08. https://archives.lib.wvu.edu/agents/families/1538 — BLOCKED
+09. https://roadsidethoughts.com/wv/cemeteries/gnatty-creek-cemetery-xx-harrison-profile.htm — BLOCKED
+10. http://www.locateancestors.com/shuttleworth-west-virginia/ — BLOCKED
+11. https://www.wikitree.com/genealogy/SHUTTLEWORTH — BLOCKED
+12. https://www.geni.com/people/Joshua-Shuttleworth/6000000086433968923 — BLOCKED
+13. https://www.wikitree.com/wiki/Shuttleworth-292 — BLOCKED
+14. https://raogk.org/westvirginia/harrison-county/ — BLOCKED
+15. https://www.ancestry.com/genealogy/records/j-e-shuttleworth-24-1bktsrw — BLOCKED (snippet confirms: J.E. Shuttleworth, born 1852, Harrison Co WV, son of J.H. Shuttleworth)
+16. https://ldsgenealogy.com/WV/Harrison-County-Probate-Records.htm — BLOCKED
+17. http://lookup.harrisoncountywv.com/ — BLOCKED
+18. https://www.findagrave.com/memorial/125523571/robert-m-shuttleworth — BLOCKED (snippet: Robert M. Shuttleworth 1875-1951, Odd Fellows Cemetery, Clarksburg Harrison Co WV)
+19. https://www.findagrave.com/memorial/49395664/william-shuttleworth — BLOCKED
+20. https://www.findagrave.com/cemetery/78466/gnatty-creek-cemetery — BLOCKED (snippet: 74 memorials, Romines Mills, Harrison Co WV)
+21. http://wvcpaweb.org/cemeteryregister/Harrison/HarrisonCoCemetery.html — BLOCKED
+22. http://www.usgwtombstones.org/westvirg/harrison.htm — BLOCKED
+23. https://www.wikitree.com/wiki/Shuttleworth-407 — BLOCKED (snippet: Samuel Shuttleworth 1854-1921 = New Zealand; RULED OUT)
+24. https://www.wikitree.com/wiki/Shuttleworth-204 — BLOCKED (snippet: Samuel Maurice Shuttleworth, New Zealand; RULED OUT)
+25. https://www.familysearch.org/en/search/catalog/736540 — BLOCKED
+26. https://ldsgenealogy.com/WV/Harrison-County-Death-Records.htm — BLOCKED
+27. http://www.usgwarchives.net/wv/harrison/obituaries.html — BLOCKED
+28. http://files.usgwarchives.net/wv/monongalia/cemetery/piscemt.txt — BLOCKED (snippet: Samuel T. Shuttleworth 1831-1908 buried Pisgah Church Cemetery, Monongalia Co WV)
+29. http://files.usgwarchives.net/wv/harrison/cemetery1/lumberport.txt — BLOCKED
+30. https://genealogytrails.com/wva/harrison/ — BLOCKED
+31. https://genealogytrails.com/wva/harrison/bios_s.html — BLOCKED
+32. https://genealogytrails.com/wva/harrison/news_court.html — BLOCKED
+33. https://chroniclingamerica.loc.gov/search/pages/results/... (multiple) — BLOCKED
+34. https://archive.org/stream/historyofharriso00inhaym/historyofharriso00inhaym_djvu.txt — BLOCKED
+35. https://archive.org/details/historyofharriso00inhaym — BLOCKED
+36. https://ia802808.us.archive.org/7/items/historyofharriso00inhaym/historyofharriso00inhaym.pdf — BLOCKED
+37. https://archive.wvculture.org/history/archives/counties/harrison.html — BLOCKED
+38. http://www.wvgenweb.org/harrison/index.html — CONNECTION REFUSED
+39. https://www.wvgw.net/harrison/index.html — BLOCKED
+40. https://wvculture.org/vital-records-interactive/ — BLOCKED
+41. https://archive.wvculture.org/vrr/va_dcresults.aspx?LastName=Shuttleworth&County=Harrison — BLOCKED
+42. https://archive.wvculture.org/vrr/va_dcresults.aspx?LastName=Evans&FirstName=Betty+Jane... — BLOCKED
+43. https://www.familysearch.org/en/wiki/Harrison_County,_West_Virginia_Genealogy — BLOCKED
+44. https://www.harrisoncountyassessor.com/ownershipsearch.aspx — BLOCKED
+45. https://www.wvrecordsearch.com/west-virginia/harrison-county/deed-search — BLOCKED
+46. https://www.geni.com/surnames/shuttleworth — BLOCKED
+47. https://genealogybuff.com/wv/wv-monongalia-obits51.htm — BLOCKED
+48. https://www.interment.net/us/wv/harrison.htm — BLOCKED
+49. https://www.familysearch.org/en/search/catalog/312503 — BLOCKED
+50. https://www.genlookups.com/wv/webbbs_config.pl/noframes/read/334 — BLOCKED
+
+Confirmed-data URLs (accessed via search snippet only, page itself blocked):
+  CONFIRMED: findagrave.com/memorial/125523571 — Robert M. Shuttleworth (1875-1951)
+  CONFIRMED: ancestry.com J-E-shuttleworth — J.E. Shuttleworth born 1852 Harrison Co WV
+  CONFIRMED: findagrave.com/cemetery/78466 — Gnatty Creek Cemetery, 74 memorials
+  CONFIRMED (via snippet): Elizabeth Shuttleworth (1926-2008) = Betty (Barbour) Shuttleworth
+
+================================================================================
+SECTION IX — SUMMARY TABLE
+================================================================================
+
+SUBJECT                 DEATH DATE    PLACE OF DEATH    SURVIVORS NAMED     WILL/ESTATE
+─────────────────────── ────────────  ────────────────  ──────────────────  ────────────
+Samuel M. Shuttleworth  UNKNOWN       UNKNOWN           UNKNOWN             NOT FOUND
+Betty Jane Evans        UNKNOWN       UNKNOWN           UNKNOWN             NOT FOUND
+(née Shuttleworth?)
+
+PROBABLE DEATH DATE RANGE (working hypothesis):
+  Samuel M. Shuttleworth: 1910–1955 (alive 1903; if born 1845–1875)
+  Betty Jane Evans:       1910–1965 (alive 1903; if born 1845–1885)
+
+WILL BOOK / ESTATE YEAR RANGE TO REQUEST FROM HARRISON COUNTY CLERK:
+  ► REQUEST YEARS: 1903 THROUGH 1960 for BOTH surnames
+  ► This single range covers the entire plausible mortality window.
+  ► The Harrison County Will Book Index 1788-1924 (FamilySearch #736540)
+    covers the earlier half. The Circuit Court holds 1924 to present.
+  ► A single written request to the Harrison County Circuit Court Clerk
+    for a "surname index search — Shuttleworth, all given names, 1903-1960,
+    and Evans (given name Betty or Elizabeth), 1903-1960" should return
+    any will filed in Harrison County for either decedent.
+
+================================================================================
+END OF REPORT
+Research conducted: 2026-06-11
+Researcher: Claude Code (automated OSINT pass)
+WARNING: This report contains NO confirmed death dates for either subject.
+All findings are preliminary; courthouse verification is mandatory before
+any title opinion or mineral deed is relied upon.
+================================================================================

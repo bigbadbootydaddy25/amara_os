@@ -505,6 +505,70 @@ window.setAMARAMicAudio = (node) => {
   node.connect(a); micAnalyser=a; micData=new Uint8Array(a.frequencyBinCount);
 };
 
+// ── ElevenLabs TTS ────────────────────────────────────────────────────────────
+const EL_KEY   = 'sk_b6f0ec19d447538de677a5ac7151d38e68226e0881a6cf0a';
+const EL_VOICE = '1hlpeD1ydbI2ow0Tt3EW';
+let ttsAudio = null, ttsCtx = null, isSpeaking = false;
+
+async function ttsSpeak(text) {
+  if (!text || isSpeaking) return;
+  isSpeaking = true;
+  clearTimeout(silenceTimer);
+  window.setAMARAState('thinking');
+  setStatus('PROCESSING...');
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': EL_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'audio/mpeg',
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: { stability: 0.48, similarity_boost: 0.78, style: 0.12, use_speaker_boost: true },
+      }),
+    });
+
+    if (!res.ok) throw new Error(`ElevenLabs ${res.status}`);
+
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+
+    if (ttsAudio) ttsAudio.pause();
+    if (ttsCtx)   ttsCtx.close();
+
+    ttsAudio = new Audio(url);
+    ttsCtx   = new AudioContext();
+
+    const src = ttsCtx.createMediaElementSource(ttsAudio);
+    window.setAMARAOutputAudio(src);   // wire into orb visualizer
+    src.connect(ttsCtx.destination);   // also route to speakers
+
+    window.setAMARAState('speaking');
+    setStatus('SPEAKING');
+    ttsAudio.play();
+
+    ttsAudio.onended = () => {
+      URL.revokeObjectURL(url);
+      isSpeaking = false;
+      showTranscript('', false);
+      window.setAMARAState('idle');
+      setStatus('LISTENING');
+    };
+  } catch (e) {
+    console.error('ElevenLabs error:', e);
+    isSpeaking = false;
+    window.setAMARAState('idle');
+    setStatus('LISTENING');
+  }
+}
+
+// Expose so external callers (LLM, tests) can trigger AMARA speech
+window.setAMARAResponse = ttsSpeak;
+
 // ── Deepgram STT ──────────────────────────────────────────────────────────────
 const DG_KEY = '5d509864bed0d109bdbd4895b8d139ef90f375a3';
 let dgSocket = null, micStream = null, audioCtx = null, scriptProc = null;
@@ -573,15 +637,13 @@ async function startDeepgram() {
     let msg;
     try { msg = JSON.parse(ev.data); } catch { return; }
 
-    // Voice activity events
+    // Voice activity events — ignore while TTS is playing
     if (msg.type === 'SpeechStarted') {
-      clearTimeout(silenceTimer);
-      window.setAMARAState('listening');
+      if (!isSpeaking) { clearTimeout(silenceTimer); window.setAMARAState('listening'); }
     } else if (msg.type === 'UtteranceEnd') {
-      silenceTimer = setTimeout(() => {
-        showTranscript('', false);
-        window.setAMARAState('idle');
-      }, 2200);
+      if (!isSpeaking) {
+        silenceTimer = setTimeout(() => { showTranscript('', false); window.setAMARAState('idle'); }, 900);
+      }
     }
 
     // Transcript
@@ -591,10 +653,7 @@ async function startDeepgram() {
         showTranscript(text, msg.is_final);
         if (msg.is_final) {
           clearTimeout(silenceTimer);
-          silenceTimer = setTimeout(() => {
-            showTranscript('', false);
-            window.setAMARAState('idle');
-          }, 2800);
+          ttsSpeak(text);   // speak → STT → TTS loop
         }
       }
     }

@@ -23,11 +23,28 @@
     border: 1px solid rgba(0,212,255,0.26); background: rgba(0,0,0,0.45);
     backdrop-filter: blur(12px); padding: 0.75rem 1.5rem; border-radius: 9999px; cursor: pointer;
   }
+  #transcript {
+    position: fixed; bottom: 10%; left: 50%; transform: translateX(-50%);
+    color: rgba(0,212,255,0.92); font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem; letter-spacing: 0.08em; text-align: center;
+    max-width: 72%; z-index: 10; pointer-events: none;
+    text-shadow: 0 0 18px rgba(0,212,255,0.7), 0 0 40px rgba(0,180,255,0.3);
+    transition: opacity 0.4s; min-height: 1.4em;
+  }
+  #transcript.interim { opacity: 0.55; }
+  #transcript.final   { opacity: 1.0; }
+  #mic-status {
+    position: fixed; top: 1.4rem; right: 1.6rem; z-index: 10;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.22em; color: rgba(0,212,255,0.5); pointer-events: none;
+  }
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div id="vignette"></div>
+<div id="transcript"></div>
+<div id="mic-status"></div>
 <div id="activate-overlay"><button id="activate-btn">Touch to activate AMARA</button></div>
 
 <script type="module">
@@ -488,6 +505,105 @@ window.setAMARAMicAudio = (node) => {
   node.connect(a); micAnalyser=a; micData=new Uint8Array(a.frequencyBinCount);
 };
 
+// ── Deepgram STT ──────────────────────────────────────────────────────────────
+const DG_KEY = '5d509864bed0d109bdbd4895b8d139ef90f375a3';
+let dgSocket = null, micStream = null, audioCtx = null, scriptProc = null;
+let silenceTimer = null;
+
+const txEl     = document.getElementById('transcript');
+const statusEl = document.getElementById('mic-status');
+
+function setStatus(txt) { if (statusEl) statusEl.textContent = txt; }
+function showTranscript(txt, isFinal) {
+  if (!txEl) return;
+  txEl.textContent = txt;
+  txEl.className = isFinal ? 'final' : 'interim';
+}
+
+async function startDeepgram() {
+  setStatus('REQUESTING MIC...');
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  } catch (e) {
+    setStatus('MIC DENIED'); console.error('Mic:', e); return;
+  }
+
+  // Wire mic into orb visualizer
+  const tmpCtx = new AudioContext();
+  const micSrc = tmpCtx.createMediaStreamSource(micStream);
+  window.setAMARAMicAudio(micSrc);
+
+  // 16kHz context for Deepgram
+  audioCtx = new AudioContext({ sampleRate: 16000 });
+  const src = audioCtx.createMediaStreamSource(micStream);
+  scriptProc = audioCtx.createScriptProcessor(4096, 1, 1);
+
+  const dgUrl = [
+    'wss://api.deepgram.com/v1/listen',
+    `?token=${DG_KEY}`,
+    '&model=nova-3',
+    '&language=en-GB',
+    '&encoding=linear16',
+    '&sample_rate=16000',
+    '&channels=1',
+    '&interim_results=true',
+    '&smart_format=true',
+    '&vad_events=true',
+    '&utterance_end_ms=1200',
+  ].join('');
+
+  dgSocket = new WebSocket(dgUrl);
+  dgSocket.binaryType = 'arraybuffer';
+
+  dgSocket.onopen = () => {
+    setStatus('LISTENING');
+    src.connect(scriptProc);
+    scriptProc.connect(audioCtx.destination);
+    scriptProc.onaudioprocess = (ev) => {
+      if (dgSocket.readyState !== WebSocket.OPEN) return;
+      const f32 = ev.inputBuffer.getChannelData(0);
+      const i16 = new Int16Array(f32.length);
+      for (let i = 0; i < f32.length; i++)
+        i16[i] = Math.max(-32768, Math.min(32767, f32[i] * 32768));
+      dgSocket.send(i16.buffer);
+    };
+  };
+
+  dgSocket.onmessage = (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+
+    // Voice activity events
+    if (msg.type === 'SpeechStarted') {
+      clearTimeout(silenceTimer);
+      window.setAMARAState('listening');
+    } else if (msg.type === 'UtteranceEnd') {
+      silenceTimer = setTimeout(() => {
+        showTranscript('', false);
+        window.setAMARAState('idle');
+      }, 2200);
+    }
+
+    // Transcript
+    if (msg.channel?.alternatives?.[0]) {
+      const text = msg.channel.alternatives[0].transcript?.trim();
+      if (text) {
+        showTranscript(text, msg.is_final);
+        if (msg.is_final) {
+          clearTimeout(silenceTimer);
+          silenceTimer = setTimeout(() => {
+            showTranscript('', false);
+            window.setAMARAState('idle');
+          }, 2800);
+        }
+      }
+    }
+  };
+
+  dgSocket.onerror = (e) => { setStatus('DG ERROR'); console.error('Deepgram:', e); };
+  dgSocket.onclose = () => { setStatus(''); };
+}
+
 // ── Activation ────────────────────────────────────────────────────────────────
 let orbReady=false;
 function activateAmara() {
@@ -496,8 +612,8 @@ function activateAmara() {
   if (ov) ov.style.display='none';
   try {
     initOrb();
-    // Dramatic burst on first activation
     setTimeout(() => spawnBurst(), 200);
+    startDeepgram();
   } catch(e) {
     console.error('AMARA init error:',e);
     if (ov) ov.style.display='flex'; orbReady=false;

@@ -97,7 +97,6 @@ export class ThreeOrbRenderer {
 
   // Groups
   private orbGroup: THREE.Group;    // rotates: wireframe + nodes + edges
-  private ringGroup: THREE.Group;   // orbits independently
 
   // Node point cloud
   private nodePos: Float32Array;
@@ -114,9 +113,6 @@ export class ThreeOrbRenderer {
 
   // Wireframe cage
   private wireMesh!: THREE.LineSegments;
-
-  // Outer ring
-  private ringMesh!: THREE.Mesh;
 
   // Halo sprite
   private haloSprite!: THREE.Sprite;
@@ -151,7 +147,6 @@ export class ThreeOrbRenderer {
   private sBright = 0.3;
   private sConnDensity = 0.35;
   private sRotSpeed = 0.004;
-  private sRingOpacity = 0.2;
   private sHaloScale = 1.0;
 
   constructor(canvas: HTMLCanvasElement, width: number, height: number) {
@@ -165,9 +160,7 @@ export class ThreeOrbRenderer {
     this.camera.position.z = 4.8;
 
     this.orbGroup = new THREE.Group();
-    this.ringGroup = new THREE.Group();
     this.scene.add(this.orbGroup);
-    this.scene.add(this.ringGroup);
 
     this.nodePos = new Float32Array(NODE_COUNT * 3);
     this.nodeColor = new Float32Array(NODE_COUNT * 3);
@@ -192,7 +185,6 @@ export class ThreeOrbRenderer {
     this.buildNodes();
     this.buildEdges();
     this.buildWireframe();
-    this.buildRing();
     this.buildHalo();
     this.buildParticles();
   }
@@ -309,37 +301,6 @@ export class ThreeOrbRenderer {
     this.wireMesh = new THREE.LineSegments(wire, mat);
     this.orbGroup.add(this.wireMesh);
     geom.dispose();
-  }
-
-  private buildRing(): void {
-    const geom = new THREE.TorusGeometry(SPHERE_R * 1.22, 0.013, 8, 120);
-    const mat = new THREE.MeshBasicMaterial({
-      color: 0x00d4ff,
-      transparent: true,
-      opacity: 0.22,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-    });
-    this.ringMesh = new THREE.Mesh(geom, mat);
-    this.ringMesh.rotation.x = Math.PI * 0.12;
-
-    // Second ring at slight angle for more visual interest
-    const geom2 = new THREE.TorusGeometry(SPHERE_R * 1.24, 0.008, 8, 120);
-    const mat2 = new THREE.MeshBasicMaterial({
-      color: 0x00d4ff,
-      transparent: true,
-      opacity: 0.12,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-    });
-    const ring2 = new THREE.Mesh(geom2, mat2);
-    ring2.rotation.x = Math.PI * 0.35;
-    ring2.rotation.y = Math.PI * 0.15;
-
-    this.ringGroup.add(this.ringMesh);
-    this.ringGroup.add(ring2);
   }
 
   private buildHalo(): void {
@@ -461,7 +422,6 @@ export class ThreeOrbRenderer {
     this.updateNodes();
     this.updateEdges();
     this.updateWireframe();
-    this.updateRing(safeDt);
     this.updateHalo();
     this.updateParticles(safeDt);
   }
@@ -508,7 +468,6 @@ export class ThreeOrbRenderer {
     let tBright: number;
     let tConn: number;
     let tRot: number;
-    let tRing: number;
     let tHalo: number;
 
     switch (this.state) {
@@ -516,7 +475,6 @@ export class ThreeOrbRenderer {
         tBright = 0.22 + breathe * 0.10;
         tConn = 0.28 + breathe * 0.08;
         tRot = 0.003 + breathe * 0.001;
-        tRing = 0.14 + breathe * 0.05;
         tHalo = 0.88 + breathe * 0.06;
         break;
 
@@ -524,7 +482,6 @@ export class ThreeOrbRenderer {
         tBright = 0.18 + this.aMic * 0.38 + (Math.sin(t * 1.8) + 1) * 0.04;
         tConn = 0.20 + this.aMic * 0.25;
         tRot = 0.002 + this.aMic * 0.003;
-        tRing = 0.12 + this.aMic * 0.20 + Math.sin(t * 2.2) * 0.04;
         tHalo = 0.90 + this.aMic * 0.22;
         break;
 
@@ -534,7 +491,6 @@ export class ThreeOrbRenderer {
           tBright = 0.38 + pulse * 0.28;
           tConn = 0.55 + pulse * 0.30;
           tRot = 0.009 + pulse * 0.005;
-          tRing = 0.38 + pulse * 0.22;
           tHalo = 1.05 + pulse * 0.15;
         }
         break;
@@ -543,7 +499,6 @@ export class ThreeOrbRenderer {
         tBright = 0.42 + this.aMid * 0.52 + this.aHigh * 0.18;
         tConn = 0.45 + this.aOverall * 0.55;
         tRot = 0.005 + this.aLow * 0.012;
-        tRing = 0.40 + this.aOverall * 0.58;
         tHalo = 1.0 + this.aOverall * 0.95;
         break;
 
@@ -551,7 +506,6 @@ export class ThreeOrbRenderer {
         tBright = 0.25;
         tConn = 0.3;
         tRot = 0.003;
-        tRing = 0.15;
         tHalo = 0.9;
     }
 
@@ -559,7 +513,6 @@ export class ThreeOrbRenderer {
     this.sBright = lerp(this.sBright, tBright, smooth);
     this.sConnDensity = lerp(this.sConnDensity, tConn, smooth * 1.2);
     this.sRotSpeed = lerp(this.sRotSpeed, tRot, smooth * 0.6);
-    this.sRingOpacity = lerp(this.sRingOpacity, tRing, smooth);
     this.sHaloScale = lerp(this.sHaloScale, tHalo, smooth * 0.8);
   }
 
@@ -668,30 +621,6 @@ export class ThreeOrbRenderer {
     // Orb group rotation
     this.orbGroup.rotation.y += this.sRotSpeed * (1 + this.aLow * 1.2);
     this.orbGroup.rotation.x += this.sRotSpeed * 0.18;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Ring update
-  // ---------------------------------------------------------------------------
-
-  private updateRing(dt: number): void {
-    this.ringGroup.rotation.y += dt * 0.28;
-
-    // Scale ring on audio peaks
-    const peakBoost = this.state === 'speaking' ? 1 + this.aOverall * 0.32 : 1.0;
-    this.ringGroup.scale.setScalar(peakBoost);
-
-    // Ripple/pulse ring opacity
-    const t = this.time;
-    const pulse = this.state === 'speaking'
-      ? this.sRingOpacity * (0.9 + Math.sin(t * 8 + this.aHigh * 12) * 0.1)
-      : this.sRingOpacity;
-
-    this.ringGroup.children.forEach((child, i) => {
-      const mesh = child as THREE.Mesh;
-      const mat = mesh.material as THREE.MeshBasicMaterial;
-      mat.opacity = clamp(pulse * (i === 0 ? 1.0 : 0.55), 0, 0.75);
-    });
   }
 
   // ---------------------------------------------------------------------------

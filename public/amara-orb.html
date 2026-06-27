@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>AMARA</title>
-<script src="./three.global.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -47,59 +46,61 @@
 <canvas id="c"></canvas>
 <div id="vignette"></div>
 <div id="activate-overlay">
-  <button id="activate-btn" onclick="activateAmara()">Touch to activate AMARA</button>
+  <button id="activate-btn">Touch to activate AMARA</button>
 </div>
 
-<script>
-'use strict';
+<script type="module">
+import * as THREE from './three.module.min.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
-var SPHERE_R      = 1.8;
-var NODE_COUNT    = 165;
-var SURFACE_NODES = 58;
-var MAX_CONN_DIST  = 0.84;
-var MAX_EDGES     = 500;
-var PARTICLE_CNT  = 240;
+const SPHERE_R      = 1.8;
+const NODE_COUNT    = 165;
+const SURFACE_NODES = 58;
+const MAX_CONN_DIST = 0.84;
+const MAX_EDGES     = 500;
+const PARTICLE_CNT  = 240;
 
 // ── Animation state ──────────────────────────────────────────────────────────
-var currentState = 'idle';
-var time = 0;
-var lastT = 0;
-var sBright = 0.3, sConn = 0.35, sRot = 0.004, sRing = 0.2, sHalo = 1.0;
-var aLow = 0, aMid = 0, aHigh = 0, aOverall = 0, aMic = 0;
+let currentState = 'idle';
+let time = 0;
+let lastT = 0;
+let sBright = 0.3, sConn = 0.35, sRot = 0.004, sRing = 0.2, sHalo = 1.0;
+let aLow = 0, aMid = 0, aHigh = 0, aOverall = 0, aMic = 0;
 
 // ── Audio ────────────────────────────────────────────────────────────────────
-var outAnalyser = null, micAnalyser = null;
-var outData = new Uint8Array(256), micData = new Uint8Array(256);
+let outAnalyser = null, micAnalyser = null;
+let outData = new Uint8Array(256), micData = new Uint8Array(256);
 
-// ── Three.js object references (set in initOrb) ───────────────────────────────
-var renderer, scene, camera;
-var orbGroup, ringGroup;
-var nodePos, nodeColor, nodeGeom;
-var nodeData = [];
-var edgePos, edgeColor, edgeGeom;
-var wireMat;
-var ringMatA, ringMatB;
-var haloSprite;
-var partPos, partVel, partLife, partGeom;
+// ── Three.js object references (assigned in initOrb) ─────────────────────────
+let renderer, scene, camera;
+let orbGroup, ringGroup;
+let nodePos, nodeColor, nodeGeom;
+let nodeData = [];
+let edgePos, edgeColor, edgeGeom;
+let wireMat;
+let ringMatA, ringMatB;
+let haloSprite;
+let partPos, partVel, partLife, partGeom;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-function lerp(a, b, t) { return a + (b - a) * t; }
-function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
-function bandAvg(data, s, e) {
-  var l = data.length;
-  var si = Math.floor(l * s), ei = Math.floor(l * e);
-  var sum = 0;
-  for (var i = si; i < ei; i++) sum += data[i];
+const lerp  = (a, b, t) => a + (b - a) * t;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const bandAvg = (data, s, e) => {
+  const l = data.length;
+  const si = Math.floor(l * s), ei = Math.floor(l * e);
+  let sum = 0;
+  for (let i = si; i < ei; i++) sum += data[i];
   return sum / ((ei - si) * 255 || 1);
-}
+};
 
-// ── Texture helpers ──────────────────────────────────────────────────────────
+// ── Texture factories ─────────────────────────────────────────────────────────
 function makeGlowTex() {
-  var sz = 128, c = document.createElement('canvas');
+  const sz = 128;
+  const c = document.createElement('canvas');
   c.width = c.height = sz;
-  var ctx = c.getContext('2d'), h = sz / 2;
-  var g = ctx.createRadialGradient(h, h, 0, h, h, h);
+  const ctx = c.getContext('2d');
+  const h = sz / 2;
+  const g = ctx.createRadialGradient(h, h, 0, h, h, h);
   g.addColorStop(0,    'rgba(255,255,255,1)');
   g.addColorStop(0.18, 'rgba(200,245,255,0.9)');
   g.addColorStop(0.42, 'rgba(0,212,255,0.5)');
@@ -111,10 +112,12 @@ function makeGlowTex() {
 }
 
 function makeHaloTex() {
-  var sz = 512, c = document.createElement('canvas');
+  const sz = 512;
+  const c = document.createElement('canvas');
   c.width = c.height = sz;
-  var ctx = c.getContext('2d'), h = sz / 2;
-  var g = ctx.createRadialGradient(h, h, 0, h, h, h);
+  const ctx = c.getContext('2d');
+  const h = sz / 2;
+  const g = ctx.createRadialGradient(h, h, 0, h, h, h);
   g.addColorStop(0,    'rgba(0,0,0,0)');
   g.addColorStop(0.40, 'rgba(0,0,0,0)');
   g.addColorStop(0.58, 'rgba(0,212,255,0.06)');
@@ -128,10 +131,12 @@ function makeHaloTex() {
 }
 
 function makeParticleTex() {
-  var sz = 64, c = document.createElement('canvas');
+  const sz = 64;
+  const c = document.createElement('canvas');
   c.width = c.height = sz;
-  var ctx = c.getContext('2d'), h = sz / 2;
-  var g = ctx.createRadialGradient(h, h, 0, h, h, h);
+  const ctx = c.getContext('2d');
+  const h = sz / 2;
+  const g = ctx.createRadialGradient(h, h, 0, h, h, h);
   g.addColorStop(0,    'rgba(255,255,255,1)');
   g.addColorStop(0.35, 'rgba(255,255,255,0.7)');
   g.addColorStop(0.7,  'rgba(200,240,255,0.2)');
@@ -141,11 +146,10 @@ function makeParticleTex() {
   return new THREE.CanvasTexture(c);
 }
 
-// ── Lazy initialiser — called once on button click ───────────────────────────
+// ── Lazy init — runs once on button click ─────────────────────────────────────
 function initOrb() {
-  var canvas = document.getElementById('c');
-
-  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+  const canvas = document.getElementById('c');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setClearColor(0x000000, 1);
 
   scene  = new THREE.Scene();
@@ -158,7 +162,7 @@ function initOrb() {
   scene.add(ringGroup);
 
   function resize() {
-    var w = window.innerWidth, h = window.innerHeight;
+    const w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     camera.aspect = w / h;
@@ -167,7 +171,7 @@ function initOrb() {
   resize();
   window.addEventListener('resize', resize, { passive: true });
 
-  // ── Nodes ─────────────────────────────────────────────────────────────────
+  // ── Nodes ──────────────────────────────────────────────────────────────────
   nodePos   = new Float32Array(NODE_COUNT * 3);
   nodeColor = new Float32Array(NODE_COUNT * 3);
   nodeGeom  = new THREE.BufferGeometry();
@@ -175,47 +179,51 @@ function initOrb() {
   nodeGeom.setAttribute('color',    new THREE.BufferAttribute(nodeColor, 3));
 
   nodeData = [];
-  var golden = Math.PI * (Math.sqrt(5) - 1);
+  const golden = Math.PI * (Math.sqrt(5) - 1);
 
-  for (var i = 0; i < SURFACE_NODES; i++) {
-    var y  = 1 - (i / (SURFACE_NODES - 1)) * 2;
-    var r  = Math.sqrt(Math.max(0, 1 - y * y));
-    var th = golden * i;
+  for (let i = 0; i < SURFACE_NODES; i++) {
+    const y  = 1 - (i / (SURFACE_NODES - 1)) * 2;
+    const r  = Math.sqrt(Math.max(0, 1 - y * y));
+    const th = golden * i;
     nodeData.push({
       bx: Math.cos(th) * r * SPHERE_R, by: y * SPHERE_R, bz: Math.sin(th) * r * SPHERE_R,
       px: 0, py: 0, pz: 0,
       phx: Math.random() * 6.28, phy: Math.random() * 6.28, phz: Math.random() * 6.28,
-      spx: 0.14 + Math.random() * 0.18, spy: 0.11 + Math.random() * 0.16, spz: 0.09 + Math.random() * 0.20,
+      spx: 0.14 + Math.random() * 0.18,
+      spy: 0.11 + Math.random() * 0.16,
+      spz: 0.09 + Math.random() * 0.20,
       amp: 0.035 + Math.random() * 0.065,
       bright: 0.4 + Math.random() * 0.6,
     });
   }
 
-  for (var j = SURFACE_NODES; j < NODE_COUNT; j++) {
-    var u  = Math.random();
-    var d  = SPHERE_R * Math.pow(u, 0.45) * 0.96;
-    var th2 = Math.random() * 6.28;
-    var ph2 = Math.acos(2 * Math.random() - 1);
+  for (let i = SURFACE_NODES; i < NODE_COUNT; i++) {
+    const u  = Math.random();
+    const d  = SPHERE_R * Math.pow(u, 0.45) * 0.96;
+    const th = Math.random() * 6.28;
+    const ph = Math.acos(2 * Math.random() - 1);
     nodeData.push({
-      bx: d * Math.sin(ph2) * Math.cos(th2),
-      by: d * Math.sin(ph2) * Math.sin(th2),
-      bz: d * Math.cos(ph2),
+      bx: d * Math.sin(ph) * Math.cos(th),
+      by: d * Math.sin(ph) * Math.sin(th),
+      bz: d * Math.cos(ph),
       px: 0, py: 0, pz: 0,
       phx: Math.random() * 6.28, phy: Math.random() * 6.28, phz: Math.random() * 6.28,
-      spx: 0.07 + Math.random() * 0.22, spy: 0.05 + Math.random() * 0.18, spz: 0.08 + Math.random() * 0.21,
+      spx: 0.07 + Math.random() * 0.22,
+      spy: 0.05 + Math.random() * 0.18,
+      spz: 0.08 + Math.random() * 0.21,
       amp: 0.07 + Math.random() * 0.18,
       bright: 0.15 + Math.random() * 0.55,
     });
   }
 
-  var nodeMat = new THREE.PointsMaterial({
+  const nodeMat = new THREE.PointsMaterial({
     size: 0.22, map: makeGlowTex(), vertexColors: true,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     sizeAttenuation: true,
   });
   orbGroup.add(new THREE.Points(nodeGeom, nodeMat));
 
-  // ── Edges ─────────────────────────────────────────────────────────────────
+  // ── Edges ──────────────────────────────────────────────────────────────────
   edgePos   = new Float32Array(MAX_EDGES * 6);
   edgeColor = new Float32Array(MAX_EDGES * 6);
   edgeGeom  = new THREE.BufferGeometry();
@@ -226,9 +234,9 @@ function initOrb() {
     vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   })));
 
-  // ── Wireframe ─────────────────────────────────────────────────────────────
-  var icoGeom  = new THREE.IcosahedronGeometry(SPHERE_R, 2);
-  var wireGeom = new THREE.WireframeGeometry(icoGeom);
+  // ── Wireframe ──────────────────────────────────────────────────────────────
+  const icoGeom  = new THREE.IcosahedronGeometry(SPHERE_R, 2);
+  const wireGeom = new THREE.WireframeGeometry(icoGeom);
   wireMat = new THREE.LineBasicMaterial({
     color: 0x00d4ff, transparent: true, opacity: 0.06,
     depthWrite: false, blending: THREE.AdditiveBlending,
@@ -236,28 +244,28 @@ function initOrb() {
   orbGroup.add(new THREE.LineSegments(wireGeom, wireMat));
   icoGeom.dispose();
 
-  // ── Rings ─────────────────────────────────────────────────────────────────
-  var ringGeoA = new THREE.TorusGeometry(SPHERE_R * 1.22, 0.013, 8, 120);
+  // ── Rings ──────────────────────────────────────────────────────────────────
+  const ringGeoA = new THREE.TorusGeometry(SPHERE_R * 1.22, 0.013, 8, 120);
   ringMatA = new THREE.MeshBasicMaterial({
     color: 0x00d4ff, transparent: true, opacity: 0.22,
     depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   });
-  var ringA = new THREE.Mesh(ringGeoA, ringMatA);
+  const ringA = new THREE.Mesh(ringGeoA, ringMatA);
   ringA.rotation.x = Math.PI * 0.12;
   ringGroup.add(ringA);
 
-  var ringGeoB = new THREE.TorusGeometry(SPHERE_R * 1.24, 0.008, 8, 120);
+  const ringGeoB = new THREE.TorusGeometry(SPHERE_R * 1.24, 0.008, 8, 120);
   ringMatB = new THREE.MeshBasicMaterial({
     color: 0x00d4ff, transparent: true, opacity: 0.12,
     depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   });
-  var ringB = new THREE.Mesh(ringGeoB, ringMatB);
+  const ringB = new THREE.Mesh(ringGeoB, ringMatB);
   ringB.rotation.x = Math.PI * 0.35;
   ringB.rotation.y = Math.PI * 0.15;
   ringGroup.add(ringB);
 
-  // ── Halo ──────────────────────────────────────────────────────────────────
-  var haloMat = new THREE.SpriteMaterial({
+  // ── Halo ───────────────────────────────────────────────────────────────────
+  const haloMat = new THREE.SpriteMaterial({
     map: makeHaloTex(), transparent: true,
     blending: THREE.AdditiveBlending, depthWrite: false,
   });
@@ -265,26 +273,25 @@ function initOrb() {
   haloSprite.scale.set(7.2, 7.2, 1);
   scene.add(haloSprite);
 
-  // ── Particles ─────────────────────────────────────────────────────────────
+  // ── Particles ──────────────────────────────────────────────────────────────
   partPos  = new Float32Array(PARTICLE_CNT * 3).fill(999);
   partVel  = new Float32Array(PARTICLE_CNT * 3);
   partLife = new Float32Array(PARTICLE_CNT);
   partGeom = new THREE.BufferGeometry();
   partGeom.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
   partGeom.setDrawRange(0, 0);
-  var partMat = new THREE.PointsMaterial({
+  const partMat = new THREE.PointsMaterial({
     map: makeParticleTex(), size: 0.1, transparent: true, opacity: 0.9,
     depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
   });
   scene.add(new THREE.Points(partGeom, partMat));
 
-  // ── Start loop ─────────────────────────────────────────────────────────────
   requestAnimationFrame(tick);
 }
 
-// ── Animation loop ───────────────────────────────────────────────────────────
+// ── Animation loop ────────────────────────────────────────────────────────────
 function tick(ts) {
-  var dt = lastT ? Math.min((ts - lastT) / 1000, 0.05) : 0.016;
+  const dt = lastT ? Math.min((ts - lastT) / 1000, 0.05) : 0.016;
   lastT = ts;
   time += dt;
 
@@ -301,7 +308,7 @@ function tick(ts) {
   requestAnimationFrame(tick);
 }
 
-// ── Audio sampling ───────────────────────────────────────────────────────────
+// ── Audio sampling ────────────────────────────────────────────────────────────
 function sampleAudio() {
   if (outAnalyser) {
     outAnalyser.getByteFrequencyData(outData);
@@ -320,46 +327,47 @@ function sampleAudio() {
   }
 }
 
-// ── State targets ────────────────────────────────────────────────────────────
+// ── State targets ─────────────────────────────────────────────────────────────
 function computeTargets() {
-  var breathe = (Math.sin(time * 0.7) + 1) * 0.5;
-  var tB, tC, tR, tRi, tH;
+  const breathe = (Math.sin(time * 0.7) + 1) * 0.5;
+  let tB, tC, tR, tRi, tH;
 
   switch (currentState) {
     case 'idle':
-      tB = 0.22 + breathe * 0.10;
-      tC = 0.28 + breathe * 0.08;
-      tR = 0.003 + breathe * 0.001;
+      tB  = 0.22 + breathe * 0.10;
+      tC  = 0.28 + breathe * 0.08;
+      tR  = 0.003 + breathe * 0.001;
       tRi = 0.14 + breathe * 0.05;
-      tH = 0.88 + breathe * 0.06;
+      tH  = 0.88 + breathe * 0.06;
       break;
     case 'listening':
-      tB = 0.18 + aMic * 0.38 + (Math.sin(time * 1.8) + 1) * 0.04;
-      tC = 0.20 + aMic * 0.25;
-      tR = 0.002 + aMic * 0.003;
+      tB  = 0.18 + aMic * 0.38 + (Math.sin(time * 1.8) + 1) * 0.04;
+      tC  = 0.20 + aMic * 0.25;
+      tR  = 0.002 + aMic * 0.003;
       tRi = 0.12 + aMic * 0.20 + Math.sin(time * 2.2) * 0.04;
-      tH = 0.90 + aMic * 0.22;
+      tH  = 0.90 + aMic * 0.22;
       break;
-    case 'thinking':
-      var p = (Math.sin(time * 4.8) + 1) * 0.5;
-      tB = 0.38 + p * 0.28;
-      tC = 0.55 + p * 0.30;
-      tR = 0.009 + p * 0.005;
+    case 'thinking': {
+      const p = (Math.sin(time * 4.8) + 1) * 0.5;
+      tB  = 0.38 + p * 0.28;
+      tC  = 0.55 + p * 0.30;
+      tR  = 0.009 + p * 0.005;
       tRi = 0.38 + p * 0.22;
-      tH = 1.05 + p * 0.15;
+      tH  = 1.05 + p * 0.15;
       break;
+    }
     case 'speaking':
-      tB = 0.42 + aMid * 0.52 + aHigh * 0.18;
-      tC = 0.45 + aOverall * 0.55;
-      tR = 0.005 + aLow * 0.012;
+      tB  = 0.42 + aMid * 0.52 + aHigh * 0.18;
+      tC  = 0.45 + aOverall * 0.55;
+      tR  = 0.005 + aLow * 0.012;
       tRi = 0.40 + aOverall * 0.58;
-      tH = 1.0 + aOverall * 0.95;
+      tH  = 1.0 + aOverall * 0.95;
       break;
     default:
       tB = 0.25; tC = 0.3; tR = 0.003; tRi = 0.15; tH = 0.9;
   }
 
-  var sm = 0.07;
+  const sm = 0.07;
   sBright = lerp(sBright, tB,  sm);
   sConn   = lerp(sConn,   tC,  sm * 1.2);
   sRot    = lerp(sRot,    tR,  sm * 0.6);
@@ -367,32 +375,35 @@ function computeTargets() {
   sHalo   = lerp(sHalo,   tH,  sm * 0.8);
 }
 
-// ── Node update ──────────────────────────────────────────────────────────────
+// ── Node update ───────────────────────────────────────────────────────────────
 function updateNodes() {
-  for (var i = 0; i < NODE_COUNT; i++) {
-    var n = nodeData[i];
-    var dx = Math.sin(time * n.spx + n.phx) * n.amp;
-    var dy = Math.sin(time * n.spy + n.phy) * n.amp;
-    var dz = Math.sin(time * n.spz + n.phz) * n.amp;
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const n = nodeData[i];
+    const dx = Math.sin(time * n.spx + n.phx) * n.amp;
+    const dy = Math.sin(time * n.spy + n.phy) * n.amp;
+    const dz = Math.sin(time * n.spz + n.phz) * n.amp;
     n.px = n.bx + dx;
     n.py = n.by + dy;
     n.pz = n.bz + dz;
-    var len = Math.sqrt(n.px * n.px + n.py * n.py + n.pz * n.pz);
-    if (len > SPHERE_R) { var s = SPHERE_R / len; n.px *= s; n.py *= s; n.pz *= s; }
+    const len = Math.sqrt(n.px * n.px + n.py * n.py + n.pz * n.pz);
+    if (len > SPHERE_R) {
+      const s = SPHERE_R / len;
+      n.px *= s; n.py *= s; n.pz *= s;
+    }
 
     nodePos[i * 3]     = n.px;
     nodePos[i * 3 + 1] = n.py;
     nodePos[i * 3 + 2] = n.pz;
 
-    var sparkle = (Math.sin(time * 1.8 + n.phx * 11) + 1) * 0.5;
-    var audioB  = currentState === 'speaking'  ? aMid * 0.5 + aHigh * 0.3
-                : currentState === 'listening' ? aMic * 0.3
-                : currentState === 'thinking'  ? (Math.sin(time * 5 + n.phz * 3) + 1) * 0.25
-                : 0;
-    var tgt = clamp(sBright * n.bright + sparkle * 0.12 + audioB, 0.04, 1.0);
+    const sparkle = (Math.sin(time * 1.8 + n.phx * 11) + 1) * 0.5;
+    const audioB  = currentState === 'speaking'  ? aMid * 0.5 + aHigh * 0.3
+                  : currentState === 'listening' ? aMic * 0.3
+                  : currentState === 'thinking'  ? (Math.sin(time * 5 + n.phz * 3) + 1) * 0.25
+                  : 0;
+    const tgt = clamp(sBright * n.bright + sparkle * 0.12 + audioB, 0.04, 1.0);
     n.bright = lerp(n.bright, tgt, 0.08 + audioB * 0.12);
 
-    var b = n.bright;
+    const b = n.bright;
     nodeColor[i * 3]     = 0;
     nodeColor[i * 3 + 1] = 0.831 * b;
     nodeColor[i * 3 + 2] = b;
@@ -401,20 +412,20 @@ function updateNodes() {
   nodeGeom.attributes.color.needsUpdate    = true;
 }
 
-// ── Edge update ──────────────────────────────────────────────────────────────
+// ── Edge update ───────────────────────────────────────────────────────────────
 function updateEdges() {
-  var maxE = Math.floor(MAX_EDGES * clamp(sConn, 0.1, 1.0));
-  var idx = 0;
-  for (var a = 0; a < NODE_COUNT && idx < maxE; a++) {
-    var na = nodeData[a];
-    for (var b = a + 1; b < NODE_COUNT && idx < maxE; b++) {
-      var nb = nodeData[b];
-      var dx = na.px - nb.px, dy = na.py - nb.py, dz = na.pz - nb.pz;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  const maxE = Math.floor(MAX_EDGES * clamp(sConn, 0.1, 1.0));
+  let idx = 0;
+  for (let a = 0; a < NODE_COUNT && idx < maxE; a++) {
+    const na = nodeData[a];
+    for (let b = a + 1; b < NODE_COUNT && idx < maxE; b++) {
+      const nb   = nodeData[b];
+      const dx   = na.px - nb.px, dy = na.py - nb.py, dz = na.pz - nb.pz;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       if (dist >= MAX_CONN_DIST) continue;
-      var fade = 1 - dist / MAX_CONN_DIST;
-      var c = clamp(fade * fade * sConn * (na.bright + nb.bright) * 0.5 * 0.55, 0, 1);
-      var base = idx * 6;
+      const fade = 1 - dist / MAX_CONN_DIST;
+      const c    = clamp(fade * fade * sConn * (na.bright + nb.bright) * 0.5 * 0.55, 0, 1);
+      const base = idx * 6;
       edgePos[base]     = na.px; edgePos[base + 1] = na.py; edgePos[base + 2] = na.pz;
       edgePos[base + 3] = nb.px; edgePos[base + 4] = nb.py; edgePos[base + 5] = nb.pz;
       edgeColor[base]     = 0; edgeColor[base + 1] = 0.831 * c; edgeColor[base + 2] = c;
@@ -427,42 +438,44 @@ function updateEdges() {
   edgeGeom.setDrawRange(0, idx * 2);
 }
 
-// ── Wireframe update ─────────────────────────────────────────────────────────
-function updateWireframe(dt) {
-  var breathe = (Math.sin(time * 0.6) + 1) * 0.5;
-  var base    = currentState === 'idle' ? 0.055 : currentState === 'listening' ? 0.045 : 0.08;
+// ── Wireframe update ──────────────────────────────────────────────────────────
+function updateWireframe() {
+  const breathe = (Math.sin(time * 0.6) + 1) * 0.5;
+  const base    = currentState === 'idle' ? 0.055 : currentState === 'listening' ? 0.045 : 0.08;
   wireMat.opacity = clamp(base + breathe * 0.02 + (currentState === 'speaking' ? aMid * 0.06 : 0), 0.03, 0.18);
   orbGroup.rotation.y += sRot * (1 + aLow * 1.2);
   orbGroup.rotation.x += sRot * 0.18;
 }
 
-// ── Ring update ──────────────────────────────────────────────────────────────
+// ── Ring update ───────────────────────────────────────────────────────────────
 function updateRing(dt) {
   ringGroup.rotation.y += dt * 0.28;
-  var boost = currentState === 'speaking' ? 1 + aOverall * 0.32 : 1.0;
+  const boost = currentState === 'speaking' ? 1 + aOverall * 0.32 : 1.0;
   ringGroup.scale.setScalar(boost);
-  var p = currentState === 'speaking' ? sRing * (0.9 + Math.sin(time * 8 + aHigh * 12) * 0.1) : sRing;
+  const p = currentState === 'speaking'
+    ? sRing * (0.9 + Math.sin(time * 8 + aHigh * 12) * 0.1)
+    : sRing;
   ringMatA.opacity = clamp(p, 0, 0.75);
   ringMatB.opacity = clamp(p * 0.55, 0, 0.75);
 }
 
-// ── Halo update ──────────────────────────────────────────────────────────────
+// ── Halo update ───────────────────────────────────────────────────────────────
 function updateHalo() {
-  var s = sHalo * 7.2;
+  const s = sHalo * 7.2;
   haloSprite.scale.set(s, s, 1);
 }
 
-// ── Particle update ──────────────────────────────────────────────────────────
+// ── Particle update ───────────────────────────────────────────────────────────
 function updateParticles(dt) {
-  var active = 0;
-  for (var i = 0; i < PARTICLE_CNT; i++) {
+  let active = 0;
+  for (let i = 0; i < PARTICLE_CNT; i++) {
     if (partLife[i] <= 0) continue;
     partLife[i] -= dt;
     if (partLife[i] <= 0) {
       partPos[i * 3] = partPos[i * 3 + 1] = partPos[i * 3 + 2] = 999;
       continue;
     }
-    var drag = Math.pow(0.88, dt * 60);
+    const drag = Math.pow(0.88, dt * 60);
     partVel[i * 3]     *= drag; partVel[i * 3 + 1] *= drag; partVel[i * 3 + 2] *= drag;
     partPos[i * 3]     += partVel[i * 3]     * dt;
     partPos[i * 3 + 1] += partVel[i * 3 + 1] * dt;
@@ -473,66 +486,62 @@ function updateParticles(dt) {
   partGeom.setDrawRange(0, active > 0 ? PARTICLE_CNT : 0);
 }
 
-// ── Particle burst ───────────────────────────────────────────────────────────
+// ── Particle burst ────────────────────────────────────────────────────────────
 function spawnBurst() {
-  var spawned = 0;
-  var count = 80 + Math.floor(Math.random() * 40);
-  for (var i = 0; i < PARTICLE_CNT && spawned < count; i++) {
+  let spawned = 0;
+  const count = 80 + Math.floor(Math.random() * 40);
+  for (let i = 0; i < PARTICLE_CNT && spawned < count; i++) {
     if (partLife[i] > 0) continue;
-    var th = Math.random() * 6.28;
-    var ph = Math.acos(2 * Math.random() - 1);
-    var r  = SPHERE_R;
-    var px = r * Math.sin(ph) * Math.cos(th);
-    var py = r * Math.sin(ph) * Math.sin(th);
-    var pz = r * Math.cos(ph);
+    const th = Math.random() * 6.28;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const px = SPHERE_R * Math.sin(ph) * Math.cos(th);
+    const py = SPHERE_R * Math.sin(ph) * Math.sin(th);
+    const pz = SPHERE_R * Math.cos(ph);
     partPos[i * 3]     = px; partPos[i * 3 + 1] = py; partPos[i * 3 + 2] = pz;
-    var spd = 0.8 + Math.random() * 1.6;
-    partVel[i * 3]     = (px / r) * spd + (Math.random() - 0.5) * 0.3;
-    partVel[i * 3 + 1] = (py / r) * spd + (Math.random() - 0.5) * 0.3;
-    partVel[i * 3 + 2] = (pz / r) * spd + (Math.random() - 0.5) * 0.3;
+    const spd = 0.8 + Math.random() * 1.6;
+    partVel[i * 3]     = (px / SPHERE_R) * spd + (Math.random() - 0.5) * 0.3;
+    partVel[i * 3 + 1] = (py / SPHERE_R) * spd + (Math.random() - 0.5) * 0.3;
+    partVel[i * 3 + 2] = (pz / SPHERE_R) * spd + (Math.random() - 0.5) * 0.3;
     partLife[i] = 0.8 + Math.random() * 0.6;
     spawned++;
   }
 }
 
-// ── Public API ───────────────────────────────────────────────────────────────
-window.setAMARAState = function(state) {
-  var s = state === 'processing' ? 'thinking' : state;
-  if (['idle', 'listening', 'thinking', 'speaking'].indexOf(s) === -1) return;
+// ── Public API (exposed to window for external integration) ───────────────────
+window.setAMARAState = (state) => {
+  const s = state === 'processing' ? 'thinking' : state;
+  if (!['idle', 'listening', 'thinking', 'speaking'].includes(s)) return;
   currentState = s;
 };
 
-window.triggerWakeWord = function() {
+window.triggerWakeWord = () => {
   if (partGeom) spawnBurst();
 };
 
-window.setAMARAOutputAudio = function(audioNode) {
-  var ctx      = audioNode.context;
-  var analyser = ctx.createAnalyser();
+window.setAMARAOutputAudio = (audioNode) => {
+  const analyser = audioNode.context.createAnalyser();
   analyser.fftSize = 256;
   audioNode.connect(analyser);
   outAnalyser = analyser;
   outData     = new Uint8Array(analyser.frequencyBinCount);
 };
 
-window.setAMARAMicAudio = function(audioNode) {
-  var ctx      = audioNode.context;
-  var analyser = ctx.createAnalyser();
+window.setAMARAMicAudio = (audioNode) => {
+  const analyser = audioNode.context.createAnalyser();
   analyser.fftSize = 256;
   audioNode.connect(analyser);
   micAnalyser = analyser;
   micData     = new Uint8Array(analyser.frequencyBinCount);
 };
 
-// ── Activation — called on button click ──────────────────────────────────────
-var orbReady = false;
+// ── Activation ────────────────────────────────────────────────────────────────
+let orbReady = false;
+
 function activateAmara() {
   if (orbReady) return;
   orbReady = true;
-
-  var overlay = document.getElementById('activate-overlay');
+  const overlay = document.getElementById('activate-overlay');
   if (overlay) overlay.style.display = 'none';
-
   try {
     initOrb();
   } catch (e) {
@@ -542,19 +551,19 @@ function activateAmara() {
   }
 }
 
+document.getElementById('activate-btn').addEventListener('click', activateAmara);
+
 // ── Cursor hide ───────────────────────────────────────────────────────────────
-var cursorTimer;
-document.addEventListener('mousemove', function() {
+let cursorTimer;
+document.addEventListener('mousemove', () => {
   document.body.classList.add('show-cursor');
   clearTimeout(cursorTimer);
-  cursorTimer = setTimeout(function() {
-    document.body.classList.remove('show-cursor');
-  }, 2000);
+  cursorTimer = setTimeout(() => document.body.classList.remove('show-cursor'), 2000);
 }, { passive: true });
 
 // ── Keyboard shortcuts (1–4 = states, Space = burst) ─────────────────────────
-document.addEventListener('keydown', function(e) {
-  if (e.key === '1') window.setAMARAState('idle');
+document.addEventListener('keydown', (e) => {
+  if      (e.key === '1') window.setAMARAState('idle');
   else if (e.key === '2') window.setAMARAState('listening');
   else if (e.key === '3') window.setAMARAState('processing');
   else if (e.key === '4') window.setAMARAState('speaking');

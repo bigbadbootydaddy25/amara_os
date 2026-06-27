@@ -45,7 +45,7 @@ const AMB_CNT       = 180;
 // ── Animation state ───────────────────────────────────────────────────────────
 let currentState = 'idle';
 let time = 0, lastT = 0;
-let sBright = 0.3, sConn = 0.35, sRot = 0.004, sRing = 0.2, sHalo = 1.0;
+let sBright = 0.3, sConn = 0.35, sRot = 0.004, sHalo = 1.0;
 let aLow = 0, aMid = 0, aHigh = 0, aOverall = 0, aMic = 0;
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
@@ -54,16 +54,14 @@ let outData = new Uint8Array(256), micData = new Uint8Array(256);
 
 // ── Three.js refs (assigned in initOrb) ───────────────────────────────────────
 let renderer, scene, camera;
-let orbGroup, ringGroup;
+let orbGroup;
 let nodePos, nodeColor, nodeGeom, nodeData = [];
 let edgePos, edgeColor, edgeGeom;
 let wireMat;
-let ringMats = [];
 let haloSprite;
 let coreInner, coreOuter, coreInnerMat, coreOuterMat;
 let partPos, partVel, partLife, partGeom;
 let ambPos, ambGeom, ambOrbit = [];
-let shockMesh, shockMat, shockActive = false, shockT = 0;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const lerp  = (a, b, t) => a + (b - a) * t;
@@ -150,8 +148,7 @@ function initOrb() {
   camera = new THREE.PerspectiveCamera(56, 1, 0.01, 100);
   camera.position.z = 4.8;
   orbGroup  = new THREE.Group();
-  ringGroup = new THREE.Group();
-  scene.add(orbGroup, ringGroup);
+  scene.add(orbGroup);
 
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
@@ -220,27 +217,6 @@ function initOrb() {
   orbGroup.add(new THREE.LineSegments(new THREE.WireframeGeometry(icoGeom), wireMat));
   icoGeom.dispose();
 
-  // ── 5 Layered rings ───────────────────────────────────────────────────────
-  const RING_DEFS = [
-    { r: SPHERE_R*1.14, tube: 0.018, seg: 150, rx: 0.12,  ry: 0.0,  rz: 0.0,  baseOp: 0.38 },
-    { r: SPHERE_R*1.24, tube: 0.012, seg: 140, rx: 0.60,  ry: 0.22, rz: 0.0,  baseOp: 0.26 },
-    { r: SPHERE_R*1.36, tube: 0.009, seg: 130, rx:-0.48,  ry: 0.85, rz: 0.32, baseOp: 0.20 },
-    { r: SPHERE_R*1.50, tube: 0.006, seg: 120, rx: 1.12,  ry: 0.35, rz: 0.65, baseOp: 0.14 },
-    { r: SPHERE_R*1.08, tube: 0.006, seg: 110, rx: 0.88,  ry: 1.55, rz: 0.45, baseOp: 0.16 },
-  ];
-  ringMats = [];
-  RING_DEFS.forEach(def => {
-    const geo = new THREE.TorusGeometry(def.r, def.tube, 8, def.seg);
-    const mat = new THREE.MeshBasicMaterial({
-      color: 0x00d4ff, transparent: true, opacity: def.baseOp,
-      depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.rotation.set(def.rx, def.ry, def.rz);
-    ringGroup.add(mesh);
-    ringMats.push({ mat, baseOp: def.baseOp });
-  });
-
   // ── Outer halo ────────────────────────────────────────────────────────────
   haloSprite = new THREE.Sprite(new THREE.SpriteMaterial({
     map: makeHaloTex(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
@@ -298,14 +274,6 @@ function initOrb() {
     depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
   })));
 
-  // ── Shockwave ring (activate burst) ───────────────────────────────────────
-  shockMat  = new THREE.MeshBasicMaterial({
-    color: 0x00d4ff, transparent: true, opacity: 0,
-    depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-  });
-  shockMesh = new THREE.Mesh(new THREE.TorusGeometry(1, 0.028, 4, 90), shockMat);
-  scene.add(shockMesh);
-
   requestAnimationFrame(tick);
 }
 
@@ -319,12 +287,10 @@ function tick(ts) {
   updateNodes();
   updateEdges();
   updateWireframe(dt);
-  updateRings(dt);
   updateHalo();
   updateCore();
   updateParticles(dt);
   updateAmbient(dt);
-  updateShockwave(dt);
   updateCamera();
 
   renderer.render(scene, camera);
@@ -349,26 +315,25 @@ function sampleAudio() {
 // ── Targets ───────────────────────────────────────────────────────────────────
 function computeTargets() {
   const b = (Math.sin(time*0.7)+1)*0.5;
-  let tB, tC, tR, tRi, tH;
+  let tB, tC, tR, tH;
   switch (currentState) {
     case 'idle':
-      tB=0.24+b*0.12; tC=0.30+b*0.09; tR=0.0035+b*0.001; tRi=0.16+b*0.06; tH=0.90+b*0.07; break;
+      tB=0.24+b*0.12; tC=0.30+b*0.09; tR=0.0035+b*0.001; tH=0.90+b*0.07; break;
     case 'listening':
       tB=0.20+aMic*0.42+(Math.sin(time*1.8)+1)*0.04;
-      tC=0.22+aMic*0.28; tR=0.002+aMic*0.004;
-      tRi=0.14+aMic*0.22+Math.sin(time*2.2)*0.04; tH=0.92+aMic*0.25; break;
+      tC=0.22+aMic*0.28; tR=0.002+aMic*0.004; tH=0.92+aMic*0.25; break;
     case 'thinking': {
       const p=(Math.sin(time*4.8)+1)*0.5;
-      tB=0.42+p*0.30; tC=0.58+p*0.32; tR=0.010+p*0.006; tRi=0.42+p*0.24; tH=1.08+p*0.16; break;
+      tB=0.42+p*0.30; tC=0.58+p*0.32; tR=0.010+p*0.006; tH=1.08+p*0.16; break;
     }
     case 'speaking':
       tB=0.46+aMid*0.55+aHigh*0.20; tC=0.48+aOverall*0.58;
-      tR=0.006+aLow*0.014; tRi=0.44+aOverall*0.62; tH=1.05+aOverall*0.98; break;
-    default: tB=0.28; tC=0.32; tR=0.0035; tRi=0.18; tH=0.92;
+      tR=0.006+aLow*0.014; tH=1.05+aOverall*0.98; break;
+    default: tB=0.28; tC=0.32; tR=0.0035; tH=0.92;
   }
   const sm=0.07;
   sBright=lerp(sBright,tB,sm); sConn=lerp(sConn,tC,sm*1.2);
-  sRot=lerp(sRot,tR,sm*0.6); sRing=lerp(sRing,tRi,sm); sHalo=lerp(sHalo,tH,sm*0.8);
+  sRot=lerp(sRot,tR,sm*0.6); sHalo=lerp(sHalo,tH,sm*0.8);
 }
 
 // ── Nodes ─────────────────────────────────────────────────────────────────────
@@ -435,22 +400,6 @@ function updateWireframe(dt) {
   orbGroup.rotation.z+=rotSpeed*0.09;
 }
 
-// ── 5 rings ───────────────────────────────────────────────────────────────────
-function updateRings(dt) {
-  ringGroup.rotation.y+=dt*0.22;
-  ringGroup.rotation.x+=dt*0.06;
-  const boost=currentState==='speaking'?1+aOverall*0.35:1.0;
-  ringGroup.scale.setScalar(boost);
-  const base=sRing*5.5;
-  ringMats.forEach((rm, i) => {
-    const wave=0.82+0.18*Math.sin(time*(0.7+i*0.28)+i*1.3);
-    const pulsed=currentState==='speaking'
-      ? base*(0.88+Math.sin(time*7+aHigh*10)*0.12)
-      : base;
-    rm.mat.opacity=clamp(rm.baseOp*pulsed*wave, 0, rm.baseOp*1.5);
-  });
-}
-
 // ── Halo ──────────────────────────────────────────────────────────────────────
 function updateHalo() {
   const s=sHalo*7.4; haloSprite.scale.set(s,s,1);
@@ -496,17 +445,6 @@ function updateAmbient(dt) {
   ambGeom.attributes.position.needsUpdate=true;
 }
 
-// ── Shockwave ─────────────────────────────────────────────────────────────────
-function updateShockwave(dt) {
-  if (!shockActive) return;
-  shockT+=dt;
-  const prog=shockT/1.4;
-  if (prog>=1) { shockActive=false; shockMat.opacity=0; shockMesh.scale.setScalar(1); return; }
-  const eased=1-Math.pow(1-prog,2.5);
-  shockMesh.scale.setScalar(0.4+eased*6.0);
-  shockMat.opacity=(1-prog)*0.75;
-}
-
 // ── Subtle camera drift ───────────────────────────────────────────────────────
 function updateCamera() {
   camera.position.x=Math.sin(time*0.055)*0.10;
@@ -532,8 +470,6 @@ function spawnBurst() {
     partLife[i]=1.0+Math.random()*0.9;
     spawned++;
   }
-  // Trigger expanding shockwave ring
-  shockActive=true; shockT=0;
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────

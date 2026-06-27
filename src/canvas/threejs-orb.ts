@@ -360,11 +360,28 @@ export class ThreeOrbRenderer {
     this.partGeom.setAttribute('position', new THREE.BufferAttribute(this.partPos, 3));
     this.partGeom.setDrawRange(0, 0);
 
+    // Round glow texture so particles appear as soft circles, not squares
+    const partTex = (() => {
+      const sz = 64;
+      const c = document.createElement('canvas');
+      c.width = c.height = sz;
+      const ctx = c.getContext('2d')!;
+      const h = sz / 2;
+      const g = ctx.createRadialGradient(h, h, 0, h, h, h);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.35, 'rgba(255,255,255,0.7)');
+      g.addColorStop(0.7, 'rgba(200,240,255,0.2)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, sz, sz);
+      return new THREE.CanvasTexture(c);
+    })();
+
     const mat = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.04,
+      map: partTex,
+      size: 0.1,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       sizeAttenuation: true,

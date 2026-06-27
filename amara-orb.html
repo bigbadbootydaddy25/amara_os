@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AMARA</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; cursor: none; }
+  body.show-cursor { cursor: default; }
+  canvas { display: block; position: fixed; inset: 0; width: 100% !important; height: 100% !important; }
+  #vignette {
+    pointer-events: none; position: fixed; inset: 0; z-index: 2;
+    background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.38) 65%, rgba(0,0,0,0.82) 100%);
+  }
+  #activate-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.22);
+    display: flex; align-items: center; justify-content: center; z-index: 40; cursor: pointer;
+  }
+  #activate-btn {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.42em; text-transform: uppercase; color: rgba(207,240,255,0.85);
+    border: 1px solid rgba(0,212,255,0.26); background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(12px); padding: 0.75rem 1.5rem; border-radius: 9999px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vignette"></div>
+<div id="activate-overlay"><button id="activate-btn">Touch to activate AMARA</button></div>
+
+<script type="module">
+import * as THREE from './three.module.min.js';
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+const SPHERE_R      = 1.8;
+const NODE_COUNT    = 220;
+const SURFACE_NODES = 80;
+const MAX_CONN_DIST = 0.90;
+const MAX_EDGES     = 900;
+const PARTICLE_CNT  = 350;
+const AMB_CNT       = 180;
+
+// ── Animation state ───────────────────────────────────────────────────────────
+let currentState = 'idle';
+let time = 0, lastT = 0;
+let sBright = 0.3, sConn = 0.35, sRot = 0.004, sHalo = 1.0;
+let aLow = 0, aMid = 0, aHigh = 0, aOverall = 0, aMic = 0;
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let outAnalyser = null, micAnalyser = null;
+let outData = new Uint8Array(256), micData = new Uint8Array(256);
+
+// ── Three.js refs (assigned in initOrb) ───────────────────────────────────────
+let renderer, scene, camera;
+let orbGroup;
+let nodePos, nodeColor, nodeGeom, nodeData = [];
+let edgePos, edgeColor, edgeGeom;
+let wireMat;
+let haloSprite;
+let coreInner, coreOuter, coreInnerMat, coreOuterMat;
+let partPos, partVel, partLife, partGeom;
+let ambPos, ambGeom, ambOrbit = [];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const lerp  = (a, b, t) => a + (b - a) * t;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const bandAvg = (data, s, e) => {
+  const l = data.length, si = Math.floor(l*s), ei = Math.floor(l*e);
+  let sum = 0; for (let i = si; i < ei; i++) sum += data[i];
+  return sum / ((ei-si)*255||1);
+};
+
+// ── Texture factories ─────────────────────────────────────────────────────────
+function mkGradTex(sz, stops) {
+  const c = document.createElement('canvas'); c.width = c.height = sz;
+  const ctx = c.getContext('2d'), h = sz/2;
+  const g = ctx.createRadialGradient(h,h,0,h,h,h);
+  stops.forEach(([t, s]) => g.addColorStop(t, s));
+  ctx.fillStyle = g; ctx.fillRect(0,0,sz,sz);
+  return new THREE.CanvasTexture(c);
+}
+
+const makeGlowTex = () => mkGradTex(128, [
+  [0,    'rgba(255,255,255,1)'],
+  [0.18, 'rgba(200,245,255,0.92)'],
+  [0.42, 'rgba(0,212,255,0.55)'],
+  [0.72, 'rgba(0,100,200,0.15)'],
+  [1,    'rgba(0,0,0,0)'],
+]);
+
+const makeHaloTex = () => mkGradTex(512, [
+  [0,    'rgba(0,0,0,0)'],
+  [0.38, 'rgba(0,0,0,0)'],
+  [0.55, 'rgba(0,212,255,0.07)'],
+  [0.68, 'rgba(0,180,240,0.18)'],
+  [0.80, 'rgba(0,80,160,0.12)'],
+  [0.92, 'rgba(0,20,60,0.05)'],
+  [1,    'rgba(0,0,0,0)'],
+]);
+
+const makeParticleTex = () => mkGradTex(64, [
+  [0,    'rgba(255,255,255,1)'],
+  [0.30, 'rgba(200,245,255,0.8)'],
+  [0.65, 'rgba(0,200,255,0.25)'],
+  [1,    'rgba(0,0,0,0)'],
+]);
+
+const makeCoreInnerTex = () => mkGradTex(128, [
+  [0,    'rgba(255,255,255,1)'],
+  [0.15, 'rgba(230,252,255,1)'],
+  [0.35, 'rgba(0,220,255,0.88)'],
+  [0.60, 'rgba(0,140,220,0.4)'],
+  [0.82, 'rgba(0,60,160,0.12)'],
+  [1,    'rgba(0,0,0,0)'],
+]);
+
+const makeCoreOuterTex = () => mkGradTex(256, [
+  [0,    'rgba(30,200,255,0.95)'],
+  [0.22, 'rgba(0,180,240,0.65)'],
+  [0.48, 'rgba(0,100,200,0.28)'],
+  [0.72, 'rgba(0,40,130,0.10)'],
+  [1,    'rgba(0,0,0,0)'],
+]);
+
+const makeAmbientTex = () => mkGradTex(32, [
+  [0,   'rgba(120,235,255,0.9)'],
+  [0.5, 'rgba(0,160,210,0.35)'],
+  [1,   'rgba(0,0,0,0)'],
+]);
+
+// ── Orbital basis helper ──────────────────────────────────────────────────────
+function perpBasis(nx, ny, nz) {
+  let ax = Math.abs(nx) < 0.9 ? 1 : 0, ay = Math.abs(nx) < 0.9 ? 0 : 1, az = 0;
+  let u1x = ny*az - nz*ay, u1y = nz*ax - nx*az, u1z = nx*ay - ny*ax;
+  const u1l = Math.sqrt(u1x*u1x + u1y*u1y + u1z*u1z) || 1;
+  u1x /= u1l; u1y /= u1l; u1z /= u1l;
+  return [u1x, u1y, u1z, ny*u1z - nz*u1y, nz*u1x - nx*u1z, nx*u1y - ny*u1x];
+}
+
+// ── Lazy init ─────────────────────────────────────────────────────────────────
+function initOrb() {
+  const canvas = document.getElementById('c');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setClearColor(0x000000, 1);
+  scene  = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(56, 1, 0.01, 100);
+  camera.position.z = 4.8;
+  orbGroup  = new THREE.Group();
+  scene.add(orbGroup);
+
+  function resize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // ── Nodes ─────────────────────────────────────────────────────────────────
+  nodePos   = new Float32Array(NODE_COUNT * 3);
+  nodeColor = new Float32Array(NODE_COUNT * 3);
+  nodeGeom  = new THREE.BufferGeometry();
+  nodeGeom.setAttribute('position', new THREE.BufferAttribute(nodePos, 3));
+  nodeGeom.setAttribute('color',    new THREE.BufferAttribute(nodeColor, 3));
+  nodeData  = [];
+
+  const golden = Math.PI * (Math.sqrt(5) - 1);
+  for (let i = 0; i < SURFACE_NODES; i++) {
+    const y = 1 - (i / (SURFACE_NODES-1)) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y*y));
+    const th = golden * i;
+    nodeData.push({
+      bx: Math.cos(th)*r*SPHERE_R, by: y*SPHERE_R, bz: Math.sin(th)*r*SPHERE_R,
+      px: 0, py: 0, pz: 0,
+      phx: Math.random()*6.28, phy: Math.random()*6.28, phz: Math.random()*6.28,
+      spx: 0.12+Math.random()*0.20, spy: 0.10+Math.random()*0.18, spz: 0.08+Math.random()*0.22,
+      amp: 0.03+Math.random()*0.06, bright: 0.45+Math.random()*0.55,
+    });
+  }
+  for (let i = SURFACE_NODES; i < NODE_COUNT; i++) {
+    const u = Math.random(), d = SPHERE_R * Math.pow(u, 0.42) * 0.96;
+    const th = Math.random()*6.28, ph = Math.acos(2*Math.random()-1);
+    nodeData.push({
+      bx: d*Math.sin(ph)*Math.cos(th), by: d*Math.sin(ph)*Math.sin(th), bz: d*Math.cos(ph),
+      px: 0, py: 0, pz: 0,
+      phx: Math.random()*6.28, phy: Math.random()*6.28, phz: Math.random()*6.28,
+      spx: 0.06+Math.random()*0.24, spy: 0.05+Math.random()*0.20, spz: 0.07+Math.random()*0.22,
+      amp: 0.06+Math.random()*0.20, bright: 0.12+Math.random()*0.58,
+    });
+  }
+
+  orbGroup.add(new THREE.Points(nodeGeom, new THREE.PointsMaterial({
+    size: 0.24, map: makeGlowTex(), vertexColors: true,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  })));
+
+  // ── Edges ─────────────────────────────────────────────────────────────────
+  edgePos   = new Float32Array(MAX_EDGES * 6);
+  edgeColor = new Float32Array(MAX_EDGES * 6);
+  edgeGeom  = new THREE.BufferGeometry();
+  edgeGeom.setAttribute('position', new THREE.BufferAttribute(edgePos, 3));
+  edgeGeom.setAttribute('color',    new THREE.BufferAttribute(edgeColor, 3));
+  edgeGeom.setDrawRange(0, 0);
+  orbGroup.add(new THREE.LineSegments(edgeGeom, new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  })));
+
+  // ── Geodesic wireframe ────────────────────────────────────────────────────
+  const icoGeom = new THREE.IcosahedronGeometry(SPHERE_R, 2);
+  wireMat = new THREE.LineBasicMaterial({
+    color: 0x00d4ff, transparent: true, opacity: 0.07,
+    depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  orbGroup.add(new THREE.LineSegments(new THREE.WireframeGeometry(icoGeom), wireMat));
+  icoGeom.dispose();
+
+  // ── Outer halo ────────────────────────────────────────────────────────────
+  haloSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: makeHaloTex(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  haloSprite.scale.set(7.2, 7.2, 1);
+  scene.add(haloSprite);
+
+  // ── Glowing core ──────────────────────────────────────────────────────────
+  coreInnerMat = new THREE.SpriteMaterial({
+    map: makeCoreInnerTex(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  coreInner = new THREE.Sprite(coreInnerMat);
+  coreInner.scale.set(0.75, 0.75, 1);
+  scene.add(coreInner);
+
+  coreOuterMat = new THREE.SpriteMaterial({
+    map: makeCoreOuterTex(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  coreOuter = new THREE.Sprite(coreOuterMat);
+  coreOuter.scale.set(3.2, 3.2, 1);
+  scene.add(coreOuter);
+
+  // ── Burst particles ───────────────────────────────────────────────────────
+  partPos  = new Float32Array(PARTICLE_CNT * 3).fill(999);
+  partVel  = new Float32Array(PARTICLE_CNT * 3);
+  partLife = new Float32Array(PARTICLE_CNT);
+  partGeom = new THREE.BufferGeometry();
+  partGeom.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+  partGeom.setDrawRange(0, 0);
+  scene.add(new THREE.Points(partGeom, new THREE.PointsMaterial({
+    map: makeParticleTex(), size: 0.13, transparent: true, opacity: 0.95,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  })));
+
+  // ── Ambient energy field ──────────────────────────────────────────────────
+  ambPos   = new Float32Array(AMB_CNT * 3);
+  ambOrbit = [];
+  for (let i = 0; i < AMB_CNT; i++) {
+    const r   = SPHERE_R * (1.12 + Math.random() * 0.75);
+    const spd = (0.10 + Math.random() * 0.38) * (Math.random() < 0.5 ? 1 : -1);
+    const ang = Math.random() * Math.PI * 2;
+    const nx = Math.random()-0.5, ny = Math.random()-0.5, nz = Math.random()-0.5;
+    const nl = Math.sqrt(nx*nx+ny*ny+nz*nz) || 1;
+    const basis = perpBasis(nx/nl, ny/nl, nz/nl);
+    ambOrbit.push({ r, spd, ang, basis });
+    const cos = Math.cos(ang), sin = Math.sin(ang);
+    ambPos[i*3]   = cos*basis[0]*r + sin*basis[3]*r;
+    ambPos[i*3+1] = cos*basis[1]*r + sin*basis[4]*r;
+    ambPos[i*3+2] = cos*basis[2]*r + sin*basis[5]*r;
+  }
+  ambGeom = new THREE.BufferGeometry();
+  ambGeom.setAttribute('position', new THREE.BufferAttribute(ambPos, 3));
+  scene.add(new THREE.Points(ambGeom, new THREE.PointsMaterial({
+    map: makeAmbientTex(), size: 0.07, transparent: true, opacity: 0.55,
+    depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  })));
+
+  requestAnimationFrame(tick);
+}
+
+// ── Animation loop ────────────────────────────────────────────────────────────
+function tick(ts) {
+  const dt = lastT ? Math.min((ts-lastT)/1000, 0.05) : 0.016;
+  lastT = ts; time += dt;
+
+  sampleAudio();
+  computeTargets();
+  updateNodes();
+  updateEdges();
+  updateWireframe(dt);
+  updateHalo();
+  updateCore();
+  updateParticles(dt);
+  updateAmbient(dt);
+  updateCamera();
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+function sampleAudio() {
+  if (outAnalyser) {
+    outAnalyser.getByteFrequencyData(outData);
+    aLow     = lerp(aLow,     bandAvg(outData, 0, 0.12), 0.15);
+    aMid     = lerp(aMid,     bandAvg(outData, 0.12, 0.5), 0.12);
+    aHigh    = lerp(aHigh,    bandAvg(outData, 0.5, 1.0), 0.10);
+    aOverall = lerp(aOverall, bandAvg(outData, 0, 1), 0.14);
+  } else { aLow = aMid = aHigh = aOverall = lerp(aOverall, 0, 0.08); }
+  if (micAnalyser) {
+    micAnalyser.getByteFrequencyData(micData);
+    aMic = lerp(aMic, bandAvg(micData, 0, 0.5), 0.18);
+  } else { aMic = lerp(aMic, 0, 0.10); }
+}
+
+// ── Targets ───────────────────────────────────────────────────────────────────
+function computeTargets() {
+  const b = (Math.sin(time*0.7)+1)*0.5;
+  let tB, tC, tR, tH;
+  switch (currentState) {
+    case 'idle':
+      tB=0.24+b*0.12; tC=0.30+b*0.09; tR=0.0035+b*0.001; tH=0.90+b*0.07; break;
+    case 'listening':
+      tB=0.20+aMic*0.42+(Math.sin(time*1.8)+1)*0.04;
+      tC=0.22+aMic*0.28; tR=0.002+aMic*0.004; tH=0.92+aMic*0.25; break;
+    case 'thinking': {
+      const p=(Math.sin(time*4.8)+1)*0.5;
+      tB=0.42+p*0.30; tC=0.58+p*0.32; tR=0.010+p*0.006; tH=1.08+p*0.16; break;
+    }
+    case 'speaking':
+      tB=0.46+aMid*0.55+aHigh*0.20; tC=0.48+aOverall*0.58;
+      tR=0.006+aLow*0.014; tH=1.05+aOverall*0.98; break;
+    default: tB=0.28; tC=0.32; tR=0.0035; tH=0.92;
+  }
+  const sm=0.07;
+  sBright=lerp(sBright,tB,sm); sConn=lerp(sConn,tC,sm*1.2);
+  sRot=lerp(sRot,tR,sm*0.6); sHalo=lerp(sHalo,tH,sm*0.8);
+}
+
+// ── Nodes ─────────────────────────────────────────────────────────────────────
+function updateNodes() {
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const n = nodeData[i];
+    n.px = n.bx + Math.sin(time*n.spx+n.phx)*n.amp;
+    n.py = n.by + Math.sin(time*n.spy+n.phy)*n.amp;
+    n.pz = n.bz + Math.sin(time*n.spz+n.phz)*n.amp;
+    const len = Math.sqrt(n.px*n.px+n.py*n.py+n.pz*n.pz);
+    if (len > SPHERE_R) { const s=SPHERE_R/len; n.px*=s; n.py*=s; n.pz*=s; }
+    nodePos[i*3]=n.px; nodePos[i*3+1]=n.py; nodePos[i*3+2]=n.pz;
+
+    const sparkle=(Math.sin(time*2.2+n.phx*13)+1)*0.5;
+    const audioB = currentState==='speaking'  ? aMid*0.55+aHigh*0.32
+                 : currentState==='listening' ? aMic*0.35
+                 : currentState==='thinking'  ? (Math.sin(time*5.2+n.phz*3)+1)*0.28 : 0;
+    const tgt=clamp(sBright*n.bright+sparkle*0.14+audioB, 0.05, 1.0);
+    n.bright=lerp(n.bright, tgt, 0.09+audioB*0.12);
+
+    const b=n.bright;
+    nodeColor[i*3]=0; nodeColor[i*3+1]=0.831*b; nodeColor[i*3+2]=b;
+  }
+  nodeGeom.attributes.position.needsUpdate=true;
+  nodeGeom.attributes.color.needsUpdate=true;
+}
+
+// ── Edges with neural pulse ────────────────────────────────────────────────────
+function updateEdges() {
+  const maxE = Math.floor(MAX_EDGES * clamp(sConn, 0.1, 1.0));
+  let idx = 0;
+  for (let a = 0; a < NODE_COUNT && idx < maxE; a++) {
+    const na = nodeData[a];
+    for (let b = a+1; b < NODE_COUNT && idx < maxE; b++) {
+      const nb = nodeData[b];
+      const dx=na.px-nb.px, dy=na.py-nb.py, dz=na.pz-nb.pz;
+      const dist=Math.sqrt(dx*dx+dy*dy+dz*dz);
+      if (dist >= MAX_CONN_DIST) continue;
+      const fade = 1-dist/MAX_CONN_DIST;
+      // Neural pulse: each edge gets a travelling brightness wave
+      const pulse = 0.55 + 0.45*Math.sin(time*3.8 + idx*0.41);
+      const c = clamp(fade*fade*sConn*(na.bright+nb.bright)*0.5*0.78*pulse, 0, 1);
+      const base=idx*6;
+      edgePos[base]=na.px; edgePos[base+1]=na.py; edgePos[base+2]=na.pz;
+      edgePos[base+3]=nb.px; edgePos[base+4]=nb.py; edgePos[base+5]=nb.pz;
+      edgeColor[base]=0; edgeColor[base+1]=0.831*c; edgeColor[base+2]=c;
+      edgeColor[base+3]=0; edgeColor[base+4]=0.831*c; edgeColor[base+5]=c;
+      idx++;
+    }
+  }
+  edgeGeom.attributes.position.needsUpdate=true;
+  edgeGeom.attributes.color.needsUpdate=true;
+  edgeGeom.setDrawRange(0, idx*2);
+}
+
+// ── Wireframe + orb rotation ──────────────────────────────────────────────────
+function updateWireframe(dt) {
+  const breathe=(Math.sin(time*0.6)+1)*0.5;
+  const base=currentState==='idle'?0.06:currentState==='listening'?0.048:0.10;
+  wireMat.opacity=clamp(base+breathe*0.025+sBright*0.055+(currentState==='speaking'?aMid*0.07:0),0.035,0.22);
+  const rotSpeed=sRot*(1+aLow*1.4);
+  orbGroup.rotation.y+=rotSpeed;
+  orbGroup.rotation.x+=rotSpeed*0.22;
+  orbGroup.rotation.z+=rotSpeed*0.09;
+}
+
+// ── Halo ──────────────────────────────────────────────────────────────────────
+function updateHalo() {
+  const s=sHalo*7.4; haloSprite.scale.set(s,s,1);
+}
+
+// ── Glowing core ──────────────────────────────────────────────────────────────
+function updateCore() {
+  const breathe=(Math.sin(time*1.9)+1)*0.5;
+  const pulse = currentState==='idle'     ? 0.45+breathe*0.38
+              : currentState==='listening'? 0.65+breathe*0.22+aMic*0.45
+              : currentState==='thinking' ? 0.80+(Math.sin(time*5.2)+1)*0.28
+                                          : 0.85+aOverall*0.65;
+  const is=0.55+pulse*0.65; coreInner.scale.set(is,is,1); coreInnerMat.opacity=0.65+pulse*0.30;
+  const os=2.2+pulse*1.8;   coreOuter.scale.set(os,os,1); coreOuterMat.opacity=0.28+pulse*0.28;
+}
+
+// ── Burst particles ───────────────────────────────────────────────────────────
+function updateParticles(dt) {
+  let active=0;
+  for (let i=0; i<PARTICLE_CNT; i++) {
+    if (partLife[i]<=0) continue;
+    partLife[i]-=dt;
+    if (partLife[i]<=0) { partPos[i*3]=partPos[i*3+1]=partPos[i*3+2]=999; continue; }
+    const drag=Math.pow(0.86, dt*60);
+    partVel[i*3]*=drag; partVel[i*3+1]*=drag; partVel[i*3+2]*=drag;
+    partPos[i*3]+=partVel[i*3]*dt; partPos[i*3+1]+=partVel[i*3+1]*dt; partPos[i*3+2]+=partVel[i*3+2]*dt;
+    active++;
+  }
+  partGeom.attributes.position.needsUpdate=true;
+  partGeom.setDrawRange(0, active>0?PARTICLE_CNT:0);
+}
+
+// ── Ambient energy field ──────────────────────────────────────────────────────
+function updateAmbient(dt) {
+  for (let i=0; i<AMB_CNT; i++) {
+    const o=ambOrbit[i];
+    o.ang+=o.spd*dt;
+    const cos=Math.cos(o.ang), sin=Math.sin(o.ang);
+    ambPos[i*3]  =cos*o.basis[0]*o.r+sin*o.basis[3]*o.r;
+    ambPos[i*3+1]=cos*o.basis[1]*o.r+sin*o.basis[4]*o.r;
+    ambPos[i*3+2]=cos*o.basis[2]*o.r+sin*o.basis[5]*o.r;
+  }
+  ambGeom.attributes.position.needsUpdate=true;
+}
+
+// ── Subtle camera drift ───────────────────────────────────────────────────────
+function updateCamera() {
+  camera.position.x=Math.sin(time*0.055)*0.10;
+  camera.position.y=Math.sin(time*0.082)*0.07;
+  camera.lookAt(0,0,0);
+}
+
+// ── Particle burst ────────────────────────────────────────────────────────────
+function spawnBurst() {
+  let spawned=0;
+  const count=200+Math.floor(Math.random()*60);
+  for (let i=0; i<PARTICLE_CNT&&spawned<count; i++) {
+    if (partLife[i]>0) continue;
+    const th=Math.random()*6.28, ph=Math.acos(2*Math.random()-1);
+    const px=SPHERE_R*Math.sin(ph)*Math.cos(th);
+    const py=SPHERE_R*Math.sin(ph)*Math.sin(th);
+    const pz=SPHERE_R*Math.cos(ph);
+    partPos[i*3]=px; partPos[i*3+1]=py; partPos[i*3+2]=pz;
+    const spd=1.8+Math.random()*3.2;
+    partVel[i*3]  =(px/SPHERE_R)*spd+(Math.random()-0.5)*0.5;
+    partVel[i*3+1]=(py/SPHERE_R)*spd+(Math.random()-0.5)*0.5;
+    partVel[i*3+2]=(pz/SPHERE_R)*spd+(Math.random()-0.5)*0.5;
+    partLife[i]=1.0+Math.random()*0.9;
+    spawned++;
+  }
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+window.setAMARAState = (state) => {
+  const s = state==='processing'?'thinking':state;
+  if (!['idle','listening','thinking','speaking'].includes(s)) return;
+  currentState=s;
+};
+window.triggerWakeWord   = () => { if (partGeom) spawnBurst(); };
+window.setAMARAOutputAudio = (node) => {
+  const a=node.context.createAnalyser(); a.fftSize=256;
+  node.connect(a); outAnalyser=a; outData=new Uint8Array(a.frequencyBinCount);
+};
+window.setAMARAMicAudio = (node) => {
+  const a=node.context.createAnalyser(); a.fftSize=256;
+  node.connect(a); micAnalyser=a; micData=new Uint8Array(a.frequencyBinCount);
+};
+
+// ── Activation ────────────────────────────────────────────────────────────────
+let orbReady=false;
+function activateAmara() {
+  if (orbReady) return; orbReady=true;
+  const ov=document.getElementById('activate-overlay');
+  if (ov) ov.style.display='none';
+  try {
+    initOrb();
+    // Dramatic burst on first activation
+    setTimeout(() => spawnBurst(), 200);
+  } catch(e) {
+    console.error('AMARA init error:',e);
+    if (ov) ov.style.display='flex'; orbReady=false;
+  }
+}
+document.getElementById('activate-btn').addEventListener('click', activateAmara);
+
+// ── Cursor ────────────────────────────────────────────────────────────────────
+let cursorTimer;
+document.addEventListener('mousemove', () => {
+  document.body.classList.add('show-cursor');
+  clearTimeout(cursorTimer);
+  cursorTimer=setTimeout(()=>document.body.classList.remove('show-cursor'),2000);
+}, { passive:true });
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if      (e.key==='1') window.setAMARAState('idle');
+  else if (e.key==='2') window.setAMARAState('listening');
+  else if (e.key==='3') window.setAMARAState('processing');
+  else if (e.key==='4') window.setAMARAState('speaking');
+  else if (e.key===' ') window.triggerWakeWord();
+});
+</script>
+</body>
+</html>

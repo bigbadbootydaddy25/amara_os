@@ -23,28 +23,11 @@
     border: 1px solid rgba(0,212,255,0.26); background: rgba(0,0,0,0.45);
     backdrop-filter: blur(12px); padding: 0.75rem 1.5rem; border-radius: 9999px; cursor: pointer;
   }
-  #transcript {
-    position: fixed; bottom: 10%; left: 50%; transform: translateX(-50%);
-    color: rgba(0,212,255,0.92); font-family: 'Share Tech Mono', monospace;
-    font-size: 1rem; letter-spacing: 0.08em; text-align: center;
-    max-width: 72%; z-index: 10; pointer-events: none;
-    text-shadow: 0 0 18px rgba(0,212,255,0.7), 0 0 40px rgba(0,180,255,0.3);
-    transition: opacity 0.4s; min-height: 1.4em;
-  }
-  #transcript.interim { opacity: 0.55; }
-  #transcript.final   { opacity: 1.0; }
-  #mic-status {
-    position: fixed; top: 1.4rem; right: 1.6rem; z-index: 10;
-    font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
-    letter-spacing: 0.22em; color: rgba(0,212,255,0.5); pointer-events: none;
-  }
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div id="vignette"></div>
-<div id="transcript"></div>
-<div id="mic-status"></div>
 <div id="activate-overlay"><button id="activate-btn">Touch to activate AMARA</button></div>
 
 <script type="module">
@@ -574,15 +557,8 @@ const DG_KEY = '5d509864bed0d109bdbd4895b8d139ef90f375a3';
 let dgSocket = null, micStream = null, audioCtx = null, scriptProc = null;
 let silenceTimer = null;
 
-const txEl     = document.getElementById('transcript');
-const statusEl = document.getElementById('mic-status');
-
-function setStatus(txt) { if (statusEl) statusEl.textContent = txt; }
-function showTranscript(txt, isFinal) {
-  if (!txEl) return;
-  txEl.textContent = txt;
-  txEl.className = isFinal ? 'final' : 'interim';
-}
+function setStatus() {}
+function showTranscript() {}
 
 async function startDeepgram() {
   setStatus('REQUESTING MIC...');

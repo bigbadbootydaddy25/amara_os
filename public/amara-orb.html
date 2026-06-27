@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>AMARA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,44 +21,6 @@
     z-index: 2;
   }
 
-  #overlay {
-    pointer-events: none;
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.45rem;
-    z-index: 10;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  #amara-name {
-    color: #00d4ff;
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
-    letter-spacing: 0.55em;
-    text-shadow: 0 0 18px rgba(0,212,255,0.45);
-    line-height: 1;
-  }
-
-  #status-row {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    color: #ffffff;
-    font-size: 0.62rem;
-    letter-spacing: 0.45em;
-    opacity: 0.55;
-  }
-
-  #status-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.35);
-    flex-shrink: 0;
-  }
 
   #activate-overlay {
     position: fixed; inset: 0;
@@ -87,13 +47,6 @@
 <body>
 <canvas id="c"></canvas>
 <div id="vignette"></div>
-<div id="overlay">
-  <div id="amara-name">AMARA</div>
-  <div id="status-row">
-    <span id="status-dot"></span>
-    <span id="status-text">IDLE</span>
-  </div>
-</div>
 <div id="activate-overlay">
   <button id="activate-btn" onclick="activateAmara()">Touch to activate AMARA</button>
 </div>
@@ -309,18 +262,6 @@ const bandAvg = (data, s, e) => {
   return sum / ((ei - si) * 255 || 1);
 };
 
-// ── Status UI ────────────────────────────────────────────────────────────────
-const statusDot  = document.getElementById('status-dot');
-const statusText = document.getElementById('status-text');
-const STATE_LABELS = { idle:'IDLE', listening:'LISTENING', thinking:'PROCESSING', speaking:'SPEAKING' };
-const STATE_DOT    = { idle:'rgba(255,255,255,0.35)', listening:'#00d4ff', thinking:'#00d4ff', speaking:'#00d4ff' };
-
-function updateStatus(st) {
-  statusText.textContent = STATE_LABELS[st] || 'IDLE';
-  const col = STATE_DOT[st] || 'rgba(255,255,255,0.35)';
-  statusDot.style.background = col;
-  statusDot.style.boxShadow  = st !== 'idle' ? '0 0 6px '+col : 'none';
-}
 
 // ── Animation loop ───────────────────────────────────────────────────────────
 let lastT = 0;
@@ -536,7 +477,6 @@ window.setAMARAState = function(state) {
   const s = state === 'processing' ? 'thinking' : state;
   if (!['idle','listening','thinking','speaking'].includes(s)) return;
   currentState = s;
-  updateStatus(s);
 };
 
 window.triggerWakeWord = function() {

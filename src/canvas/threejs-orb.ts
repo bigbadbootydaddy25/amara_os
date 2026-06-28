@@ -18,25 +18,74 @@ function bandAvg(data: Uint8Array, startRatio: number, endRatio: number): number
   return sum / ((e - s) * 255);
 }
 
+// Per-node color type: 0=cyan, 1=purple, 2=white-blue
+function nodeRGB(ct: number, b: number): [number, number, number] {
+  if (ct === 1) return [0.72 * b, 0.10 * b, b];   // purple
+  if (ct === 2) return [0.75 * b, 0.90 * b, b];   // white-blue
+  return [0, 0.831 * b, b];                         // cyan
+}
+
 // ---------------------------------------------------------------------------
 // Texture factories
 // ---------------------------------------------------------------------------
 
-function makeGlowTexture(): THREE.CanvasTexture {
-  const size = 128;
+function makeStarTexture(): THREE.CanvasTexture {
+  const sz = 128;
   const c = document.createElement('canvas');
-  c.width = size;
-  c.height = size;
+  c.width = c.height = sz;
   const ctx = c.getContext('2d')!;
-  const h = size / 2;
-  const g = ctx.createRadialGradient(h, h, 0, h, h, h);
+  const h = sz / 2;
+  for (let ray = 0; ray < 4; ray++) {
+    ctx.save();
+    ctx.translate(h, h);
+    ctx.rotate(ray * Math.PI / 4);
+    const rg = ctx.createLinearGradient(-h, 0, h, 0);
+    rg.addColorStop(0, 'rgba(0,210,255,0)');
+    rg.addColorStop(0.28, 'rgba(60,220,255,0.5)');
+    rg.addColorStop(0.5, 'rgba(255,255,255,1)');
+    rg.addColorStop(0.72, 'rgba(60,220,255,0.5)');
+    rg.addColorStop(1, 'rgba(0,210,255,0)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(-h, -1.5, sz, 3);
+    ctx.restore();
+  }
+  const g = ctx.createRadialGradient(h, h, 0, h, h, h * 0.36);
   g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.18, 'rgba(200,245,255,0.9)');
-  g.addColorStop(0.42, 'rgba(0,212,255,0.5)');
-  g.addColorStop(0.72, 'rgba(0,100,200,0.15)');
+  g.addColorStop(0.3, 'rgba(210,248,255,0.95)');
+  g.addColorStop(0.7, 'rgba(0,210,255,0.5)');
   g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, sz, sz);
+  return new THREE.CanvasTexture(c);
+}
+
+function makePurpleStarTexture(): THREE.CanvasTexture {
+  const sz = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = sz;
+  const ctx = c.getContext('2d')!;
+  const h = sz / 2;
+  for (let ray = 0; ray < 4; ray++) {
+    ctx.save();
+    ctx.translate(h, h);
+    ctx.rotate(ray * Math.PI / 4);
+    const rg = ctx.createLinearGradient(-h, 0, h, 0);
+    rg.addColorStop(0, 'rgba(140,0,255,0)');
+    rg.addColorStop(0.28, 'rgba(180,60,255,0.5)');
+    rg.addColorStop(0.5, 'rgba(255,255,255,1)');
+    rg.addColorStop(0.72, 'rgba(180,60,255,0.5)');
+    rg.addColorStop(1, 'rgba(140,0,255,0)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(-h, -1.5, sz, 3);
+    ctx.restore();
+  }
+  const g = ctx.createRadialGradient(h, h, 0, h, h, h * 0.36);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.3, 'rgba(230,200,255,0.95)');
+  g.addColorStop(0.7, 'rgba(160,0,255,0.5)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, sz, sz);
   return new THREE.CanvasTexture(c);
 }
 
@@ -49,11 +98,11 @@ function makeHaloTexture(): THREE.CanvasTexture {
   const h = size / 2;
   const g = ctx.createRadialGradient(h, h, 0, h, h, h);
   g.addColorStop(0, 'rgba(0,0,0,0)');
-  g.addColorStop(0.40, 'rgba(0,0,0,0)');
-  g.addColorStop(0.58, 'rgba(0,212,255,0.06)');
-  g.addColorStop(0.70, 'rgba(0,180,240,0.14)');
-  g.addColorStop(0.82, 'rgba(0,80,160,0.10)');
-  g.addColorStop(0.92, 'rgba(0,20,60,0.04)');
+  g.addColorStop(0.38, 'rgba(0,0,0,0)');
+  g.addColorStop(0.52, 'rgba(0,212,255,0.07)');
+  g.addColorStop(0.65, 'rgba(0,180,240,0.16)');
+  g.addColorStop(0.78, 'rgba(60,0,160,0.10)');
+  g.addColorStop(0.90, 'rgba(0,20,60,0.04)');
   g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
@@ -64,26 +113,23 @@ function makeHaloTexture(): THREE.CanvasTexture {
 // Constants
 // ---------------------------------------------------------------------------
 
-const SPHERE_R = 1.8;
-const NODE_COUNT = 165;
-const SURFACE_NODES = 58;
-const MAX_CONN_DIST = 0.84;
-const MAX_EDGES = 500;
-const PARTICLE_COUNT = 240;
+const SPHERE_R = 2.0;
+const NODE_COUNT = 320;
+const MAX_EDGES = 3000;
+const PARTICLE_COUNT = 350;
 
 // ---------------------------------------------------------------------------
-// Per-node animation data (kept in JS, not GPU)
+// Per-node data
 // ---------------------------------------------------------------------------
 
 interface NodeData {
-  base: THREE.Vector3;
-  phase: THREE.Vector3;  // noise phase per axis
-  speed: THREE.Vector3;  // noise speed per axis
-  amp: number;           // drift amplitude
-  bright: number;        // current brightness 0-1
-  targetBright: number;
-  baseSize: number;      // sprite size in world units
-  cur: THREE.Vector3;    // current position (updated per frame)
+  bx: number; by: number; bz: number;   // base position (fibonacci surface)
+  px: number; py: number; pz: number;   // current animated position
+  phX: number; phY: number; phZ: number; // noise phase
+  spX: number; spY: number; spZ: number; // noise speed
+  amp: number;
+  bright: number;
+  ct: number;  // color type: 0=cyan, 1=purple, 2=white-blue
 }
 
 // ---------------------------------------------------------------------------
@@ -95,36 +141,32 @@ export class ThreeOrbRenderer {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
 
-  // Groups
-  private orbGroup: THREE.Group;    // rotates: wireframe + nodes + edges
+  private orbGroup: THREE.Group;
 
-  // Node point cloud
   private nodePos: Float32Array;
   private nodeColor: Float32Array;
   private nodeGeom: THREE.BufferGeometry;
   private nodePoints!: THREE.Points;
-  private nodes: NodeData[] = [];
+  private purpleNodePos: Float32Array;
+  private purpleNodeColor: Float32Array;
+  private purpleNodeGeom: THREE.BufferGeometry;
+  private purpleNodePoints!: THREE.Points;
+  private nodeData: NodeData[] = [];
 
-  // Connection line segments
   private edgePos: Float32Array;
   private edgeColor: Float32Array;
   private edgeGeom: THREE.BufferGeometry;
   private edgeLines!: THREE.LineSegments;
+  private edgePairs: Array<[number, number]> = [];
 
-  // Wireframe cage
-  private wireMesh!: THREE.LineSegments;
-
-  // Halo sprite
   private haloSprite!: THREE.Sprite;
 
-  // Particle burst
   private partPos: Float32Array;
   private partVel: Float32Array;
   private partLife: Float32Array;
   private partGeom: THREE.BufferGeometry;
   private partSystem!: THREE.Points;
 
-  // Audio
   private outAnalyser: AnalyserNode | null = null;
   private micAnalyser: AnalyserNode | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,20 +174,17 @@ export class ThreeOrbRenderer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private micData: any = new Uint8Array(256);
 
-  // Smooth audio levels
   private aLow = 0;
   private aMid = 0;
   private aHigh = 0;
   private aOverall = 0;
   private aMic = 0;
 
-  // State
   private state: AmaraState = 'idle';
   private time = 0;
 
-  // Smoothed display values
-  private sBright = 0.3;
-  private sConnDensity = 0.35;
+  private sBright = 0.55;
+  private sConn = 0.65;
   private sRotSpeed = 0.004;
   private sHaloScale = 1.0;
 
@@ -156,14 +195,16 @@ export class ThreeOrbRenderer {
     this.renderer.setClearColor(0x000000, 1);
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(56, width / height, 0.01, 100);
-    this.camera.position.z = 4.8;
+    this.camera = new THREE.PerspectiveCamera(52, width / height, 0.01, 100);
+    this.camera.position.z = 4.4;
 
     this.orbGroup = new THREE.Group();
     this.scene.add(this.orbGroup);
 
     this.nodePos = new Float32Array(NODE_COUNT * 3);
     this.nodeColor = new Float32Array(NODE_COUNT * 3);
+    this.purpleNodePos = new Float32Array(NODE_COUNT * 3);
+    this.purpleNodeColor = new Float32Array(NODE_COUNT * 3);
     this.edgePos = new Float32Array(MAX_EDGES * 6);
     this.edgeColor = new Float32Array(MAX_EDGES * 6);
     this.partPos = new Float32Array(PARTICLE_COUNT * 3);
@@ -171,6 +212,7 @@ export class ThreeOrbRenderer {
     this.partLife = new Float32Array(PARTICLE_COUNT);
 
     this.nodeGeom = new THREE.BufferGeometry();
+    this.purpleNodeGeom = new THREE.BufferGeometry();
     this.edgeGeom = new THREE.BufferGeometry();
     this.partGeom = new THREE.BufferGeometry();
 
@@ -184,92 +226,85 @@ export class ThreeOrbRenderer {
   private buildScene(): void {
     this.buildNodes();
     this.buildEdges();
-    this.buildWireframe();
     this.buildHalo();
     this.buildParticles();
   }
 
   private buildNodes(): void {
-    const glowTex = makeGlowTexture();
+    const goldenAngle = Math.PI * (Math.sqrt(5) - 1);
 
-    // Surface nodes: fibonacci sphere distribution
-    for (let i = 0; i < SURFACE_NODES; i++) {
-      const goldenAngle = Math.PI * (Math.sqrt(5) - 1);
-      const y = 1 - (i / (SURFACE_NODES - 1)) * 2;
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const y = 1 - (i / (NODE_COUNT - 1)) * 2;
       const r = Math.sqrt(Math.max(0, 1 - y * y));
       const theta = goldenAngle * i;
-      const pos = new THREE.Vector3(
-        Math.cos(theta) * r * SPHERE_R,
-        y * SPHERE_R,
-        Math.sin(theta) * r * SPHERE_R,
-      );
-      this.nodes.push({
-        base: pos.clone(),
-        phase: new THREE.Vector3(
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-        ),
-        speed: new THREE.Vector3(
-          0.14 + Math.random() * 0.18,
-          0.11 + Math.random() * 0.16,
-          0.09 + Math.random() * 0.20,
-        ),
-        amp: 0.035 + Math.random() * 0.065,
-        bright: 0.4 + Math.random() * 0.6,
-        targetBright: 0.5,
-        baseSize: 7 + Math.random() * 14,
-        cur: pos.clone(),
+      const bx = Math.cos(theta) * r * SPHERE_R;
+      const by = y * SPHERE_R;
+      const bz = Math.sin(theta) * r * SPHERE_R;
+
+      const rand = Math.random();
+      const ct = rand < 0.72 ? 0 : rand < 0.90 ? 1 : 2;
+
+      this.nodeData.push({
+        bx, by, bz,
+        px: bx, py: by, pz: bz,
+        phX: Math.random() * Math.PI * 2,
+        phY: Math.random() * Math.PI * 2,
+        phZ: Math.random() * Math.PI * 2,
+        spX: 0.10 + Math.random() * 0.20,
+        spY: 0.08 + Math.random() * 0.18,
+        spZ: 0.09 + Math.random() * 0.22,
+        amp: 0.025 + Math.random() * 0.055,
+        bright: 0.5 + Math.random() * 0.5,
+        ct,
       });
     }
 
-    // Interior nodes: weighted toward outer shell
-    const interiorCount = NODE_COUNT - SURFACE_NODES;
-    for (let i = 0; i < interiorCount; i++) {
-      const u = Math.random();
-      const dist = SPHERE_R * Math.pow(u, 0.45) * 0.96;
-      const theta2 = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const pos = new THREE.Vector3(
-        dist * Math.sin(phi) * Math.cos(theta2),
-        dist * Math.sin(phi) * Math.sin(theta2),
-        dist * Math.cos(phi),
-      );
-      this.nodes.push({
-        base: pos.clone(),
-        phase: new THREE.Vector3(
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-        ),
-        speed: new THREE.Vector3(
-          0.07 + Math.random() * 0.22,
-          0.05 + Math.random() * 0.18,
-          0.08 + Math.random() * 0.21,
-        ),
-        amp: 0.07 + Math.random() * 0.18,
-        bright: 0.15 + Math.random() * 0.55,
-        targetBright: 0.25,
-        baseSize: 3 + Math.random() * 9,
-        cur: pos.clone(),
-      });
+    // Pre-compute edge pairs: always short, probabilistically long
+    const order = Array.from({ length: NODE_COUNT }, (_, i) => i)
+      .sort(() => Math.random() - 0.5);
+    for (let ai = 0; ai < NODE_COUNT && this.edgePairs.length < MAX_EDGES; ai++) {
+      const a = order[ai];
+      const na = this.nodeData[a];
+      for (let bi = ai + 1; bi < NODE_COUNT && this.edgePairs.length < MAX_EDGES; bi++) {
+        const b = order[bi];
+        const nb = this.nodeData[b];
+        const dx = na.bx - nb.bx, dy = na.by - nb.by, dz = na.bz - nb.bz;
+        const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (d > 3.6) continue;
+        const prob = d < 1.0 ? 1.0 : 0.10 * Math.pow((3.6 - d) / 2.6, 2.0);
+        if (Math.random() < prob) this.edgePairs.push([a, b]);
+      }
     }
 
+    // Cyan / white-blue node points
     this.nodeGeom.setAttribute('position', new THREE.BufferAttribute(this.nodePos, 3));
     this.nodeGeom.setAttribute('color', new THREE.BufferAttribute(this.nodeColor, 3));
-
-    const mat = new THREE.PointsMaterial({
-      size: 0.22,
-      map: glowTex,
+    const cyanMat = new THREE.PointsMaterial({
+      size: 0.26,
+      map: makeStarTexture(),
       vertexColors: true,
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       sizeAttenuation: true,
     });
-
-    this.nodePoints = new THREE.Points(this.nodeGeom, mat);
+    this.nodePoints = new THREE.Points(this.nodeGeom, cyanMat);
     this.orbGroup.add(this.nodePoints);
+
+    // Purple node points (separate draw call with purple texture)
+    this.purpleNodeGeom.setAttribute('position', new THREE.BufferAttribute(this.purpleNodePos, 3));
+    this.purpleNodeGeom.setAttribute('color', new THREE.BufferAttribute(this.purpleNodeColor, 3));
+    const purpleMat = new THREE.PointsMaterial({
+      size: 0.28,
+      map: makePurpleStarTexture(),
+      vertexColors: true,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    });
+    this.purpleNodePoints = new THREE.Points(this.purpleNodeGeom, purpleMat);
+    this.orbGroup.add(this.purpleNodePoints);
   }
 
   private buildEdges(): void {
@@ -283,36 +318,19 @@ export class ThreeOrbRenderer {
       depthWrite: false,
       blending: THREE.AdditiveBlending,
     });
-
     this.edgeLines = new THREE.LineSegments(this.edgeGeom, mat);
     this.orbGroup.add(this.edgeLines);
   }
 
-  private buildWireframe(): void {
-    const geom = new THREE.IcosahedronGeometry(SPHERE_R * 1.0, 2);
-    const wire = new THREE.WireframeGeometry(geom);
-    const mat = new THREE.LineBasicMaterial({
-      color: 0x00d4ff,
-      transparent: true,
-      opacity: 0.06,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-    this.wireMesh = new THREE.LineSegments(wire, mat);
-    this.orbGroup.add(this.wireMesh);
-    geom.dispose();
-  }
-
   private buildHalo(): void {
-    const haloTex = makeHaloTexture();
     const spriteMat = new THREE.SpriteMaterial({
-      map: haloTex,
+      map: makeHaloTexture(),
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     this.haloSprite = new THREE.Sprite(spriteMat);
-    this.haloSprite.scale.set(7.2, 7.2, 1);
+    this.haloSprite.scale.set(9.5, 9.5, 1);
     this.scene.add(this.haloSprite);
   }
 
@@ -321,26 +339,22 @@ export class ThreeOrbRenderer {
     this.partGeom.setAttribute('position', new THREE.BufferAttribute(this.partPos, 3));
     this.partGeom.setDrawRange(0, 0);
 
-    // Round glow texture so particles appear as soft circles, not squares
-    const partTex = (() => {
-      const sz = 64;
-      const c = document.createElement('canvas');
-      c.width = c.height = sz;
-      const ctx = c.getContext('2d')!;
-      const h = sz / 2;
-      const g = ctx.createRadialGradient(h, h, 0, h, h, h);
-      g.addColorStop(0, 'rgba(255,255,255,1)');
-      g.addColorStop(0.35, 'rgba(255,255,255,0.7)');
-      g.addColorStop(0.7, 'rgba(200,240,255,0.2)');
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, sz, sz);
-      return new THREE.CanvasTexture(c);
-    })();
+    const sz = 64;
+    const pc = document.createElement('canvas');
+    pc.width = pc.height = sz;
+    const pctx = pc.getContext('2d')!;
+    const ph = sz / 2;
+    const pg = pctx.createRadialGradient(ph, ph, 0, ph, ph, ph);
+    pg.addColorStop(0, 'rgba(255,255,255,1)');
+    pg.addColorStop(0.35, 'rgba(200,240,255,0.7)');
+    pg.addColorStop(0.7, 'rgba(0,200,255,0.2)');
+    pg.addColorStop(1, 'rgba(0,0,0,0)');
+    pctx.fillStyle = pg;
+    pctx.fillRect(0, 0, sz, sz);
 
     const mat = new THREE.PointsMaterial({
-      map: partTex,
-      size: 0.1,
+      map: new THREE.CanvasTexture(pc),
+      size: 0.10,
       transparent: true,
       opacity: 0.9,
       depthWrite: false,
@@ -374,7 +388,6 @@ export class ThreeOrbRenderer {
     const burst = 80 + Math.floor(Math.random() * 40);
     for (let i = 0; i < PARTICLE_COUNT && spawned < burst; i++) {
       if (this.partLife[i] <= 0) {
-        // Spawn from random point on sphere surface
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos(2 * Math.random() - 1);
         const r = SPHERE_R;
@@ -384,7 +397,6 @@ export class ThreeOrbRenderer {
         this.partPos[i * 3] = px;
         this.partPos[i * 3 + 1] = py;
         this.partPos[i * 3 + 2] = pz;
-        // Velocity: outward + slight random
         const speed = 0.8 + Math.random() * 1.6;
         this.partVel[i * 3] = (px / r) * speed + (Math.random() - 0.5) * 0.3;
         this.partVel[i * 3 + 1] = (py / r) * speed + (Math.random() - 0.5) * 0.3;
@@ -404,6 +416,7 @@ export class ThreeOrbRenderer {
 
   dispose(): void {
     this.nodeGeom.dispose();
+    this.purpleNodeGeom.dispose();
     this.edgeGeom.dispose();
     this.partGeom.dispose();
     this.renderer.dispose();
@@ -421,7 +434,7 @@ export class ThreeOrbRenderer {
     this.computeTargets();
     this.updateNodes();
     this.updateEdges();
-    this.updateWireframe();
+    this.updateOrbRotation();
     this.updateHalo();
     this.updateParticles(safeDt);
   }
@@ -472,48 +485,47 @@ export class ThreeOrbRenderer {
 
     switch (this.state) {
       case 'idle':
-        tBright = 0.22 + breathe * 0.10;
-        tConn = 0.28 + breathe * 0.08;
-        tRot = 0.003 + breathe * 0.001;
-        tHalo = 0.88 + breathe * 0.06;
+        tBright = 0.40 + breathe * 0.12;
+        tConn   = 0.50 + breathe * 0.10;
+        tRot    = 0.003 + breathe * 0.001;
+        tHalo   = 0.90 + breathe * 0.06;
         break;
 
       case 'listening':
-        tBright = 0.18 + this.aMic * 0.38 + (Math.sin(t * 1.8) + 1) * 0.04;
-        tConn = 0.20 + this.aMic * 0.25;
-        tRot = 0.002 + this.aMic * 0.003;
-        tHalo = 0.90 + this.aMic * 0.22;
+        tBright = 0.35 + this.aMic * 0.45 + (Math.sin(t * 1.8) + 1) * 0.05;
+        tConn   = 0.45 + this.aMic * 0.30;
+        tRot    = 0.002 + this.aMic * 0.004;
+        tHalo   = 1.00 + this.aMic * 0.28;
         break;
 
-      case 'thinking':
-        {
-          const pulse = (Math.sin(t * 4.8) + 1) * 0.5;
-          tBright = 0.38 + pulse * 0.28;
-          tConn = 0.55 + pulse * 0.30;
-          tRot = 0.009 + pulse * 0.005;
-          tHalo = 1.05 + pulse * 0.15;
-        }
+      case 'thinking': {
+        const pulse = (Math.sin(t * 4.8) + 1) * 0.5;
+        tBright = 0.55 + pulse * 0.30;
+        tConn   = 0.70 + pulse * 0.25;
+        tRot    = 0.010 + pulse * 0.005;
+        tHalo   = 1.10 + pulse * 0.15;
         break;
+      }
 
       case 'speaking':
-        tBright = 0.42 + this.aMid * 0.52 + this.aHigh * 0.18;
-        tConn = 0.45 + this.aOverall * 0.55;
-        tRot = 0.005 + this.aLow * 0.012;
-        tHalo = 1.0 + this.aOverall * 0.95;
+        tBright = 0.55 + this.aMid * 0.55 + this.aHigh * 0.20;
+        tConn   = 0.60 + this.aOverall * 0.40;
+        tRot    = 0.005 + this.aLow * 0.012;
+        tHalo   = 1.05 + this.aOverall * 0.95;
         break;
 
       default:
-        tBright = 0.25;
-        tConn = 0.3;
-        tRot = 0.003;
-        tHalo = 0.9;
+        tBright = 0.45;
+        tConn   = 0.55;
+        tRot    = 0.003;
+        tHalo   = 0.90;
     }
 
-    const smooth = 0.07;
-    this.sBright = lerp(this.sBright, tBright, smooth);
-    this.sConnDensity = lerp(this.sConnDensity, tConn, smooth * 1.2);
-    this.sRotSpeed = lerp(this.sRotSpeed, tRot, smooth * 0.6);
-    this.sHaloScale = lerp(this.sHaloScale, tHalo, smooth * 0.8);
+    const sm = 0.07;
+    this.sBright    = lerp(this.sBright, tBright, sm);
+    this.sConn      = lerp(this.sConn, tConn, sm * 1.2);
+    this.sRotSpeed  = lerp(this.sRotSpeed, tRot, sm * 0.6);
+    this.sHaloScale = lerp(this.sHaloScale, tHalo, sm * 0.8);
   }
 
   // ---------------------------------------------------------------------------
@@ -522,46 +534,66 @@ export class ThreeOrbRenderer {
 
   private updateNodes(): void {
     const t = this.time;
+    let cyanIdx = 0;
+    let purpleIdx = 0;
 
     for (let i = 0; i < NODE_COUNT; i++) {
-      const n = this.nodes[i];
+      const n = this.nodeData[i];
 
-      // Drift position
-      const dx = Math.sin(t * n.speed.x + n.phase.x) * n.amp;
-      const dy = Math.sin(t * n.speed.y + n.phase.y) * n.amp;
-      const dz = Math.sin(t * n.speed.z + n.phase.z) * n.amp;
-      n.cur.set(n.base.x + dx, n.base.y + dy, n.base.z + dz);
+      // Drift
+      n.px = n.bx + Math.sin(t * n.spX + n.phX) * n.amp;
+      n.py = n.by + Math.sin(t * n.spY + n.phY) * n.amp;
+      n.pz = n.bz + Math.sin(t * n.spZ + n.phZ) * n.amp;
 
-      // Clamp to sphere
-      const len = n.cur.length();
-      if (len > SPHERE_R) n.cur.multiplyScalar(SPHERE_R / len);
+      // Clamp to sphere surface
+      const len = Math.sqrt(n.px * n.px + n.py * n.py + n.pz * n.pz);
+      if (len > SPHERE_R) {
+        const inv = SPHERE_R / len;
+        n.px *= inv; n.py *= inv; n.pz *= inv;
+      }
 
-      // Write position
-      this.nodePos[i * 3] = n.cur.x;
-      this.nodePos[i * 3 + 1] = n.cur.y;
-      this.nodePos[i * 3 + 2] = n.cur.z;
-
-      // Brightness: base + per-node sparkle + audio
-      const sparkle = (Math.sin(t * 1.8 + n.phase.x * 11) + 1) * 0.5;
+      // Sparkle brightness
+      const sparkle = (Math.sin(t * 1.8 + n.phX * 11) + 1) * 0.5;
       const audioBoost = this.state === 'speaking'
         ? this.aMid * 0.5 + this.aHigh * 0.3
         : this.state === 'listening'
           ? this.aMic * 0.3
           : this.state === 'thinking'
-            ? (Math.sin(t * 5 + n.phase.z * 3) + 1) * 0.25
+            ? (Math.sin(t * 5 + n.phZ * 3) + 1) * 0.25
             : 0;
-      n.targetBright = clamp(this.sBright * n.bright + sparkle * 0.12 + audioBoost, 0.04, 1.0);
-      n.bright = lerp(n.bright, n.targetBright, 0.08 + audioBoost * 0.12);
+      const b = clamp(this.sBright * n.bright + sparkle * 0.15 + audioBoost, 0.04, 1.0);
+      n.bright = lerp(n.bright, b, 0.08 + audioBoost * 0.12);
 
-      // Ice blue color: rgb(0, 212, 255) / 255 = (0, 0.831, 1.0)
-      const b = n.bright;
-      this.nodeColor[i * 3] = 0;
-      this.nodeColor[i * 3 + 1] = 0.831 * b;
-      this.nodeColor[i * 3 + 2] = b;
+      const [r, g, bl] = nodeRGB(n.ct, clamp(n.bright, 0, 1));
+
+      if (n.ct === 1) {
+        // Purple: goes to purple point cloud
+        this.purpleNodePos[purpleIdx * 3] = n.px;
+        this.purpleNodePos[purpleIdx * 3 + 1] = n.py;
+        this.purpleNodePos[purpleIdx * 3 + 2] = n.pz;
+        this.purpleNodeColor[purpleIdx * 3] = r;
+        this.purpleNodeColor[purpleIdx * 3 + 1] = g;
+        this.purpleNodeColor[purpleIdx * 3 + 2] = bl;
+        purpleIdx++;
+      } else {
+        // Cyan / white-blue: cyan point cloud
+        this.nodePos[cyanIdx * 3] = n.px;
+        this.nodePos[cyanIdx * 3 + 1] = n.py;
+        this.nodePos[cyanIdx * 3 + 2] = n.pz;
+        this.nodeColor[cyanIdx * 3] = r;
+        this.nodeColor[cyanIdx * 3 + 1] = g;
+        this.nodeColor[cyanIdx * 3 + 2] = bl;
+        cyanIdx++;
+      }
     }
 
+    this.nodeGeom.setDrawRange(0, cyanIdx);
     this.nodeGeom.attributes.position.needsUpdate = true;
     this.nodeGeom.attributes.color.needsUpdate = true;
+
+    this.purpleNodeGeom.setDrawRange(0, purpleIdx);
+    this.purpleNodeGeom.attributes.position.needsUpdate = true;
+    this.purpleNodeGeom.attributes.color.needsUpdate = true;
   }
 
   // ---------------------------------------------------------------------------
@@ -569,56 +601,36 @@ export class ThreeOrbRenderer {
   // ---------------------------------------------------------------------------
 
   private updateEdges(): void {
-    const maxEdgesThisFrame = Math.floor(MAX_EDGES * clamp(this.sConnDensity, 0.1, 1.0));
-    let idx = 0;
+    const maxE = Math.min(this.edgePairs.length, Math.floor(this.edgePairs.length * clamp(this.sConn, 0.1, 1.0)));
 
-    for (let a = 0; a < NODE_COUNT && idx < maxEdgesThisFrame; a++) {
-      const na = this.nodes[a];
-      for (let b = a + 1; b < NODE_COUNT && idx < maxEdgesThisFrame; b++) {
-        const nb = this.nodes[b];
-        const dist = na.cur.distanceTo(nb.cur);
-        if (dist >= MAX_CONN_DIST) continue;
+    for (let idx = 0; idx < maxE; idx++) {
+      const [ai, bi] = this.edgePairs[idx];
+      const na = this.nodeData[ai];
+      const nb = this.nodeData[bi];
+      const pulse = 0.52 + 0.48 * Math.sin(this.time * 3.0 + idx * 0.35);
+      const cA = clamp(this.sConn * na.bright * 0.92 * pulse, 0, 1);
+      const cB = clamp(this.sConn * nb.bright * 0.92 * pulse, 0, 1);
 
-        const fade = 1 - dist / MAX_CONN_DIST;
-        const edgeBright = fade * fade * this.sConnDensity * (na.bright + nb.bright) * 0.5;
-        const c = clamp(edgeBright * 0.55, 0, 1);
+      const base = idx * 6;
+      this.edgePos[base]     = na.px; this.edgePos[base + 1] = na.py; this.edgePos[base + 2] = na.pz;
+      this.edgePos[base + 3] = nb.px; this.edgePos[base + 4] = nb.py; this.edgePos[base + 5] = nb.pz;
 
-        const base = idx * 6;
-        this.edgePos[base] = na.cur.x;
-        this.edgePos[base + 1] = na.cur.y;
-        this.edgePos[base + 2] = na.cur.z;
-        this.edgePos[base + 3] = nb.cur.x;
-        this.edgePos[base + 4] = nb.cur.y;
-        this.edgePos[base + 5] = nb.cur.z;
-
-        // Ice blue with computed brightness
-        this.edgeColor[base] = 0;
-        this.edgeColor[base + 1] = 0.831 * c;
-        this.edgeColor[base + 2] = c;
-        this.edgeColor[base + 3] = 0;
-        this.edgeColor[base + 4] = 0.831 * c;
-        this.edgeColor[base + 5] = c;
-        idx++;
-      }
+      const [rA, gA, bA] = nodeRGB(na.ct, cA);
+      this.edgeColor[base]     = rA; this.edgeColor[base + 1] = gA; this.edgeColor[base + 2] = bA;
+      const [rB, gB, bB] = nodeRGB(nb.ct, cB);
+      this.edgeColor[base + 3] = rB; this.edgeColor[base + 4] = gB; this.edgeColor[base + 5] = bB;
     }
 
     this.edgeGeom.attributes.position.needsUpdate = true;
     this.edgeGeom.attributes.color.needsUpdate = true;
-    this.edgeGeom.setDrawRange(0, idx * 2);
+    this.edgeGeom.setDrawRange(0, maxE * 2);
   }
 
   // ---------------------------------------------------------------------------
-  // Wireframe update
+  // Rotation update
   // ---------------------------------------------------------------------------
 
-  private updateWireframe(): void {
-    const mat = this.wireMesh.material as THREE.LineBasicMaterial;
-    const breathe = (Math.sin(this.time * 0.6) + 1) * 0.5;
-    const baseOpacity = this.state === 'idle' ? 0.055 : this.state === 'listening' ? 0.045 : 0.08;
-    const audioBoost = this.state === 'speaking' ? this.aMid * 0.06 : 0;
-    mat.opacity = clamp(baseOpacity + breathe * 0.02 + audioBoost, 0.03, 0.18);
-
-    // Orb group rotation
+  private updateOrbRotation(): void {
     this.orbGroup.rotation.y += this.sRotSpeed * (1 + this.aLow * 1.2);
     this.orbGroup.rotation.x += this.sRotSpeed * 0.18;
   }
@@ -628,7 +640,7 @@ export class ThreeOrbRenderer {
   // ---------------------------------------------------------------------------
 
   private updateHalo(): void {
-    const scale = this.sHaloScale * 7.2;
+    const scale = this.sHaloScale * 9.5;
     this.haloSprite.scale.set(scale, scale, 1);
   }
 
@@ -644,14 +656,12 @@ export class ThreeOrbRenderer {
       this.partLife[i] -= dt;
 
       if (this.partLife[i] <= 0) {
-        // Deactivate: push far away
         this.partPos[i * 3] = 999;
         this.partPos[i * 3 + 1] = 999;
         this.partPos[i * 3 + 2] = 999;
         continue;
       }
 
-      // Move outward with deceleration
       const drag = Math.pow(0.88, dt * 60);
       this.partVel[i * 3] *= drag;
       this.partVel[i * 3 + 1] *= drag;
@@ -666,7 +676,5 @@ export class ThreeOrbRenderer {
 
     this.partGeom.attributes.position.needsUpdate = true;
     this.partGeom.setDrawRange(0, activeCount > 0 ? PARTICLE_COUNT : 0);
-    const mat = this.partSystem.material as THREE.PointsMaterial;
-    mat.opacity = clamp(0.85, 0, 1);
   }
 }

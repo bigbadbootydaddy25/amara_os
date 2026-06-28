@@ -17,11 +17,31 @@
     position: fixed; inset: 0; background: transparent;
     z-index: 40; cursor: pointer;
   }
+  #browser-layer {
+    position: fixed; inset: 0; z-index: 1;
+    width: 100%; height: 100%; border: none; display: none;
+  }
+  #orb-wrap {
+    position: fixed; inset: 0; z-index: 5;
+    transform: scale(1);
+    transform-origin: calc(100% - 20px) calc(100% - 20px);
+    transition: transform 0.65s cubic-bezier(0.34, 1.2, 0.64, 1);
+  }
+  #orb-wrap.minimized { transform: scale(0.16); }
+  #restore-overlay {
+    display: none; position: fixed; inset: 0; z-index: 35;
+    cursor: pointer; background: transparent;
+  }
+  #restore-overlay.active { display: block; }
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="vignette"></div>
+<iframe id="browser-layer" src="about:blank"></iframe>
+<div id="orb-wrap">
+  <canvas id="c"></canvas>
+  <div id="vignette"></div>
+</div>
+<div id="restore-overlay"></div>
 <div id="activate-overlay"></div>
 
 <script type="module">
@@ -39,6 +59,7 @@ let currentState = 'idle';
 let time = 0, lastT = 0;
 let sBright = 0.55, sConn = 0.65, sRot = 0.004, sHalo = 1.0;
 let aLow = 0, aMid = 0, aHigh = 0, aOverall = 0, aMic = 0;
+let isMinimized = false, icePulseTime = -99;
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
 let outAnalyser = null, micAnalyser = null;
@@ -165,8 +186,8 @@ function nodeRGB(ct, b) {
 // ── Lazy init ─────────────────────────────────────────────────────────────────
 function initOrb() {
   const canvas = document.getElementById('c');
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-  renderer.setClearColor(0x000000, 1);
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0);
   scene  = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(52, 1, 0.01, 100);
   camera.position.z = 4.4;
@@ -342,6 +363,13 @@ function computeTargets() {
   const sm=0.07;
   sBright=lerp(sBright,tB,sm); sConn=lerp(sConn,tC,sm*1.2);
   sRot=lerp(sRot,tR,sm*0.6); sHalo=lerp(sHalo,tH,sm*0.8);
+  // Ice-blue navigation pulse overrides targets briefly
+  if (time - icePulseTime < 1.8) {
+    const pulse=(Math.sin(time*7.5)+1)*0.5;
+    sBright=lerp(sBright, 0.88+pulse*0.12, 0.22);
+    sHalo  =lerp(sHalo,   1.6 +pulse*0.28, 0.18);
+    sConn  =lerp(sConn,   0.92,             0.22);
+  }
 }
 
 // ── Nodes ─────────────────────────────────────────────────────────────────────
@@ -474,6 +502,89 @@ window.setAMARAMicAudio = (node) => {
   node.connect(a); micAnalyser=a; micData=new Uint8Array(a.frequencyBinCount);
 };
 
+// ── Minimize / restore ────────────────────────────────────────────────────────
+const orbWrap      = document.getElementById('orb-wrap');
+const restoreOvlay = document.getElementById('restore-overlay');
+
+function minimizeOrb() {
+  isMinimized = true;
+  orbWrap.classList.add('minimized');
+  restoreOvlay.classList.add('active');
+}
+function restoreOrb() {
+  isMinimized = false;
+  orbWrap.classList.remove('minimized');
+  restoreOvlay.classList.remove('active');
+}
+restoreOvlay.addEventListener('click', restoreOrb);
+
+// ── Browser layer ─────────────────────────────────────────────────────────────
+const browserLayer = document.getElementById('browser-layer');
+
+const URL_MAP = {
+  'youtube':        'https://www.youtube.com',
+  'gmail':          'https://mail.google.com',
+  'google':         'https://www.google.com',
+  'courtlistener':  'https://www.courtlistener.com',
+  'court listener': 'https://www.courtlistener.com',
+  'twitter':        'https://twitter.com',
+  'reddit':         'https://www.reddit.com',
+  'github':         'https://github.com',
+  'wikipedia':      'https://wikipedia.org',
+  'netflix':        'https://www.netflix.com',
+  'spotify':        'https://open.spotify.com',
+  'amazon':         'https://www.amazon.com',
+  'maps':           'https://maps.google.com',
+  'weather':        'https://forecast.weather.gov',
+  'news':           'https://news.google.com',
+};
+
+function resolveUrl(target) {
+  const t = target.toLowerCase().trim();
+  for (const [k, u] of Object.entries(URL_MAP)) {
+    if (t.includes(k)) return u;
+  }
+  const slug = t.replace(/\s+/g, '');
+  if (/^[\w-]+\.[a-z]{2,}/.test(slug)) return `https://${slug}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(target)}`;
+}
+
+function navigateBrowser(target) {
+  browserLayer.src = resolveUrl(target);
+  browserLayer.style.display = 'block';
+  icePulseTime = time;
+  if (partGeom) spawnBurst();
+}
+
+function closeBrowser() {
+  browserLayer.style.display = 'none';
+  browserLayer.src = 'about:blank';
+}
+
+// ── Command parser (runs before TTS on every final transcript) ────────────────
+function parseCommand(text) {
+  const t = text.toLowerCase().trim();
+
+  // Minimize — only on explicit command, never auto
+  if (/\b(minimize|go small|shrink|make yourself small|get small|be small)\b/.test(t)) {
+    minimizeOrb(); return true;
+  }
+
+  // Any other speech → restore if minimized
+  if (isMinimized) restoreOrb();
+
+  // Close browser
+  if (/\b(close browser|close the page|close that|hide browser|close window)\b/.test(t)) {
+    closeBrowser(); return true;
+  }
+
+  // Navigation
+  const nav = t.match(/\b(?:show me|pull up|open|go to|navigate to|flip to|switch to|take me to|load)\s+(.+)/);
+  if (nav) { navigateBrowser(nav[1].trim()); return false; }
+
+  return false;
+}
+
 // ── ElevenLabs TTS ────────────────────────────────────────────────────────────
 const EL_KEY   = 'sk_b6f0ec19d447538de677a5ac7151d38e68226e0881a6cf0a';
 const EL_VOICE = '1hlpeD1ydbI2ow0Tt3EW';
@@ -601,7 +712,11 @@ async function startDeepgram() {
 
     // Voice activity events — ignore while TTS is playing
     if (msg.type === 'SpeechStarted') {
-      if (!isSpeaking) { clearTimeout(silenceTimer); window.setAMARAState('listening'); }
+      if (!isSpeaking) {
+        clearTimeout(silenceTimer);
+        window.setAMARAState('listening');
+        if (isMinimized) restoreOrb();
+      }
     } else if (msg.type === 'UtteranceEnd') {
       if (!isSpeaking) {
         silenceTimer = setTimeout(() => { showTranscript('', false); window.setAMARAState('idle'); }, 900);
@@ -615,7 +730,7 @@ async function startDeepgram() {
         showTranscript(text, msg.is_final);
         if (msg.is_final) {
           clearTimeout(silenceTimer);
-          ttsSpeak(text);   // speak → STT → TTS loop
+          if (!parseCommand(text)) ttsSpeak(text);
         }
       }
     }

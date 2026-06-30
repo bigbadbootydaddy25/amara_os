@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMARA OS - Robot Face Animation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AMARA OS</h1>
+            <p>Robot Face Animation System</p>
+        </header>
+
+        <div class="controls">
+            <button id="toggleViewBtn" class="btn">Toggle Split View</button>
+            <button id="blinkBtn" class="btn">Blink</button>
+            <button id="talkBtn" class="btn">Talk</button>
+            <button id="turnBtn" class="btn">Head Turn</button>
+            <button id="litBtn" class="btn">Light Eyes</button>
+        </div>
+
+        <div id="robotWrapper" class="robot-wrapper">
+            <!-- Single View -->
+            <div id="singleView" class="view-container active">
+                <canvas id="robotCanvas" width="640" height="640"></canvas>
+            </div>
+
+            <!-- Split View -->
+            <div id="splitView" class="view-container split-view">
+                <div class="split-panel">
+                    <h3>Base</h3>
+                    <canvas id="baseCanvas" width="640" height="640"></canvas>
+                </div>
+                <div class="split-panel">
+                    <h3>Lit</h3>
+                    <canvas id="litCanvas" width="640" height="640"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Features: Feathered Edge Masking • Smooth Overlay Blending • Auto-Blink</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

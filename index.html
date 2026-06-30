@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMARA OS - Robot Animation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AMARA OS Animation System</h1>
+            <div class="controls">
+                <button id="toggleView" class="btn">Toggle Split View</button>
+                <button id="initiateBtn" class="btn">Initiate</button>
+                <button id="talkBtn" class="btn">Talk</button>
+                <button id="blinkBtn" class="btn">Blink</button>
+                <button id="headTurnBtn" class="btn">Head Turn</button>
+            </div>
+        </header>
+        
+        <main id="mainContent" class="single-view">
+            <div class="canvas-wrapper" id="baseWrapper" style="display: none;">
+                <h2>Base Robot</h2>
+                <canvas id="baseCanvas" width="640" height="640"></canvas>
+            </div>
+            <div class="canvas-wrapper" id="litWrapper">
+                <h2>Animated Robot</h2>
+                <canvas id="litCanvas" width="640" height="640"></canvas>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Feathered Edge Masking Technology - No Black Rectangles!</p>
+        </footer>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+</html>

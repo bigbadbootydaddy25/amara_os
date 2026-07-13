@@ -1,0 +1,82 @@
+# AMARA OS -- non-secret configuration.
+# Secrets (API keys, Supabase credentials) live in .env, not here.
+
+app:
+  name: AMARA OS
+  phase: 1
+
+# Workspaces are the top-level data scoping boundary. Every DB row carries
+# a `workspace` field; queries never cross workspaces without an explicit
+# cross-workspace flag. Do not add a fourth workspace without updating the
+# `workspace` check constraints in /migrations.
+workspaces:
+  - texhoma
+  - acesn8s_dev
+  - personal_investments
+
+# Client registry. Phase 1 ships with exactly one active client. Adding a
+# future landman client is a data change here, not a code change -- but do
+# not add another entry until Scott says so.
+clients:
+  - id: texhoma
+    name: Texhoma Land Consultants
+    workspace: texhoma
+    active: true
+
+llm:
+  providers:
+    ollama:
+      base_url_env: OLLAMA_BASE_URL
+      default_base_url: http://localhost:11434
+      default_model: llama3.1
+      embedding_model: nomic-embed-text
+    anthropic:
+      api_key_env: ANTHROPIC_API_KEY
+      default_model: claude-sonnet-4-5
+
+  # Rule-based routing table: task_type -> provider (+ optional model
+  # override). FOREMAN v0 does no autonomous planning -- it just looks
+  # this table up.
+  routing:
+    draft_email:
+      provider: ollama
+    draft:
+      provider: ollama
+    deal_analysis:
+      provider: anthropic
+    deed_read:
+      provider: anthropic
+    default:
+      provider: ollama
+
+guards:
+  # Hard rule: this string can never appear in outbound content.
+  blacklist_terms:
+    - HomeVestors
+  # AI/system/agent names that must never appear in a branded client
+  # deliverable (branding.py strips these before the byline is applied).
+  ai_names:
+    - AMARA
+    - FOREMAN
+    - Nova
+    - Ollama
+    - Claude
+    - Anthropic
+
+identity:
+  name: AMARA
+  branding_line: "Prepared by: Scott Schufford | Aces N 8s"
+  visual:
+    background_color: "#000000"
+    accent_color: "#00d4ff"
+    typography: "Share Tech Mono"
+    avatar:
+      material: "platinum-white android"
+      eyes: "electric-blue"
+      halo: "three-ring"
+
+# Phase 2 attachment points. No code reads these in Phase 1 -- sockets only.
+presence:
+  elevenlabs_voice_id: ""
+  heygen_avatar_id: ""
+  heygen_mode: lite

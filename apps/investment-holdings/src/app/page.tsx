@@ -1,6 +1,23 @@
 import { investmentHoldingsContent } from "@aces/content";
-import { Hero, StatsStrip, SectionTitle, FeatureGrid, ContactForm } from "@aces/ui";
+import {
+  Hero,
+  StatsStrip,
+  SectionTitle,
+  FeatureGrid,
+  ContactForm,
+  ChartUpIcon,
+  TargetIcon,
+  LockIcon,
+  ClockIcon,
+} from "@aces/ui";
 import { AssetExplorer } from "@/components/AssetExplorer";
+
+const statIcons = [
+  <ChartUpIcon key="chart" className="h-6 w-6" />,
+  <TargetIcon key="target" className="h-6 w-6" />,
+  <LockIcon key="lock" className="h-6 w-6" />,
+  <ClockIcon key="clock" className="h-6 w-6" />,
+];
 
 export default function Home() {
   return (
@@ -8,7 +25,7 @@ export default function Home() {
       <Hero hero={investmentHoldingsContent.hero} backgroundVariant="aurora" />
 
       {investmentHoldingsContent.stats ? (
-        <StatsStrip stats={investmentHoldingsContent.stats} />
+        <StatsStrip stats={investmentHoldingsContent.stats} icons={statIcons} />
       ) : null}
 
       <section className="mx-auto max-w-7xl px-6 py-24 md:px-10">

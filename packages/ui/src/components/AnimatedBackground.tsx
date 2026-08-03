@@ -37,6 +37,8 @@ export function AnimatedBackground({
       {variant === "aurora" ? <AuroraLayer reduceMotion={!!shouldReduceMotion} /> : null}
       {variant === "blueprint" ? <BlueprintLayer reduceMotion={!!shouldReduceMotion} /> : null}
 
+      <CrestWatermark />
+
       <div
         className="absolute inset-0 opacity-[0.05]"
         style={{
@@ -54,6 +56,41 @@ export function AnimatedBackground({
         }}
       />
     </div>
+  );
+}
+
+function CrestWatermark() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 200 260"
+      className="absolute -right-10 bottom-0 hidden h-[110%] w-auto text-[var(--color-gold)] opacity-[0.05] sm:block md:opacity-[0.06]"
+    >
+      <path
+        d="M30 40 L45 20 L60 34 L100 5 L140 34 L155 20 L170 40 L162 100 C162 170 130 220 100 235 C70 220 38 170 38 100 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <circle cx="100" cy="5" r="5" fill="currentColor" />
+      <circle cx="45" cy="20" r="3.6" fill="currentColor" />
+      <circle cx="155" cy="20" r="3.6" fill="currentColor" />
+      <path
+        d="M100 70c-18 20-42 38-42 60a28 28 0 0 0 46 21c-4 10-8 17-15 23h22c-7-6-11-13-15-23a28 28 0 0 0 46-21c0-22-24-40-42-60Z"
+        fill="currentColor"
+        opacity={0.9}
+      />
+      <text
+        x="100"
+        y="200"
+        textAnchor="middle"
+        fontSize="34"
+        fontFamily="serif"
+        fill="currentColor"
+      >
+        8
+      </text>
+    </svg>
   );
 }
 

@@ -8,9 +8,11 @@ import { AnimatedBackground, type BackgroundVariant } from "./AnimatedBackground
 export interface HeroProps {
   hero: HeroContent;
   backgroundVariant?: BackgroundVariant;
+  /** Renders the final headline line in the site accent color. */
+  accentLastLine?: boolean;
 }
 
-export function Hero({ hero, backgroundVariant = "aurora" }: HeroProps) {
+export function Hero({ hero, backgroundVariant = "aurora", accentLastLine = false }: HeroProps) {
   return (
     <section className="relative flex min-h-[92vh] items-center overflow-hidden border-b border-[var(--color-border)]">
       <AnimatedBackground variant={backgroundVariant} />
@@ -29,17 +31,21 @@ export function Hero({ hero, backgroundVariant = "aurora" }: HeroProps) {
         ) : null}
 
         <h1 className="font-[var(--font-display)] text-4xl font-normal leading-[1.05] text-[var(--color-text)] sm:text-6xl md:text-7xl">
-          {hero.headline.map((line, i) => (
-            <motion.span
-              key={line}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 + i * 0.12 }}
-              className="block"
-            >
-              {line}
-            </motion.span>
-          ))}
+          {hero.headline.map((line, i) => {
+            const isLast = i === hero.headline.length - 1;
+            return (
+              <motion.span
+                key={line}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 + i * 0.12 }}
+                className="block"
+                style={accentLastLine && isLast ? { color: "var(--color-accent-soft)" } : undefined}
+              >
+                {line}
+              </motion.span>
+            );
+          })}
         </h1>
 
         <motion.p

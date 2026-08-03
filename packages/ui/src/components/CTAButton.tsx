@@ -5,7 +5,7 @@ import { cx } from "../lib/cx";
 export interface CTAButtonProps
   extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
   href: string;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "solid";
   size?: "md" | "sm";
   children: React.ReactNode;
 }
@@ -19,15 +19,17 @@ export function CTAButton({
   ...rest
 }: CTAButtonProps) {
   const base =
-    "group relative inline-flex items-center gap-2 rounded-full text-sm font-medium tracking-wide uppercase transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+    "group relative inline-flex items-center gap-2 rounded-md text-sm font-medium tracking-wide uppercase transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
   const sizes: Record<string, string> = {
-    md: "px-7 py-3 text-sm",
+    md: "px-6 py-3 text-sm",
     sm: "px-4 py-2 text-xs",
   };
 
   const variants: Record<string, string> = {
     primary:
+      "border border-[var(--color-gold)] bg-[var(--color-bg-elevated)]/60 text-[var(--color-gold)] hover:bg-[var(--color-gold)] hover:text-[var(--color-bg)] hover:shadow-[0_0_30px_var(--glow)] focus-visible:outline-[var(--color-gold)]",
+    solid:
       "bg-[var(--color-gold)] text-[var(--color-bg)] hover:bg-[var(--color-gold-soft)] shadow-[0_0_0_1px_var(--color-gold)] hover:shadow-[0_0_30px_var(--glow)] focus-visible:outline-[var(--color-gold)]",
     secondary:
       "bg-transparent text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] focus-visible:outline-[var(--color-gold)]",

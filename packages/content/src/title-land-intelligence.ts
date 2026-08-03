@@ -74,3 +74,27 @@ export const titleLandIntelligenceContent: SiteContent = {
   footerNote:
     "Aces N 8s Title & Land Intelligence provides research and informational support and does not provide legal advice. Information on this site is provided for general informational purposes only.",
 };
+
+export interface IndustryItem {
+  label: string;
+  body: string;
+}
+
+export const titleIntelIndustries: IndustryItem[] = [
+  {
+    label: "Energy",
+    body: "Oil & gas title research, leasing, and curative support.",
+  },
+  {
+    label: "Real Estate",
+    body: "Acquisitions, financing, and asset transfer due diligence.",
+  },
+  {
+    label: "Development",
+    body: "Land entitlement, due diligence, and planning support.",
+  },
+  {
+    label: "Private Capital",
+    body: "Diligence and title clarity for private capital decisions.",
+  },
+];

@@ -60,6 +60,7 @@ export default function RootLayout({
             secondaryLabel={investmentHoldingsContent.hero.secondaryLabel}
             secondaryHref={investmentHoldingsContent.hero.secondaryHref}
             parentPlatform={brand.parentPlatform}
+            brandSubtitleColorVar="var(--color-gold)"
           />
           {children}
           <Footer

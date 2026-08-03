@@ -5,7 +5,8 @@ export * from "./value-chain";
 export { capitalContent } from "./capital";
 export { landDevelopmentContent } from "./land-development";
 export { investmentHoldingsContent } from "./investment-holdings";
-export { titleLandIntelligenceContent } from "./title-land-intelligence";
+export { titleLandIntelligenceContent, titleIntelIndustries } from "./title-land-intelligence";
+export type { IndustryItem } from "./title-land-intelligence";
 
 import type { SiteContent } from "./types";
 import type { SiteKey } from "@aces/brand";

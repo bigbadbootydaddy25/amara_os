@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { NavItem } from "@aces/content";
 import type { ParentPlatformLink } from "@aces/brand";
 import { CTAButton } from "./CTAButton";
+import { BrandMark } from "./BrandMark";
 import { cx } from "../lib/cx";
 
 export interface HeaderProps {
@@ -18,6 +19,8 @@ export interface HeaderProps {
   secondaryHref?: string;
   /** Renders a thin affiliation strip above the header for division sites. */
   parentPlatform?: ParentPlatformLink;
+  /** Color for the brand mark's subtitle line; defaults to the site accent. */
+  brandSubtitleColorVar?: string;
 }
 
 export function Header({
@@ -29,6 +32,7 @@ export function Header({
   secondaryLabel,
   secondaryHref,
   parentPlatform,
+  brandSubtitleColorVar,
 }: HeaderProps) {
   const [open, setOpen] = useState(false);
 
@@ -52,14 +56,10 @@ export function Header({
         <Link
           href="/"
           aria-label={siteName}
-          className="flex shrink-0 items-center gap-2 whitespace-nowrap font-[var(--font-display)] text-base tracking-wide text-[var(--color-text)]"
+          className="flex shrink-0 items-center whitespace-nowrap"
           onClick={() => setOpen(false)}
         >
-          <span
-            aria-hidden
-            className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--glow)]"
-          />
-          {shortName}
+          <BrandMark shortName={shortName} subtitleColorVar={brandSubtitleColorVar} size="sm" />
         </Link>
 
         <nav className="hidden min-w-0 items-center gap-3 overflow-x-auto xl:flex xl:gap-5">

@@ -14,3 +14,8 @@ export { ContactForm } from "./components/ContactForm";
 export { LegalPageLayout } from "./components/LegalPageLayout";
 export { ComingSoonPortalPage } from "./components/ComingSoonPortalPage";
 export { ThemeRoot } from "./components/ThemeRoot";
+export { BrandMark } from "./components/BrandMark";
+export * from "./components/icons";
+export { IconFeatureRow } from "./components/IconFeatureRow";
+export { DiagonalImageGrid } from "./components/DiagonalImageGrid";
+export type { DiagonalImageItem } from "./components/DiagonalImageGrid";

@@ -1,11 +1,38 @@
 import { landDevelopmentContent } from "@aces/content";
-import { Hero, StatsStrip, SectionTitle, FeatureGrid, ContactForm } from "@aces/ui";
+import {
+  Hero,
+  StatsStrip,
+  SectionTitle,
+  FeatureGrid,
+  ContactForm,
+  IconFeatureRow,
+  PinIcon,
+  DocumentIcon,
+  BlueprintIcon,
+  BuildingIcon,
+  ChartUpIcon,
+} from "@aces/ui";
 import { SubdivisionVisualizer } from "@/components/SubdivisionVisualizer";
 
+const processIcons = [PinIcon, DocumentIcon, BlueprintIcon, BuildingIcon, ChartUpIcon];
+const processIndexes = [0, 1, 2, 3, 5];
+
 export default function Home() {
+  const processFeatures = processIndexes.map((idx, i) => {
+    const section = landDevelopmentContent.sections[idx];
+    const Icon = processIcons[i];
+    return {
+      icon: <Icon className="h-6 w-6" />,
+      label: section.title,
+      body: section.body,
+    };
+  });
+
   return (
     <main>
-      <Hero hero={landDevelopmentContent.hero} backgroundVariant="map-grid" />
+      <Hero hero={landDevelopmentContent.hero} backgroundVariant="map-grid" accentLastLine />
+
+      <IconFeatureRow items={processFeatures} />
 
       {landDevelopmentContent.stats ? (
         <StatsStrip stats={landDevelopmentContent.stats} />

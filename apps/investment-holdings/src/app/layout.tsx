@@ -59,6 +59,7 @@ export default function RootLayout({
             ctaHref={investmentHoldingsContent.hero.ctaHref}
             secondaryLabel={investmentHoldingsContent.hero.secondaryLabel}
             secondaryHref={investmentHoldingsContent.hero.secondaryHref}
+            parentPlatform={brand.parentPlatform}
           />
           {children}
           <Footer

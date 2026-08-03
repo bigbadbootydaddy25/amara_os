@@ -1,10 +1,16 @@
-import { capitalContent } from "@aces/content";
+import { capitalContent, divisions, valueChainStages } from "@aces/content";
 import { Hero, StatsStrip, SectionTitle, FeatureGrid, ContactForm } from "@aces/ui";
+import { CommandCenter } from "@/components/CommandCenter";
+import { ValueChainSequence } from "@/components/ValueChainSequence";
 
 export default function Home() {
   return (
     <main>
       <Hero hero={capitalContent.hero} backgroundVariant="skyline" />
+
+      <CommandCenter capitalName="Aces N 8s Capital" divisions={divisions} />
+
+      <ValueChainSequence stages={valueChainStages} />
 
       {capitalContent.stats ? <StatsStrip stats={capitalContent.stats} /> : null}
 

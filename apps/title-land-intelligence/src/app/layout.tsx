@@ -57,6 +57,7 @@ export default function RootLayout({
             nav={titleLandIntelligenceContent.nav}
             ctaLabel={titleLandIntelligenceContent.hero.ctaLabel}
             ctaHref={titleLandIntelligenceContent.hero.ctaHref}
+            parentPlatform={brand.parentPlatform}
           />
           {children}
           <Footer

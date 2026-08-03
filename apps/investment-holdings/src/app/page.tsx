@@ -1,5 +1,6 @@
 import { investmentHoldingsContent } from "@aces/content";
 import { Hero, StatsStrip, SectionTitle, FeatureGrid, ContactForm } from "@aces/ui";
+import { AssetExplorer } from "@/components/AssetExplorer";
 
 export default function Home() {
   return (
@@ -19,6 +20,8 @@ export default function Home() {
           <FeatureGrid sections={investmentHoldingsContent.sections} columns={3} />
         </div>
       </section>
+
+      <AssetExplorer />
 
       <section
         id="contact"

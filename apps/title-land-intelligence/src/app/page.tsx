@@ -1,5 +1,6 @@
 import { titleLandIntelligenceContent } from "@aces/content";
 import { Hero, StatsStrip, SectionTitle, FeatureGrid, ContactForm } from "@aces/ui";
+import { ParcelIntelligenceViewer } from "@/components/ParcelIntelligenceViewer";
 
 export default function Home() {
   return (
@@ -19,6 +20,8 @@ export default function Home() {
           <FeatureGrid sections={titleLandIntelligenceContent.sections} columns={3} />
         </div>
       </section>
+
+      <ParcelIntelligenceViewer />
 
       <section
         id="contact"

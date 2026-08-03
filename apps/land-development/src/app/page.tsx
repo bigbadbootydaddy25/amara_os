@@ -1,5 +1,6 @@
 import { landDevelopmentContent } from "@aces/content";
 import { Hero, StatsStrip, SectionTitle, FeatureGrid, ContactForm } from "@aces/ui";
+import { SubdivisionVisualizer } from "@/components/SubdivisionVisualizer";
 
 export default function Home() {
   return (
@@ -19,6 +20,8 @@ export default function Home() {
           <FeatureGrid sections={landDevelopmentContent.sections} columns={3} />
         </div>
       </section>
+
+      <SubdivisionVisualizer />
 
       <section
         id="contact"

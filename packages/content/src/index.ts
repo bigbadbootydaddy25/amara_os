@@ -1,5 +1,7 @@
 export * from "./types";
 export * from "./legal";
+export * from "./divisions";
+export * from "./value-chain";
 export { capitalContent } from "./capital";
 export { landDevelopmentContent } from "./land-development";
 export { investmentHoldingsContent } from "./investment-holdings";

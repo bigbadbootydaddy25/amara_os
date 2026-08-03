@@ -3,6 +3,7 @@ import type { SiteContent } from "./types";
 export const capitalContent: SiteContent = {
   key: "capital",
   nav: [
+    { label: "The Platform", href: "#platform" },
     { label: "Strategic Capital", href: "#strategic-capital" },
     { label: "Exclusive Access", href: "#exclusive-access" },
     { label: "Execution", href: "#execution-excellence" },

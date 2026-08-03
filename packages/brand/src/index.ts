@@ -17,6 +17,12 @@ export interface BrandColors {
   textMuted: string;
 }
 
+export interface ParentPlatformLink {
+  label: string;
+  name: string;
+  href: string;
+}
+
 export interface BrandTokens {
   key: SiteKey;
   name: string;
@@ -26,6 +32,10 @@ export interface BrandTokens {
   domainPlaceholder: string;
   colors: BrandColors;
   glow: string;
+  /** True only for the flagship parent platform (Capital). */
+  isFlagship?: boolean;
+  /** Present on division sites; links back to the Capital command center. */
+  parentPlatform?: ParentPlatformLink;
 }
 
 export const brands: Record<SiteKey, BrandTokens> = {
@@ -37,6 +47,7 @@ export const brands: Record<SiteKey, BrandTokens> = {
     description:
       "We identify opportunity where others see risk and build lasting value where vision meets execution.",
     domainPlaceholder: "acesn8scapital.com",
+    isFlagship: true,
     colors: {
       bg: "#07070a",
       bgElevated: "#0d0c10",
@@ -58,6 +69,11 @@ export const brands: Record<SiteKey, BrandTokens> = {
     description:
       "We acquire, entitle, and develop strategically positioned land into high-value communities designed for the future.",
     domainPlaceholder: "acesn8sland.com",
+    parentPlatform: {
+      label: "A Division Of",
+      name: "Aces N 8s Capital",
+      href: "https://acesn8scapital.com",
+    },
     colors: {
       bg: "#08090a",
       bgElevated: "#0d0f0e",
@@ -79,6 +95,11 @@ export const brands: Record<SiteKey, BrandTokens> = {
     description:
       "A privately held investment platform focused on disciplined capital deployment, strategic assets, and long-term value creation.",
     domainPlaceholder: "acesn8sholdings.com",
+    parentPlatform: {
+      label: "A Division Of",
+      name: "Aces N 8s Capital",
+      href: "https://acesn8scapital.com",
+    },
     colors: {
       bg: "#08080a",
       bgElevated: "#0e0d10",
@@ -96,10 +117,15 @@ export const brands: Record<SiteKey, BrandTokens> = {
   "title-land-intelligence": {
     key: "title-land-intelligence",
     name: "Aces N 8s Title & Land Intelligence",
-    shortName: "Title & Land Intelligence",
+    shortName: "Title Intelligence",
     description:
       "We deliver disciplined title research, land intelligence, and due-diligence support for energy, real estate, development, and private capital decisions.",
     domainPlaceholder: "acesn8stitle.com",
+    parentPlatform: {
+      label: "A Division Of",
+      name: "Aces N 8s Capital",
+      href: "https://acesn8scapital.com",
+    },
     colors: {
       bg: "#06070a",
       bgElevated: "#0b0d12",

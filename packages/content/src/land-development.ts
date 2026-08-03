@@ -7,6 +7,7 @@ export const landDevelopmentContent: SiteContent = {
     { label: "Entitlement", href: "#entitlement-permitting" },
     { label: "Master Planning", href: "#master-planning" },
     { label: "Development", href: "#development-management" },
+    { label: "Visualizer", href: "#subdivision-visualizer" },
     { label: "Projects", href: "#projects" },
     { label: "Contact", href: "#contact" },
   ],

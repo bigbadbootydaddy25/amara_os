@@ -1,28 +1,50 @@
-# AMARA OS
+# Aces N 8s Platform
 
-Voice-activated animated AI assistant with a fullscreen procedural avatar, reactive background orbs, and demo-mode state cycling.
+Monorepo for the Aces N 8s family of companies: four branded, production-ready
+Next.js sites sharing a common design system, plus the existing Amara OS app.
 
-## Setup
+## Apps
+
+- `apps/capital` — Aces N 8s Capital
+- `apps/land-development` — Aces N 8s Land Development
+- `apps/investment-holdings` — Aces N 8s Investment Holdings
+- `apps/title-land-intelligence` — Aces N 8s Title & Land Intelligence
+- `apps/amara-os` — Amara OS (voice-activated animated AI assistant, unrelated product retained from before this monorepo)
+
+## Shared packages
+
+- `packages/brand` — per-site design tokens (colors, glow, taglines, domain placeholders)
+- `packages/content` — structured copy per site (nav, hero, sections, legal, contact)
+- `packages/ui` — shared React components (Header, Footer, Hero, CTAButton, InfoCards,
+  SectionTitle, ContactForm, LegalPageLayout, ComingSoonPortalPage, AnimatedBackground,
+  StatsStrip, FeatureGrid)
+
+## Getting started
 
 ```bash
 npm install
-npm run dev
+npm run dev:capital                 # or dev:land-development / dev:investment-holdings
+                                     # / dev:title-land-intelligence / dev:amara-os
 ```
 
-Open `http://localhost:3000`.
+Each app runs on port 3000 by default; pass `-- -p <port>` to run several at once, e.g.:
 
-## Environment variables
+```bash
+npm run dev:land-development -- -p 3001
+```
 
-Copy `.env.local.example` to `.env.local` and fill in values as needed.
+## Build & lint
 
-- `ELEVENLABS_API_KEY` — ElevenLabs API key for future TTS integration
-- `ELEVENLABS_VOICE_ID` — default ElevenLabs voice id
-- `OPENCLAW_GATEWAY_URL` — optional websocket gateway URL
-- `OPENCLAW_GATEWAY_TOKEN` — optional websocket auth token
-- `OPENAI_API_KEY` — optional OpenAI fallback key
-- `OPENAI_MODEL` — fallback OpenAI model name
-- `NEXT_PUBLIC_DEMO_MODE` — `true` enables automatic state cycling demo mode
+```bash
+npm run build   # builds every workspace with a build script
+npm run lint     # lints every workspace with a lint script
+```
 
 ## Notes
 
-Task 1 provides the visual foundation only. Task 2 will add voice input, TTS, and AI backend integration.
+- Brand colors/taglines/copy are placeholder-conservative: no fabricated financial
+  performance, AUM, licensing, deal history, or team information. Replace placeholder
+  contact emails, domains, and legal-page text with real client-supplied content
+  before launch.
+- Land Development intentionally omits proprietary acquisition/underwriting criteria.
+- Investment Holdings' "Investor Login" routes to a Private Access Coming Soon page.

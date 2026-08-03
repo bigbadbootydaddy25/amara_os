@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@source "../../../../packages/ui/src";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-gold, #c9a24b);
+  color: var(--color-bg, #07070a);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

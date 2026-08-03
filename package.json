@@ -1,28 +1,25 @@
 {
-  "name": "amara_os",
+  "name": "aces-n8s-platform",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.2.2",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "zustand": "^5.0.12"
+    "dev:capital": "npm run dev -w apps/capital",
+    "dev:land-development": "npm run dev -w apps/land-development",
+    "dev:investment-holdings": "npm run dev -w apps/investment-holdings",
+    "dev:title-land-intelligence": "npm run dev -w apps/title-land-intelligence",
+    "dev:amara-os": "npm run dev -w apps/amara-os",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.2",
-    "playwright": "^1.60.0",
-    "tailwindcss": "^4",
     "typescript": "^5"
   }
 }

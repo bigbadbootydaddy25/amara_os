@@ -27,6 +27,7 @@ export interface BrandTokens {
   key: SiteKey;
   name: string;
   shortName: string;
+  eyebrow: string;
   tagline?: string;
   description: string;
   domainPlaceholder: string;
@@ -38,34 +39,43 @@ export interface BrandTokens {
   parentPlatform?: ParentPlatformLink;
 }
 
+/** Shared diagram accent colors used contextually inside interactive SVG diagrams. */
+export const diagramColors = {
+  red: "#8c1515",
+  blue: "#1f5b91",
+  green: "#3f6f4f",
+};
+
 export const brands: Record<SiteKey, BrandTokens> = {
   capital: {
     key: "capital",
     name: "Aces N 8s Capital",
     shortName: "Capital",
+    eyebrow: "Flagship Parent Platform",
     tagline: "WE DON'T PLAY THE ODDS. WE CHANGE THEM.",
     description:
       "We identify opportunity where others see risk and build lasting value where vision meets execution.",
     domainPlaceholder: "acesn8scapital.com",
     isFlagship: true,
     colors: {
-      bg: "#07070a",
-      bgElevated: "#0d0c10",
-      surface: "#131015",
+      bg: "#070707",
+      bgElevated: "#0d0d0f",
+      surface: "#0d0d0f",
       border: "#2a2320",
-      gold: "#c9a24b",
-      goldSoft: "#e8cd8a",
-      accent: "#c81e33",
-      accentSoft: "#e8495c",
-      text: "#f5f1e8",
-      textMuted: "#a89c8a",
+      gold: "#d4af37",
+      goldSoft: "#e6c96a",
+      accent: "#8c1515",
+      accentSoft: "#a8283a",
+      text: "#f7f1e3",
+      textMuted: "#b7ad98",
     },
-    glow: "rgba(201, 162, 75, 0.18)",
+    glow: "rgba(212, 175, 55, 0.18)",
   },
   "land-development": {
     key: "land-development",
     name: "Aces N 8s Land Development",
     shortName: "Land Development",
+    eyebrow: "Land Transformation Platform",
     description:
       "We acquire, entitle, and develop strategically positioned land into high-value communities designed for the future.",
     domainPlaceholder: "acesn8sland.com",
@@ -75,23 +85,24 @@ export const brands: Record<SiteKey, BrandTokens> = {
       href: "https://acesn8scapital.com",
     },
     colors: {
-      bg: "#08090a",
+      bg: "#070707",
       bgElevated: "#0d0f0e",
-      surface: "#12130f",
+      surface: "#0d0d0f",
       border: "#2b271e",
-      gold: "#b8894a",
-      goldSoft: "#d8ac6f",
-      accent: "#6fae4a",
-      accentSoft: "#8ecf6a",
-      text: "#f1efe6",
-      textMuted: "#a09982",
+      gold: "#b98946",
+      goldSoft: "#d3ac74",
+      accent: "#8c1515",
+      accentSoft: "#a8283a",
+      text: "#f7f1e3",
+      textMuted: "#b7ad98",
     },
-    glow: "rgba(184, 137, 74, 0.16)",
+    glow: "rgba(185, 137, 70, 0.16)",
   },
   "investment-holdings": {
     key: "investment-holdings",
     name: "Aces N 8s Investment Holdings",
     shortName: "Investment Holdings",
+    eyebrow: "Private Investment Platform",
     description:
       "A privately held investment platform focused on disciplined capital deployment, strategic assets, and long-term value creation.",
     domainPlaceholder: "acesn8sholdings.com",
@@ -101,23 +112,24 @@ export const brands: Record<SiteKey, BrandTokens> = {
       href: "https://acesn8scapital.com",
     },
     colors: {
-      bg: "#08080a",
+      bg: "#070707",
       bgElevated: "#0e0d10",
-      surface: "#141216",
+      surface: "#0d0d0f",
       border: "#2a2621",
-      gold: "#cbb27f",
-      goldSoft: "#e8d7ae",
-      accent: "#6b1b23",
-      accentSoft: "#8f2d34",
-      text: "#f3f0e9",
-      textMuted: "#9d9484",
+      gold: "#d8c08d",
+      goldSoft: "#e9dab6",
+      accent: "#8c1515",
+      accentSoft: "#a8283a",
+      text: "#f7f1e3",
+      textMuted: "#b7ad98",
     },
-    glow: "rgba(203, 178, 127, 0.16)",
+    glow: "rgba(216, 192, 141, 0.16)",
   },
   "title-land-intelligence": {
     key: "title-land-intelligence",
     name: "Aces N 8s Title & Land Intelligence",
     shortName: "Title Intelligence",
+    eyebrow: "Professional Intelligence Platform",
     description:
       "We deliver disciplined title research, land intelligence, and due-diligence support for energy, real estate, development, and private capital decisions.",
     domainPlaceholder: "acesn8stitle.com",
@@ -127,18 +139,18 @@ export const brands: Record<SiteKey, BrandTokens> = {
       href: "https://acesn8scapital.com",
     },
     colors: {
-      bg: "#06070a",
+      bg: "#070707",
       bgElevated: "#0b0d12",
-      surface: "#10131a",
+      surface: "#0d0d0f",
       border: "#232937",
-      gold: "#b99c5e",
-      goldSoft: "#dcc389",
-      accent: "#1c3a5e",
-      accentSoft: "#2c567e",
-      text: "#eef1f6",
-      textMuted: "#8b93a3",
+      gold: "#4f7ea8",
+      goldSoft: "#7ba4c8",
+      accent: "#8c1515",
+      accentSoft: "#a8283a",
+      text: "#f7f1e3",
+      textMuted: "#b7ad98",
     },
-    glow: "rgba(44, 86, 126, 0.22)",
+    glow: "rgba(79, 126, 168, 0.22)",
   },
 };
 

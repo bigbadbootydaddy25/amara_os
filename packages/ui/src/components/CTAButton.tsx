@@ -19,16 +19,16 @@ export function CTAButton({
   ...rest
 }: CTAButtonProps) {
   const base =
-    "group relative inline-flex items-center gap-2 rounded-md text-sm font-medium tracking-wide uppercase transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+    "group relative inline-flex items-center gap-2 text-sm font-medium tracking-wide uppercase transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
   const sizes: Record<string, string> = {
-    md: "px-6 py-3 text-sm",
+    md: "px-6 py-3.5 text-sm",
     sm: "px-4 py-2 text-xs",
   };
 
   const variants: Record<string, string> = {
     primary:
-      "border border-[var(--color-gold)] bg-[var(--color-bg-elevated)]/60 text-[var(--color-gold)] hover:bg-[var(--color-gold)] hover:text-[var(--color-bg)] hover:shadow-[0_0_30px_var(--glow)] focus-visible:outline-[var(--color-gold)]",
+      "border border-[var(--color-gold)] text-white bg-[linear-gradient(90deg,color-mix(in_srgb,var(--color-gold)_18%,transparent),color-mix(in_srgb,var(--color-accent)_12%,transparent))] hover:bg-[linear-gradient(90deg,color-mix(in_srgb,var(--color-gold)_32%,transparent),color-mix(in_srgb,var(--color-accent)_20%,transparent))] focus-visible:outline-[var(--color-gold)]",
     solid:
       "bg-[var(--color-gold)] text-[var(--color-bg)] hover:bg-[var(--color-gold-soft)] shadow-[0_0_0_1px_var(--color-gold)] hover:shadow-[0_0_30px_var(--glow)] focus-visible:outline-[var(--color-gold)]",
     secondary:

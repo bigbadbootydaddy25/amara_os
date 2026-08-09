@@ -31,7 +31,8 @@ export function InfoCards({ items, columns = 4, className }: InfoCardsProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5, delay: i * 0.06 }}
-          className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-6 transition-colors duration-300 hover:border-[var(--color-gold)]"
+          whileHover={{ y: -4 }}
+          className="border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-6 transition-colors duration-300 hover:border-[var(--color-gold)]"
         >
           <h4 className="font-[var(--font-display)] text-lg text-[var(--color-text)]">
             {item.title}

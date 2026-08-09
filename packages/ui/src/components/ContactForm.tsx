@@ -76,7 +76,7 @@ export function ContactForm({ contact }: ContactFormProps) {
             name="message"
             required
             rows={5}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-gold)]"
+            className="border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-gold)]"
           />
         </div>
 
@@ -84,7 +84,7 @@ export function ContactForm({ contact }: ContactFormProps) {
           <button
             type="submit"
             disabled={status === "submitting"}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--color-gold)] px-7 py-3 text-sm font-medium uppercase tracking-wide text-[var(--color-bg)] transition-all duration-300 hover:bg-[var(--color-gold-soft)] hover:shadow-[0_0_30px_var(--glow)] disabled:opacity-60"
+            className="inline-flex items-center gap-2 border border-[var(--color-gold)] px-6 py-3.5 text-sm font-medium uppercase tracking-wide text-white bg-[linear-gradient(90deg,color-mix(in_srgb,var(--color-gold)_18%,transparent),color-mix(in_srgb,var(--color-accent)_12%,transparent))] transition-all duration-300 hover:bg-[linear-gradient(90deg,color-mix(in_srgb,var(--color-gold)_32%,transparent),color-mix(in_srgb,var(--color-accent)_20%,transparent))] disabled:opacity-60"
           >
             {status === "submitting" ? "Sending..." : "Send Message"}
           </button>

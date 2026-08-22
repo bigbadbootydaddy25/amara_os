@@ -49,7 +49,7 @@ export function CapitalDiagram() {
 
           <DiagramLayer layer={2} activeIndex={active}>
             <circle cx={450} cy={45} r={34} fill="none" stroke="var(--color-gold)" strokeWidth={2} />
-            <text x={450} y={50} fontSize={12} textAnchor="middle" fill="#f6edd8">
+            <text x={450} y={50} fontSize={9} textAnchor="middle" fill="#f6edd8">
               INTELLIGENCE
             </text>
           </DiagramLayer>

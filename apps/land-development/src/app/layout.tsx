@@ -53,17 +53,13 @@ export default function RootLayout({
         <ThemeRoot brand={brand}>
           <Header
             siteName={brand.name}
-            shortName={brand.shortName}
-            nav={landDevelopmentContent.nav}
-            ctaLabel={landDevelopmentContent.hero.ctaLabel}
-            ctaHref={landDevelopmentContent.hero.ctaHref}
+            fullBrandName={brand.name.toUpperCase()}
             parentPlatform={brand.parentPlatform}
           />
           {children}
           <Footer
             siteName={brand.name}
             tagline={brand.tagline}
-            nav={landDevelopmentContent.nav}
             footerNote={landDevelopmentContent.footerNote}
           />
         </ThemeRoot>

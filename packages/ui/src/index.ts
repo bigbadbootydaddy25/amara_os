@@ -19,3 +19,8 @@ export * from "./components/icons";
 export { IconFeatureRow } from "./components/IconFeatureRow";
 export { DiagonalImageGrid } from "./components/DiagonalImageGrid";
 export type { DiagonalImageItem } from "./components/DiagonalImageGrid";
+export { StepDiagram, DiagramLayer } from "./components/StepDiagram";
+export type { StepDiagramStep } from "./components/StepDiagram";
+export { FamilyGrid, familyLinks } from "./components/FamilyGrid";
+export type { FamilyLink } from "./components/FamilyGrid";
+export type { HeaderNavItem } from "./components/Header";

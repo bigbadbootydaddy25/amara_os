@@ -51,20 +51,9 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body>
         <ThemeRoot brand={brand}>
-          <Header
-            siteName={brand.name}
-            shortName={brand.shortName}
-            nav={capitalContent.nav}
-            ctaLabel={capitalContent.hero.ctaLabel}
-            ctaHref={capitalContent.hero.ctaHref}
-          />
+          <Header siteName={brand.name} fullBrandName={brand.name.toUpperCase()} />
           {children}
-          <Footer
-            siteName={brand.name}
-            tagline={brand.tagline}
-            nav={capitalContent.nav}
-            footerNote={capitalContent.footerNote}
-          />
+          <Footer siteName={brand.name} tagline={brand.tagline} footerNote={capitalContent.footerNote} />
         </ThemeRoot>
       </body>
     </html>

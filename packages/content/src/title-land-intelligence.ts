@@ -72,7 +72,7 @@ export const titleLandIntelligenceContent: SiteContent = {
     phonePlaceholder: "By Appointment",
   },
   footerNote:
-    "Aces N 8s Title & Land Intelligence provides research and informational support and does not provide legal advice. Information on this site is provided for general informational purposes only.",
+    "Aces N 8s Title & Land Intelligence provides research and informational support and does not provide legal advice. Information on this site is provided for general informational purposes only. Preview build; legal name, address, phone, and policy language pending final approval.",
 };
 
 export interface IndustryItem {

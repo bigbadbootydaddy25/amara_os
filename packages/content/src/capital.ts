@@ -63,5 +63,5 @@ export const capitalContent: SiteContent = {
     phonePlaceholder: "By Appointment",
   },
   footerNote:
-    "Aces N 8s Capital is a privately held entity. Information on this site is provided for general informational purposes only and does not constitute an offer to sell or a solicitation of an offer to buy any security.",
+    "Aces N 8s Capital is a privately held entity. Information on this site is provided for general informational purposes only and does not constitute an offer to sell or a solicitation of an offer to buy any security. Preview build; legal name, address, phone, and policy language pending final approval.",
 };

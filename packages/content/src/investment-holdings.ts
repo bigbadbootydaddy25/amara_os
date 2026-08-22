@@ -58,5 +58,5 @@ export const investmentHoldingsContent: SiteContent = {
     phonePlaceholder: "By Appointment",
   },
   footerNote:
-    "This site does not constitute an offer to sell or a solicitation of an offer to buy any security. Aces N 8s Investment Holdings does not disclose returns or assets under management publicly.",
+    "This site does not constitute an offer to sell or a solicitation of an offer to buy any security. Aces N 8s Investment Holdings does not disclose returns or assets under management publicly. Preview build; legal name, address, phone, and policy language pending final approval.",
 };

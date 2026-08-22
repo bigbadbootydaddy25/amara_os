@@ -53,20 +53,15 @@ export default function RootLayout({
         <ThemeRoot brand={brand}>
           <Header
             siteName={brand.name}
-            shortName={brand.shortName}
-            nav={investmentHoldingsContent.nav}
-            ctaLabel={investmentHoldingsContent.hero.ctaLabel}
-            ctaHref={investmentHoldingsContent.hero.ctaHref}
+            fullBrandName={brand.name.toUpperCase()}
             secondaryLabel={investmentHoldingsContent.hero.secondaryLabel}
             secondaryHref={investmentHoldingsContent.hero.secondaryHref}
             parentPlatform={brand.parentPlatform}
-            brandSubtitleColorVar="var(--color-gold)"
           />
           {children}
           <Footer
             siteName={brand.name}
             tagline={brand.tagline}
-            nav={investmentHoldingsContent.nav}
             footerNote={investmentHoldingsContent.footerNote}
           />
         </ThemeRoot>

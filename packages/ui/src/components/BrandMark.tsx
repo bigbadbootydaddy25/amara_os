@@ -1,51 +1,49 @@
+import { cx } from "../lib/cx";
+
 export interface BrandMarkProps {
-  shortName: string;
-  subtitleColorVar?: string;
-  size?: "sm" | "md" | "lg";
+  fullName: string;
+  size?: "sm" | "md";
+  className?: string;
 }
 
-const sizes = {
-  sm: { text: "text-base", crown: "h-2.5 w-3.5 -top-2", subtitle: "text-[9px]" },
-  md: { text: "text-xl", crown: "h-3.5 w-5 -top-3", subtitle: "text-[10px]" },
-  lg: { text: "text-4xl sm:text-5xl", crown: "h-6 w-8 -top-5", subtitle: "text-xs" },
-};
-
-export function BrandMark({ shortName, subtitleColorVar = "var(--color-accent)", size = "md" }: BrandMarkProps) {
-  const s = sizes[size];
+export function BrandMark({ fullName, size = "md", className }: BrandMarkProps) {
+  const avatar = size === "sm" ? "h-10 w-10" : "h-12 w-12";
+  const text = size === "sm" ? "text-xs sm:text-sm" : "text-sm sm:text-base";
 
   return (
-    <div className="flex flex-col leading-none">
-      <div
-        className={`flex items-baseline gap-1.5 font-[var(--font-display)] font-semibold tracking-wide text-[var(--color-text)] ${s.text}`}
-      >
-        <span>ACES</span>
-        <span className="relative inline-flex items-baseline">
-          <CrownIcon
-            aria-hidden
-            className={`absolute left-1/2 -translate-x-1/2 text-[var(--color-gold)] ${s.crown}`}
-          />
-          N
-        </span>
-        <span>8S</span>
-      </div>
+    <div className={cx("flex items-center gap-3", className)}>
       <span
-        className={`mt-1 font-medium uppercase tracking-[0.3em] ${s.subtitle}`}
-        style={{ color: subtitleColorVar }}
+        className={cx(
+          "flex shrink-0 items-center justify-center rounded-full border border-[var(--color-gold)] bg-[var(--color-bg-elevated)]",
+          avatar
+        )}
       >
-        {shortName}
+        <CrestMark aria-hidden className="h-[58%] w-[58%] text-[var(--color-gold)]" />
+      </span>
+      <span
+        className={cx(
+          "whitespace-nowrap font-[var(--font-display)] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]",
+          text
+        )}
+      >
+        {fullName}
       </span>
     </div>
   );
 }
 
-function CrownIcon(props: React.SVGProps<SVGSVGElement>) {
+export function CrestMark(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 16" fill="currentColor" {...props}>
-      <path d="M1 14.5 L2.6 5 L7 9.2 L12 2 L17 9.2 L21.4 5 L23 14.5 Z" />
-      <circle cx="12" cy="2" r="1.6" />
-      <circle cx="2.6" cy="5" r="1.3" />
-      <circle cx="21.4" cy="5" r="1.3" />
-      <rect x="0.5" y="14" width="23" height="1.6" rx="0.5" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} {...props}>
+      <path
+        d="M4 8.5 5.8 4l2 2.3L12 2l2.2 4.3 2-2.3L18 8.5l-.9 6.4C16.4 18.6 14.5 21 12 22c-2.5-1-4.4-3.4-5.1-7Z"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 10.5c-2 2.2-4.6 4.1-4.6 6.5a3 3 0 0 0 5 2.2c-.4 1.1-.9 1.9-1.6 2.5h2.4c-.7-.6-1.2-1.4-1.6-2.5a3 3 0 0 0 5-2.2c0-2.4-2.6-4.3-4.6-6.5Z"
+        fill="currentColor"
+        stroke="none"
+      />
     </svg>
   );
 }

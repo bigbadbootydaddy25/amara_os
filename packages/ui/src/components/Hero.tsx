@@ -7,85 +7,77 @@ import { AnimatedBackground, type BackgroundVariant } from "./AnimatedBackground
 
 export interface HeroProps {
   hero: HeroContent;
+  eyebrow: string;
   backgroundVariant?: BackgroundVariant;
-  /** Renders the final headline line in the site accent color. */
-  accentLastLine?: boolean;
 }
 
-export function Hero({ hero, backgroundVariant = "aurora", accentLastLine = false }: HeroProps) {
+export function Hero({ hero, eyebrow, backgroundVariant = "aurora" }: HeroProps) {
   return (
-    <section className="relative flex min-h-[92vh] items-center overflow-hidden border-b border-[var(--color-border)]">
-      <AnimatedBackground variant={backgroundVariant} />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-start px-6 py-32 md:px-10">
-        {hero.eyebrow ? (
+    <section className="border-b border-white/10">
+      <div className="mx-auto grid max-w-[1240px] grid-cols-1 items-center gap-10 px-6 py-16 md:min-h-[76vh] md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:py-20">
+        <div>
           <motion.span
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-6 flex items-center gap-3 text-xs font-medium uppercase tracking-[0.35em] text-[var(--color-gold)]"
+            className="block text-xs uppercase tracking-[0.22em] text-[var(--color-gold)]"
           >
-            <span aria-hidden className="h-px w-10 bg-[var(--color-gold)]" />
-            {hero.eyebrow}
+            {eyebrow}
           </motion.span>
-        ) : null}
 
-        <h1 className="font-[var(--font-display)] text-4xl font-normal leading-[1.05] text-[var(--color-text)] sm:text-6xl md:text-7xl">
-          {hero.headline.map((line, i) => {
-            const isLast = i === hero.headline.length - 1;
-            return (
+          <h1 className="mt-4 font-[var(--font-display)] text-[clamp(2.5rem,7vw,5.75rem)] font-bold leading-[0.95] text-[var(--color-text)]">
+            {hero.headline.map((line, i) => (
               <motion.span
                 key={line}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 + i * 0.12 }}
                 className="block"
-                style={accentLastLine && isLast ? { color: "var(--color-accent-soft)" } : undefined}
               >
                 {line}
               </motion.span>
-            );
-          })}
-        </h1>
+            ))}
+          </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          className="mt-8 max-w-xl text-base leading-relaxed text-[var(--color-text-muted)] sm:text-lg"
-        >
-          {hero.body}
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="mt-5 max-w-xl text-lg leading-relaxed text-[#c9c1b3]"
+          >
+            {hero.body}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.65 }}
+            className="mt-6 flex flex-wrap items-center gap-4"
+          >
+            <CTAButton href={hero.ctaHref} variant="primary">
+              {hero.ctaLabel}
+            </CTAButton>
+            {hero.secondaryLabel && hero.secondaryHref ? (
+              <CTAButton href={hero.secondaryHref} variant="secondary">
+                {hero.secondaryLabel}
+              </CTAButton>
+            ) : null}
+          </motion.div>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.65 }}
-          className="mt-10 flex flex-wrap items-center gap-4"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative min-h-[340px] overflow-hidden border border-[var(--glow)] bg-[#09090b] md:min-h-[520px]"
         >
-          <CTAButton href={hero.ctaHref} variant="primary">
-            {hero.ctaLabel}
-          </CTAButton>
-          {hero.secondaryLabel && hero.secondaryHref ? (
-            <CTAButton href={hero.secondaryHref} variant="secondary">
-              {hero.secondaryLabel}
-            </CTAButton>
-          ) : null}
+          <AnimatedBackground variant={backgroundVariant} className="opacity-90" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-6 border border-[var(--color-gold)]/35"
+          />
         </motion.div>
       </div>
-
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 sm:flex"
-      >
-        <span className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
-          Scroll
-        </span>
-        <span className="h-10 w-px bg-gradient-to-b from-[var(--color-gold)] to-transparent" />
-      </motion.div>
     </section>
   );
 }

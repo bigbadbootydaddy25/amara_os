@@ -68,5 +68,5 @@ export const landDevelopmentContent: SiteContent = {
     phonePlaceholder: "By Appointment",
   },
   footerNote:
-    "Aces N 8s Land Development does not disclose proprietary acquisition methods or underwriting criteria. Information on this site is provided for general informational purposes only.",
+    "Aces N 8s Land Development does not disclose proprietary acquisition methods or underwriting criteria. Information on this site is provided for general informational purposes only. Preview build; legal name, address, phone, and policy language pending final approval.",
 };

@@ -3,44 +3,47 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import type { NavItem } from "@aces/content";
 import type { ParentPlatformLink } from "@aces/brand";
 import { CTAButton } from "./CTAButton";
 import { BrandMark } from "./BrandMark";
 import { cx } from "../lib/cx";
 
+export interface HeaderNavItem {
+  label: string;
+  href: string;
+}
+
 export interface HeaderProps {
   siteName: string;
-  shortName: string;
-  nav: NavItem[];
-  ctaLabel?: string;
-  ctaHref?: string;
+  fullBrandName: string;
+  nav?: HeaderNavItem[];
   secondaryLabel?: string;
   secondaryHref?: string;
   /** Renders a thin affiliation strip above the header for division sites. */
   parentPlatform?: ParentPlatformLink;
-  /** Color for the brand mark's subtitle line; defaults to the site accent. */
-  brandSubtitleColorVar?: string;
 }
+
+const defaultNav: HeaderNavItem[] = [
+  { label: "About", href: "#about" },
+  { label: "Platform", href: "#platform" },
+  { label: "Contact", href: "#contact" },
+];
 
 export function Header({
   siteName,
-  shortName,
-  nav,
-  ctaLabel,
-  ctaHref,
+  fullBrandName,
+  nav = defaultNav,
   secondaryLabel,
   secondaryHref,
   parentPlatform,
-  brandSubtitleColorVar,
 }: HeaderProps) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-bg)]/85 backdrop-blur-md">
       {parentPlatform ? (
-        <div className="border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
-          <div className="mx-auto flex max-w-7xl items-center gap-2 px-6 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] md:px-8">
+        <div className="border-b border-white/10 bg-[var(--color-bg-elevated)]">
+          <div className="mx-auto flex max-w-[1240px] items-center gap-2 px-6 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             <span>{parentPlatform.label}</span>
             <a
               href={parentPlatform.href}
@@ -52,41 +55,31 @@ export function Header({
           </div>
         </div>
       ) : null}
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 py-4 md:px-7">
-        <Link
-          href="/"
-          aria-label={siteName}
-          className="flex shrink-0 items-center whitespace-nowrap"
-          onClick={() => setOpen(false)}
-        >
-          <BrandMark shortName={shortName} subtitleColorVar={brandSubtitleColorVar} size="sm" />
+
+      <div className="mx-auto flex h-[84px] max-w-[1240px] items-center justify-between px-6">
+        <Link href="/" aria-label={siteName} onClick={() => setOpen(false)}>
+          <BrandMark fullName={fullBrandName} size="sm" />
         </Link>
 
-        <nav className="hidden min-w-0 items-center gap-3 overflow-x-auto xl:flex xl:gap-5">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="whitespace-nowrap text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--color-text-muted)] transition-colors duration-200 hover:text-[var(--color-gold)] xl:text-xs xl:tracking-[0.15em]"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden shrink-0 items-center gap-2.5 xl:flex xl:gap-3">
+        <div className="hidden items-center gap-8 md:flex">
+          <nav className="flex items-center gap-6">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm text-[#d8d0c1] transition-colors hover:text-[var(--color-gold)]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
           {secondaryLabel && secondaryHref ? (
             <Link
               href={secondaryHref}
-              className="whitespace-nowrap text-[11px] font-medium uppercase tracking-[0.13em] text-[var(--color-gold)] transition-colors hover:text-[var(--color-gold-soft)] xl:text-xs"
+              className="whitespace-nowrap text-xs font-medium uppercase tracking-[0.13em] text-[var(--color-gold)] transition-colors hover:text-[var(--color-gold-soft)]"
             >
               {secondaryLabel}
             </Link>
-          ) : null}
-          {ctaLabel && ctaHref ? (
-            <CTAButton href={ctaHref} variant="primary" size="sm" className="whitespace-nowrap">
-              {ctaLabel}
-            </CTAButton>
           ) : null}
         </div>
 
@@ -95,7 +88,7 @@ export function Header({
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 xl:hidden"
+          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
         >
           <span
             aria-hidden
@@ -128,7 +121,7 @@ export function Header({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="overflow-hidden border-t border-[var(--color-border)] xl:hidden"
+            className="overflow-hidden border-t border-white/10 md:hidden"
           >
             <nav className="flex flex-col gap-1 px-6 py-4">
               {nav.map((item) => (
@@ -136,23 +129,21 @@ export function Header({
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-md px-2 py-3 text-sm uppercase tracking-[0.2em] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-gold)]"
+                  className="px-2 py-3 text-sm uppercase tracking-[0.2em] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-gold)]"
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="mt-3 flex flex-col gap-3">
-                {secondaryLabel && secondaryHref ? (
-                  <CTAButton href={secondaryHref} variant="secondary" className="justify-center">
-                    {secondaryLabel}
-                  </CTAButton>
-                ) : null}
-                {ctaLabel && ctaHref ? (
-                  <CTAButton href={ctaHref} variant="primary" className="justify-center">
-                    {ctaLabel}
-                  </CTAButton>
-                ) : null}
-              </div>
+              {secondaryLabel && secondaryHref ? (
+                <CTAButton
+                  href={secondaryHref}
+                  variant="secondary"
+                  className="mt-3 justify-center"
+                  onClick={() => setOpen(false)}
+                >
+                  {secondaryLabel}
+                </CTAButton>
+              ) : null}
             </nav>
           </motion.div>
         ) : null}

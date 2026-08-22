@@ -14,7 +14,7 @@ export function FeatureGrid({ sections, columns = 3, className }: FeatureGridPro
   return (
     <div
       className={cx(
-        "grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)] sm:grid-cols-2",
+        "grid grid-cols-1 gap-px overflow-hidden border border-[var(--color-border)] bg-[var(--color-border)] sm:grid-cols-2",
         columns === 3 && "lg:grid-cols-3",
         className
       )}

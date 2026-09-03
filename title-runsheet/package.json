@@ -1,0 +1,41 @@
+{
+  "name": "title-runsheet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone mineral title runsheet app: Postgres storage, Dropbox intake/output, a six-agent abstracting pipeline, and a browser agent for recorded-instrument retrieval.",
+  "type": "module",
+  "main": "dist/cli.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "migrate": "tsx src/db/migrate.ts",
+    "pipeline": "tsx src/cli.ts pipeline",
+    "agent:intake": "tsx src/cli.ts run intake",
+    "agent:retrieval": "tsx src/cli.ts run retrieval",
+    "agent:abstracting": "tsx src/cli.ts run abstracting",
+    "agent:curative": "tsx src/cli.ts run curative",
+    "agent:runsheet": "tsx src/cli.ts run runsheet",
+    "agent:report": "tsx src/cli.ts run report",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke": "tsx src/smoke.ts"
+  },
+  "dependencies": {
+    "csv-stringify": "^6.5.1",
+    "docx": "^9.1.0",
+    "dotenv": "^16.4.5",
+    "dropbox": "^10.34.0",
+    "pdf-parse": "^1.1.1",
+    "pg": "^8.13.1",
+    "playwright": "^1.60.0",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.4",
+    "@types/pg": "^8.11.10",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}

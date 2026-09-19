@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.local.example
+!amara-land/.env.example
+
+# python (amara-land backend)
+__pycache__/
+*.pyc
+amara-land/.venv/
 
 # vercel
 .vercel

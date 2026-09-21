@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
+    "maplibre-gl": "^6.10.0",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -23,6 +25,7 @@
     "eslint-config-next": "16.2.2",
     "playwright": "^1.60.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

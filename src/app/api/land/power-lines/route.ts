@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchCappedText, CappedFetchError } from '@/lib/land/cappedFetch';
-import { bboxAroundPoint, isFiniteCoordinate } from '@/lib/land/geo';
+import { bboxAroundPoint, isFiniteCoordinate, parseCoordinateParam } from '@/lib/land/geo';
 import { OVERPASS_ENDPOINT, buildPowerLinesQuery, parsePowerLinesResponse } from '@/lib/land/overpass';
 
 const MAX_RADIUS_M = 5_000;
@@ -8,8 +8,8 @@ const MIN_RADIUS_M = 50;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const lat = Number(searchParams.get('lat'));
-  const lon = Number(searchParams.get('lon'));
+  const lat = parseCoordinateParam(searchParams.get('lat'));
+  const lon = parseCoordinateParam(searchParams.get('lon'));
   const radiusM = Math.max(MIN_RADIUS_M, Math.min(Number(searchParams.get('radiusM')) || 500, MAX_RADIUS_M));
 
   if (!isFiniteCoordinate(lon, lat)) {

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { fetchCappedText, CappedFetchError } from '@/lib/land/cappedFetch';
-import { isFiniteCoordinate } from '@/lib/land/geo';
+import { isFiniteCoordinate, parseCoordinateParam } from '@/lib/land/geo';
 import { SDA_ENDPOINT, buildSoilRequestBody, parseSoilResponse } from '@/lib/land/soil';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const lat = Number(searchParams.get('lat'));
-  const lon = Number(searchParams.get('lon'));
+  const lat = parseCoordinateParam(searchParams.get('lat'));
+  const lon = parseCoordinateParam(searchParams.get('lon'));
 
   if (!isFiniteCoordinate(lon, lat)) {
     return NextResponse.json({ error: 'Missing or invalid lat/lon query parameters' }, { status: 400 });

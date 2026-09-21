@@ -31,6 +31,18 @@ export function bboxAroundPoint({ lon, lat }: LonLat, radiusM: number): BBox {
   };
 }
 
+/**
+ * Parse a query-string coordinate value. `Number(null)` is 0, not NaN, so
+ * naively wrapping `searchParams.get(...)` in `Number(...)` turns a MISSING
+ * parameter into a valid-looking (0, 0) coordinate instead of failing
+ * validation — this returns NaN for a missing/blank parameter so
+ * `isFiniteCoordinate` correctly rejects it.
+ */
+export function parseCoordinateParam(value: string | null): number {
+  if (value === null || value.trim() === '') return NaN;
+  return Number(value);
+}
+
 export function isFiniteCoordinate(lon: unknown, lat: unknown): lon is number {
   return (
     typeof lon === 'number' &&

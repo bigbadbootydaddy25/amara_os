@@ -1,0 +1,136 @@
+# AMARA V12 — data source registry (Phase 1: Dallas County)
+#
+# GATE RULE: nothing runs automatically against a source unless
+#   access_status: approved   AND   mode: auto
+# Every other status keeps the source in ASSISTED mode: a human (or an allowed
+# browser session) pulls the export and drops the CSV in /inbox/records/ for
+# the agents to process. Update access_status ONLY when the source's terms (or a
+# written reply from the provider) allow automated use, and record the date.
+#
+# access_status: pending | approved | assisted_only | denied | not_checked
+# evidence_tier: tier stamped on facts that come from this source ([GR] = government record)
+# paid: true means a provider purchase decision is required — ask Scott first.
+
+ruleset_version: "AMARA Constitution v2026.10.05"
+active_counties: [Dallas]   # Phase 2 adds Tarrant, Collin, Denton, Johnson, Ellis
+
+sources:
+  - name: texasfile
+    description: Deed / deed-of-trust index, probate index, new-filing alerts (all 254 counties)
+    county: Dallas
+    use: deeds, deeds_of_trust, probate
+    access_status: pending        # email sent to TexasFile support re: API/bulk + automated use
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: true
+
+  - name: dallas_county_clerk
+    description: Dallas County Clerk official public records portal (fallback deed/DOT index)
+    county: Dallas
+    use: deeds, deeds_of_trust, foreclosure_notices, probate
+    access_status: not_checked    # check portal terms of use before any automation
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: dcad
+    description: Dallas Central Appraisal District — property characteristics, owner mailing, exemptions, bulk data files
+    county: Dallas
+    use: properties, lot_details
+    access_status: not_checked    # DCAD publishes downloadable data files; confirm license/terms
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: dallas_county_tax_office
+    description: Dallas County tax assessor-collector delinquent tax lists
+    county: Dallas
+    use: tax_delinquent
+    access_status: not_checked
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: dallas_county_foreclosure_postings
+    description: Dallas County Clerk notices of substitute trustee sale
+    county: Dallas
+    use: foreclosure_notices
+    access_status: not_checked
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: dallas_county_probate
+    description: Dallas County probate court indexes (estates with real property)
+    county: Dallas
+    use: probate
+    access_status: not_checked
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: dallas_city_open_data
+    description: City of Dallas open data — code enforcement, vacant/nuisance properties, mowing/demolition liens
+    county: Dallas
+    use: code_violations, liens
+    access_status: not_checked    # open data portal; confirm API terms
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: dallas_city_permits
+    description: City of Dallas building permit open data (builder confirmation for infill lots)
+    county: Dallas
+    use: permits
+    access_status: not_checked
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: texas_sos_comptroller
+    description: Texas SOS / Comptroller franchise tax search — LLC principals, registered agents
+    county: null
+    use: buyer_enrichment
+    access_status: assisted_only  # manual / allowed lookups only
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: GR
+    paid: false
+
+  - name: research_inbox
+    description: Perplexity / Claude research CSVs dropped in /inbox/research/ (always [SR])
+    county: null
+    use: buyer_leads, deal_leads
+    access_status: approved       # local files only; no outbound access involved
+    terms_checked_date: 2026-10-05
+    mode: auto
+    evidence_tier: SR
+    paid: false
+
+  - name: skip_trace_provider
+    description: Phone/email enrichment for buyers. NOT CHOSEN — paid provider; ask Scott before selecting.
+    county: null
+    use: buyer_contact
+    access_status: not_checked
+    terms_checked_date: null
+    mode: assisted
+    evidence_tier: SR
+    paid: true
+
+  - name: morning_brief_email
+    description: Outlook delivery of the Morning Brief (scott@acesn8scapital.com). OFF until Scott enables it.
+    county: null
+    use: delivery
+    access_status: denied         # intentionally off; brief is still generated and stored in the DB / out/briefs
+    terms_checked_date: 2026-10-05
+    mode: assisted
+    evidence_tier: SR
+    paid: false

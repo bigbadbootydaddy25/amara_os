@@ -1,0 +1,18 @@
+# Known private / hard-money lenders. A deed of trust to one of these marks the
+# purchase financed_hard_money (flagged, NOT counted as a cash buy).
+# Substring match on the NORMALIZED lender name. Seed list — Scott to extend.
+lenders:
+  - KIAVI
+  - LIMA ONE
+  - FUND THAT FLIP
+  - RCN CAPITAL
+  - VISIO LENDING
+  - COREVEST
+  - ANCHOR LOANS
+  - EASY STREET CAPITAL
+  - TEMPLE VIEW CAPITAL
+  - NEW SILVER
+  - EXPRESS CAPITAL FINANCING
+  - HARD MONEY
+  - PRIVATE LENDER
+  - BRIDGE LENDING

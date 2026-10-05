@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AMARA runtime data (never commit research CSVs, DB or briefs)
+/data/
+/out/
+/inbox/**/*.csv
+/inbox/**/processed/

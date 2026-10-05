@@ -1,0 +1,12 @@
+# Dallas zoning districts that allow single-family BY RIGHT, with minimum lot size (sq ft).
+# NEEDS VERIFICATION against the Dallas Development Code before the Lot Gate is trusted.
+# While `verified: false`, a zoning pass is reported as "unverified" in the brief, never silently passed.
+verified: false
+districts:
+  "R-16(A)": 16000
+  "R-13(A)": 13000
+  "R-10(A)": 10000
+  "R-7.5(A)": 7500
+  "R-5(A)": 5000
+  "R-1ac(A)": 43560
+  "R-1/2ac(A)": 21780

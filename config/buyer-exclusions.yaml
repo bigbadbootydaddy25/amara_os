@@ -1,0 +1,49 @@
+# Buyers kept in `excluded_buyers` (not wholesale targets for v1). Matching is a
+# case-insensitive substring test against the NORMALIZED grantee name.
+# Seed lists — Scott to extend as real deed data shows other names.
+national_builder:
+  - D R HORTON
+  - DR HORTON
+  - LENNAR
+  - PULTE
+  - KB HOME
+  - TOLL BROTHERS
+  - MERITAGE
+  - TAYLOR MORRISON
+  - BEAZER
+  - ASHTON WOODS
+  - CENTURY COMMUNITIES
+  - M I HOMES
+  - RYAN HOMES
+  - NVR
+ibuyer_institutional:
+  - OPENDOOR
+  - OFFERPAD
+  - ZILLOW
+  - INVITATION HOMES
+  - AMERICAN HOMES 4 RENT
+  - AMH
+  - PROGRESS RESIDENTIAL
+  - TRICON
+  - FIRSTKEY
+  - STARWOOD WAYPOINT
+  - PRETIUM
+  - HOME PARTNERS OF AMERICA
+  - SFR3
+government:
+  - CITY OF
+  - COUNTY OF
+  - STATE OF TEXAS
+  - UNITED STATES
+  - SECRETARY OF HOUSING
+  - HOUSING AUTHORITY
+  - INDEPENDENT SCHOOL DISTRICT
+  - FEDERAL NATIONAL MORTGAGE
+  - FEDERAL HOME LOAN MORTGAGE
+  - DEPARTMENT OF VETERANS
+nonprofit:
+  - HABITAT FOR HUMANITY
+  - FOUNDATION
+  - CHURCH
+  - MINISTRIES
+  - COMMUNITY DEVELOPMENT CORP
